@@ -164,6 +164,16 @@ FIXED_CHANNELS = [
     ),
 
     (
+        "ONE HD",
+        [
+            {
+                "ids": ["one.de"],
+                "names": ["one hd"],
+            }
+        ],
+    ),
+
+    (
         "3sat",
         [
             {
