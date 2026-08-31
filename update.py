@@ -9,96 +9,37 @@ from collections import OrderedDict
 # GER TV - update.py
 # ============================================================
 #
-# Erstellt täglich:
+# Erstellt:
 #
 #     deutsch.m3u
 #
-# ============================================================
+# MEHRERE QUELLEN
+# ----------------
+# Alle Quellen werden geladen und zusammengeführt.
 #
-# FESTE PRIORITÄT
+# FIXED / PRIORITÄT
+# -----------------
+# Die persönliche Reihenfolge bleibt exakt erhalten.
 #
-# 01  Das Erste
-# 02  ZDF
-# 03  ZDFinfo
-# 04  ZDFneo
-# 05  3sat
-# 06  kabel eins
-# 07  ProSieben
-# 08  RTL
-# 09  Sat.1
-# 10  VOX
-# 11  RTL Zwei
-# 12  Super RTL
-# 13  NITRO
-# 14  VOXup
-# 15  ProSieben MAXX
-# 16  kabel eins Doku
-# 17  TELE 5
-# 18  DMAX
-# 19  sixx
-# 20  Sat.1 Gold
-# 21  ARD-alpha
-# 22  Phoenix
-# 23  ARTE
-# 24  Tagesschau24
-# 25  MDR Fernsehen
-# 26  NDR Niedersachsen
-# 27  Noa 4 Hamburg
-# 28  Hamburg 1
-# 29  Radio Weser TV Bremen
-# 30  Radio Bremen Fernsehen
-# 31  WDR Fernsehen
-# 32  SWR Fernsehen Rheinland-Pfalz
-# 33  hr-fernsehen
-# 34  SR Fernsehen
-# 35  rbb Fernsehen
-# 36  Oberpfalz TV
-# 37  BR Fernsehen Nord
-# 38  München TV
-# 39  Nachrichten 360
-# 40  SPIEGEL TV
-# 41  N24 Doku
-# 42  WELT
-# 43  RT DE
-# 44  DokuSat
-# 45  Authentic History
-# 46  Bibel TV
-# 47  EWTN
-# 48  K-TV
-# 49  Terra Mater WILD
-# 50  Welt der Wunder
-# 51  Rakuten TV Action Movies Germany
-# 52  Rakuten TV Comedy Movies Germany
-# 53  Rakuten TV Drama Movies Germany
-# 54  Rakuten TV Family Movies Germany
-# 55  Rakuten TV Top Movies Germany
+# REGIONAL-FALLBACK
+# -----------------
+# Beispiel:
 #
-# Danach:
-#
-#   weitere deutsche Sender
-#
-# ============================================================
+#   NDR Niedersachsen
+#       ↓ falls nicht gefunden
+#   NDR Hamburg
 #
 # STREAM-PRIORITÄT
-#
+# ----------------
 #   1. HD + nicht Geo-blocked
 #   2. SD + nicht Geo-blocked
 #   3. HD + Geo-blocked
 #   4. SD + Geo-blocked
 #
-# ============================================================
-#
-# WICHTIG
-#
-# - Geo-blocked wird NICHT automatisch entfernt.
-# - Gibt es nur Geo-blocked, bleibt dieser Stream erhalten.
-# - @HD / @SD werden als Qualitätsvarianten behandelt.
-# - Regionale Varianten bleiben getrennt.
-# - RTL wird nur über exakte ID oder exakten Namen erkannt.
-# - "Totally Turtles" kann NICHT als RTL erkannt werden.
-# - Rakuten TV steht immer ganz am Ende der Prioritätsliste.
-# - Bei Fehlern wird deutsch.m3u NICHT überschrieben.
-# - Vor dem Überschreiben wird ein Backup erstellt.
+# RAKUTEN
+# -------
+# Die fünf gewünschten Rakuten-TV-Sender stehen am Ende
+# der persönlichen Prioritätsliste.
 #
 # ============================================================
 
@@ -115,48 +56,44 @@ TEMP_OUTPUT = "deutsch.m3u.tmp"
 SOURCES = [
 
     (
-        "IPTV-org Deutschland",
+        "Deutschland",
         "https://iptv-org.github.io/iptv/countries/de.m3u"
     ),
 
     (
-        "IPTV-org Bayern",
+        "Bayern",
         "https://iptv-org.github.io/iptv/subdivisions/de-by.m3u"
     ),
 
     (
-        "IPTV-org Berlin",
+        "Berlin",
         "https://iptv-org.github.io/iptv/subdivisions/de-be.m3u"
     ),
 
     (
-        "IPTV-org Brandenburg",
+        "Brandenburg",
         "https://iptv-org.github.io/iptv/subdivisions/de-bb.m3u"
     ),
 
     (
-        "IPTV-org Hamburg",
+        "Hamburg",
         "https://iptv-org.github.io/iptv/subdivisions/de-hh.m3u"
     ),
 
     (
-        "IPTV-org Mecklenburg-Vorpommern",
+        "Mecklenburg-Vorpommern",
         "https://iptv-org.github.io/iptv/subdivisions/de-mv.m3u"
     ),
 
     (
-        "IPTV-org Niedersachsen",
+        "Niedersachsen",
         "https://iptv-org.github.io/iptv/subdivisions/de-ni.m3u"
     ),
 
     (
-        "IPTV-org Schleswig-Holstein",
+        "Schleswig-Holstein",
         "https://iptv-org.github.io/iptv/subdivisions/de-sh.m3u"
     ),
-
-    # --------------------------------------------------------
-    # Zusätzliche deutsche Free-TV-Quelle
-    # --------------------------------------------------------
 
     (
         "German TV M3U",
@@ -167,680 +104,704 @@ SOURCES = [
 
 # ============================================================
 # FESTE PRIORITÄT
+#
+# Reihenfolge exakt nach Wunsch.
+#
+# Jeder Sender kann mehrere IDs/Namen besitzen.
+#
+# Die Liste arbeitet mit Prioritätsgruppen:
+#
+#   "variants": [
+#       [erste Variante],
+#       [Fallback-Variante],
+#       [weiterer Fallback]
+#   ]
+#
+# Die ERSTE gefundene Variante gewinnt.
+# Innerhalb derselben Variante entscheidet stream_score().
 # ============================================================
 
 FIXED_CHANNELS = [
 
-    # --------------------------------------------------------
-    # 01-05 Hauptsender
-    # --------------------------------------------------------
-
     (
         "Das Erste",
         [
-            "daserste.de",
-        ],
-        [
-            "das erste",
+            {
+                "ids": ["daserste.de"],
+                "names": ["das erste"],
+            }
         ],
     ),
 
     (
         "ZDF",
         [
-            "zdf.de",
-        ],
-        [
-            "zdf",
+            {
+                "ids": ["zdf.de"],
+                "names": ["zdf"],
+            }
         ],
     ),
 
     (
         "ZDFinfo",
         [
-            "zdfinfo.de",
-        ],
-        [
-            "zdfinfo",
-            "zdf info",
+            {
+                "ids": ["zdfinfo.de"],
+                "names": ["zdfinfo", "zdf info"],
+            }
         ],
     ),
 
     (
         "ZDFneo",
         [
-            "zdfneo.de",
-        ],
-        [
-            "zdfneo",
-            "zdf neo",
+            {
+                "ids": ["zdfneo.de"],
+                "names": ["zdfneo", "zdf neo"],
+            }
         ],
     ),
 
     (
         "3sat",
         [
-            "3sat.de",
-        ],
-        [
-            "3sat",
+            {
+                "ids": ["3sat.de"],
+                "names": ["3sat"],
+            }
         ],
     ),
-
-    # --------------------------------------------------------
-    # 06-20 Private
-    # --------------------------------------------------------
 
     (
         "kabel eins",
         [
-            "kabeleins.de",
-        ],
-        [
-            "kabel eins",
+            {
+                "ids": ["kabeleins.de"],
+                "names": ["kabel eins"],
+            }
         ],
     ),
 
     (
         "ProSieben",
         [
-            "prosieben.de",
-        ],
-        [
-            "prosieben",
+            {
+                "ids": ["prosieben.de"],
+                "names": ["prosieben"],
+            }
         ],
     ),
 
     (
         "RTL",
         [
-            "rtl.de",
-        ],
-        [
-            "rtl",
+            {
+                "ids": ["rtl.de"],
+                "names": ["rtl"],
+            }
         ],
     ),
 
     (
         "Sat.1",
         [
-            "sat1.de",
-        ],
-        [
-            "sat 1",
-            "sat.1",
+            {
+                "ids": ["sat1.de"],
+                "names": ["sat 1", "sat.1"],
+            }
         ],
     ),
 
     (
         "VOX",
         [
-            "vox.de",
-        ],
-        [
-            "vox",
+            {
+                "ids": ["vox.de"],
+                "names": ["vox"],
+            }
         ],
     ),
 
     (
         "RTL Zwei",
         [
-            "rtlzwei.de",
-        ],
-        [
-            "rtl zwei",
-            "rtl2",
-            "rtl ii",
+            {
+                "ids": ["rtlzwei.de"],
+                "names": ["rtl zwei", "rtl2", "rtl ii"],
+            }
         ],
     ),
 
     (
         "Super RTL",
         [
-            "superrtl.de",
-        ],
-        [
-            "super rtl",
+            {
+                "ids": ["superrtl.de"],
+                "names": ["super rtl"],
+            }
         ],
     ),
 
     (
         "NITRO",
         [
-            "nitro.de",
-        ],
-        [
-            "nitro",
+            {
+                "ids": ["nitro.de"],
+                "names": ["nitro"],
+            }
         ],
     ),
 
     (
         "VOXup",
         [
-            "voxup.de",
-        ],
-        [
-            "voxup",
-            "vox up",
+            {
+                "ids": ["voxup.de"],
+                "names": ["voxup", "vox up"],
+            }
         ],
     ),
 
     (
         "ProSieben MAXX",
         [
-            "prosiebenmaxx.de",
-        ],
-        [
-            "prosieben maxx",
+            {
+                "ids": ["prosiebenmaxx.de"],
+                "names": ["prosieben maxx"],
+            }
         ],
     ),
 
     (
         "kabel eins Doku",
         [
-            "kabeleinsdoku.de",
-        ],
-        [
-            "kabel eins doku",
-            "kabel1 doku",
+            {
+                "ids": ["kabeleinsdoku.de"],
+                "names": [
+                    "kabel eins doku",
+                    "kabel1 doku",
+                ],
+            }
         ],
     ),
 
     (
         "TELE 5",
         [
-            "tele5.de",
-        ],
-        [
-            "tele 5",
-            "tele5",
+            {
+                "ids": ["tele5.de"],
+                "names": ["tele 5", "tele5"],
+            }
         ],
     ),
 
     (
         "DMAX",
         [
-            "dmax.de",
-        ],
-        [
-            "dmax",
+            {
+                "ids": ["dmax.de"],
+                "names": ["dmax"],
+            }
         ],
     ),
 
     (
         "sixx",
         [
-            "sixx.de",
-        ],
-        [
-            "sixx",
+            {
+                "ids": ["sixx.de"],
+                "names": ["sixx"],
+            }
         ],
     ),
 
     (
         "Sat.1 Gold",
         [
-            "sat1gold.de",
-        ],
-        [
-            "sat 1 gold",
-            "sat.1 gold",
+            {
+                "ids": ["sat1gold.de", "sat1gold.de"],
+                "names": [
+                    "sat 1 gold",
+                    "sat.1 gold",
+                ],
+            }
         ],
     ),
-
-    # --------------------------------------------------------
-    # 21-24 Öffentlich-rechtlich
-    # --------------------------------------------------------
 
     (
         "ARD-alpha",
         [
-            "ardalpha.de",
-            "ard-alpha.de",
-        ],
-        [
-            "ard alpha",
-            "ard-alpha",
+            {
+                "ids": [
+                    "ardalpha.de",
+                    "ard-alpha.de",
+                ],
+                "names": [
+                    "ard alpha",
+                    "ard-alpha",
+                ],
+            }
         ],
     ),
 
     (
         "Phoenix",
         [
-            "phoenix.de",
-        ],
-        [
-            "phoenix",
+            {
+                "ids": ["phoenix.de"],
+                "names": ["phoenix"],
+            }
         ],
     ),
 
     (
         "ARTE",
         [
-            "arte.de",
-            "artedeutsch.de",
-        ],
-        [
-            "arte",
+            {
+                "ids": [
+                    "arte.de",
+                    "artedeutsch.de",
+                ],
+                "names": ["arte"],
+            }
         ],
     ),
 
     (
         "Tagesschau24",
         [
-            "tagesschau24.de",
-        ],
-        [
-            "tagesschau24",
-            "tagesschau 24",
+            {
+                "ids": ["tagesschau24.de"],
+                "names": [
+                    "tagesschau24",
+                    "tagesschau 24",
+                ],
+            }
         ],
     ),
-
-    # --------------------------------------------------------
-    # 25-38 Regional / Dritte
-    # --------------------------------------------------------
 
     (
         "MDR Fernsehen",
         [
-            "mdrfernsehen.de@sachsen",
-            "mdrfernsehen.de@sachsenanhalt",
-            "mdrfernsehen.de@thuringen",
-            "mdrfernsehen.de@thueringen",
-            "mdrfernsehen.de",
-        ],
-        [
-            "mdr fernsehen",
-            "mdr sachsen",
-            "mdr sachsen anhalt",
-            "mdr thüringen",
-            "mdr thueringen",
+            {
+                "ids": [
+                    "mdrfernsehen.de@sachsen",
+                    "mdrfernsehen.de@sachsenanhalt",
+                    "mdrfernsehen.de@thuringen",
+                    "mdrfernsehen.de@thueringen",
+                ],
+                "names": [
+                    "mdr sachsen",
+                    "mdr sachsen anhalt",
+                    "mdr thüringen",
+                    "mdr thueringen",
+                ],
+            },
+            {
+                "ids": ["mdrfernsehen.de"],
+                "names": ["mdr fernsehen"],
+            },
         ],
     ),
+
+    # ========================================================
+    # NDR:
+    #
+    # 1. NDR Niedersachsen
+    # 2. NDR Hamburg als Fallback
+    # 3. allgemeiner NDR als letzter Fallback
+    # ========================================================
 
     (
         "NDR Niedersachsen",
         [
-            "ndrfernsehen.de@niedersachsen",
-        ],
-        [
-            "ndr niedersachsen",
-            "ndr fernsehen niedersachsen",
+            {
+                "ids": [
+                    "ndrfernsehen.de@niedersachsen",
+                ],
+                "names": [
+                    "ndr niedersachsen",
+                    "ndr niedersachsen hd",
+                ],
+            },
+            {
+                "ids": [
+                    "ndrfernsehen.de@hamburg",
+                ],
+                "names": [
+                    "ndr hamburg",
+                ],
+            },
+            {
+                "ids": ["ndrfernsehen.de"],
+                "names": [
+                    "ndr fernsehen",
+                    "ndr",
+                ],
+            },
         ],
     ),
 
     (
         "Noa 4 Hamburg",
         [
-            "noa4hamburg.de",
-        ],
-        [
-            "noa4 hamburg",
-            "noa4 hh",
-            "noa 4 hamburg",
+            {
+                "ids": ["noa4hamburg.de"],
+                "names": [
+                    "noa4 hamburg",
+                    "noa4 hh",
+                ],
+            }
         ],
     ),
 
     (
         "Hamburg 1",
         [
-            "hamburg1.de",
-        ],
-        [
-            "hamburg 1",
-            "hamburg1",
+            {
+                "ids": ["hamburg1.de"],
+                "names": [
+                    "hamburg 1",
+                    "hamburg1",
+                ],
+            }
         ],
     ),
 
     (
         "Radio Weser TV Bremen",
         [
-            "radiowesertvbremen.de",
-        ],
-        [
-            "radio weser tv bremen",
-            "radio weser tv",
+            {
+                "ids": ["radiowesertvbremen.de"],
+                "names": [
+                    "radio weser tv bremen",
+                    "radio weser tv",
+                ],
+            }
         ],
     ),
 
     (
         "Radio Bremen Fernsehen",
         [
-            "radiobremenfernsehen.de",
-        ],
-        [
-            "radio bremen fernsehen",
-            "radio bremen tv",
+            {
+                "ids": ["radiobremenfernsehen.de"],
+                "names": [
+                    "radio bremen fernsehen",
+                    "radio bremen tv",
+                ],
+            }
         ],
     ),
 
     (
         "WDR Fernsehen",
         [
-            "wdrfernsehen.de@koln",
-            "wdrfernsehen.de@koeln",
-            "wdr.de",
-        ],
-        [
-            "wdr fernsehen",
+            {
+                "ids": [
+                    "wdrfernsehen.de@koln",
+                    "wdrfernsehen.de@koeln",
+                    "wdr.de",
+                ],
+                "names": ["wdr fernsehen"],
+            }
         ],
     ),
 
     (
         "SWR Fernsehen Rheinland-Pfalz",
         [
-            "swrfernsehenrheinlandpfalz.de",
-        ],
-        [
-            "swr fernsehen rheinland pfalz",
+            {
+                "ids": ["swrfernsehenrheinlandpfalz.de"],
+                "names": [
+                    "swr fernsehen rheinland pfalz",
+                ],
+            }
         ],
     ),
 
     (
         "hr-fernsehen",
         [
-            "hrfernsehen.de",
-        ],
-        [
-            "hr fernsehen",
-            "hr-fernsehen",
+            {
+                "ids": ["hrfernsehen.de"],
+                "names": [
+                    "hr fernsehen",
+                    "hr-fernsehen",
+                ],
+            }
         ],
     ),
 
     (
         "SR Fernsehen",
         [
-            "srfernsehen.de",
-        ],
-        [
-            "sr fernsehen",
+            {
+                "ids": ["srfernsehen.de"],
+                "names": ["sr fernsehen"],
+            }
         ],
     ),
 
     (
         "rbb Fernsehen",
         [
-            "rbbfernsehen.de",
-        ],
-        [
-            "rbb fernsehen",
+            {
+                "ids": ["rbbfernsehen.de"],
+                "names": ["rbb fernsehen"],
+            }
         ],
     ),
 
     (
         "Oberpfalz TV",
         [
-            "oberpfalztv.de",
-        ],
-        [
-            "oberpfalz tv",
-            "oberpfalztv",
+            {
+                "ids": [
+                    "oberpfalztv.de",
+                    "oberpfalz tv.de",
+                ],
+                "names": [
+                    "oberpfalz tv",
+                    "oberpfalztv",
+                ],
+            }
         ],
     ),
 
     (
         "BR Fernsehen Nord",
         [
-            "brfernsehen.de@nord",
-        ],
-        [
-            "br fernsehen nord",
+            {
+                "ids": ["brfernsehen.de@nord"],
+                "names": ["br fernsehen nord"],
+            }
         ],
     ),
 
     (
         "München TV",
         [
-            "munchentv.de",
-            "muenchentv.de",
-        ],
-        [
-            "muenchen tv",
-            "munchen tv",
-            "münchen tv",
-            "münchen.tv",
+            {
+                "ids": [
+                    "munchentv.de",
+                    "munchen tv.de",
+                ],
+                "names": [
+                    "muenchen tv",
+                    "münchen tv",
+                    "münchen.tv",
+                ],
+            }
         ],
     ),
-
-    # --------------------------------------------------------
-    # 39-45 Nachrichten / Doku
-    # --------------------------------------------------------
 
     (
         "Nachrichten 360",
         [
-            "nachrichten360.de",
-        ],
-        [
-            "nachrichten 360",
+            {
+                "ids": ["nachrichten360.de"],
+                "names": ["nachrichten 360"],
+            }
         ],
     ),
 
     (
         "SPIEGEL TV",
-        [],
         [
-            "spiegel tv",
+            {
+                "ids": [],
+                "names": ["spiegel tv"],
+            }
         ],
     ),
 
     (
         "N24 Doku",
         [
-            "n24doku.de",
-        ],
-        [
-            "n24 doku",
-            "n24doku",
+            {
+                "ids": ["n24doku.de"],
+                "names": [
+                    "n24 doku",
+                    "n24doku",
+                ],
+            }
         ],
     ),
 
     (
         "WELT",
         [
-            "welt.de",
-        ],
-        [
-            "welt",
+            {
+                "ids": ["welt.de"],
+                "names": ["welt"],
+            }
         ],
     ),
 
     (
         "RT DE",
         [
-            "rtde.de",
-            "rtdeutsch.de",
-        ],
-        [
-            "rt de",
-            "rt deutsch",
+            {
+                "ids": [
+                    "rtde.de",
+                    "rtdeutsch.de",
+                ],
+                "names": [
+                    "rt de",
+                    "rt deutsch",
+                ],
+            }
         ],
     ),
 
     (
         "DokuSat",
-        [],
         [
-            "dokusat",
+            {
+                "ids": [],
+                "names": ["dokusat"],
+            }
         ],
     ),
 
     (
         "Authentic History",
-        [],
         [
-            "authentic history",
+            {
+                "ids": [],
+                "names": ["authentic history"],
+            }
         ],
     ),
-
-    # --------------------------------------------------------
-    # 46-50 Religion / Wissen
-    # --------------------------------------------------------
 
     (
         "Bibel TV",
         [
-            "bibeltv.de",
-        ],
-        [
-            "bibel tv",
-            "bibeltv",
+            {
+                "ids": ["bibeltv.de"],
+                "names": [
+                    "bibel tv",
+                    "bibeltv",
+                ],
+            }
         ],
     ),
 
     (
         "EWTN",
         [
-            "ewtn.de",
-        ],
-        [
-            "ewtn",
+            {
+                "ids": ["ewtn.de"],
+                "names": ["ewtn"],
+            }
         ],
     ),
 
     (
         "K-TV",
         [
-            "k-tv.de",
-            "ktv.de",
-        ],
-        [
-            "k tv",
-            "k-tv",
-            "k tv kirche",
+            {
+                "ids": ["k-tv.de", "ktv.de"],
+                "names": [
+                    "k tv",
+                    "k-tv",
+                ],
+            }
         ],
     ),
 
     (
         "Terra Mater WILD",
         [
-            "terramaterwild.de",
-        ],
-        [
-            "terra mater wild",
+            {
+                "ids": ["terramaterwild.de"],
+                "names": ["terra mater wild"],
+            }
         ],
     ),
 
     (
         "Welt der Wunder",
         [
-            "weltderwunder.de",
-        ],
-        [
-            "welt der wunder",
+            {
+                "ids": ["weltderwunder.de"],
+                "names": ["welt der wunder"],
+            }
         ],
     ),
 
-    # --------------------------------------------------------
-    # 51-55 Rakuten TV
+    # ========================================================
+    # RAKUTEN TV
     #
-    # Werden ebenfalls fest priorisiert und stehen nach
-    # Welt der Wunder.
-    # --------------------------------------------------------
+    # Fest am Ende der Fixed-Reihenfolge.
+    # ========================================================
 
     (
         "Rakuten TV Action Movies Germany",
         [
-            "rakutentvactionmovies.es@germany",
-        ],
-        [
-            "rakuten tv action movies germany",
+            {
+                "ids": ["rakutentvactionmovies.es@germany"],
+                "names": [
+                    "rakuten tv action movies germany",
+                ],
+            }
         ],
     ),
 
     (
         "Rakuten TV Comedy Movies Germany",
         [
-            "rakutentvcomedymovies.es@germany",
-        ],
-        [
-            "rakuten tv comedy movies germany",
+            {
+                "ids": ["rakutentvcomedymovies.es@germany"],
+                "names": [
+                    "rakuten tv comedy movies germany",
+                ],
+            }
         ],
     ),
 
     (
         "Rakuten TV Drama Movies Germany",
         [
-            "rakutentvdramamovies.es@germany",
-        ],
-        [
-            "rakuten tv drama movies germany",
+            {
+                "ids": ["rakutentvdramamovies.es@germany"],
+                "names": [
+                    "rakuten tv drama movies germany",
+                ],
+            }
         ],
     ),
 
     (
         "Rakuten TV Family Movies Germany",
         [
-            "rakutentvfamilymovies.es@germany",
-        ],
-        [
-            "rakuten tv family movies germany",
+            {
+                "ids": ["rakutentvfamilymovies.es@germany"],
+                "names": [
+                    "rakuten tv family movies germany",
+                ],
+            }
         ],
     ),
 
     (
         "Rakuten TV Top Movies Germany",
         [
-            "rakutentvtopmovies.es@germany",
-        ],
-        [
-            "rakuten tv top movies germany",
+            {
+                "ids": ["rakutentvtopmovies.es@germany"],
+                "names": [
+                    "rakuten tv top movies germany",
+                ],
+            }
         ],
     ),
 ]
 
 
 # ============================================================
-# HARTE RAKUTEN FALLBACKS
-#
-# Wenn eine der Rakuten-Quellen den Sender nicht liefert,
-# wird der bekannte Stream verwendet.
-#
-# Dadurch bleiben die fünf gewünschten Rakuten-Sender
-# zuverlässig in der Liste.
-# ============================================================
-
-RAKUTEN_FALLBACKS = {
-
-    "Rakuten TV Action Movies Germany": (
-        'RakutenTVActionMovies.es@Germany',
-        'https://i.imgur.com/Meew6eX.png',
-        'Rakuten TV Action Movies Germany (1080p)',
-        'https://284824cf70404fdfb6ddf9349009c710.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6066/master.m3u8'
-    ),
-
-    "Rakuten TV Comedy Movies Germany": (
-        'RakutenTVComedyMovies.es@Germany',
-        'https://i.imgur.com/Meew6eX.png',
-        'Rakuten TV Comedy Movies Germany (1080p)',
-        'https://ecac08c9e2214375b907d6825aaf9a01.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6182/master.m3u8'
-    ),
-
-    "Rakuten TV Drama Movies Germany": (
-        'RakutenTVDramaMovies.es@Germany',
-        'https://i.imgur.com/Meew6eX.png',
-        'Rakuten TV Drama Movies Germany (1080p)',
-        'https://968754c2483045c1a9a7f677caec35b6.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6096/master.m3u8'
-    ),
-
-    "Rakuten TV Family Movies Germany": (
-        'RakutenTVFamilyMovies.es@Germany',
-        'https://i.imgur.com/Meew6eX.png',
-        'Rakuten TV Family Movies Germany (1080p)',
-        'https://af230031eeac45f3b78d4f8a13265105.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6209/master.m3u8'
-    ),
-
-    "Rakuten TV Top Movies Germany": (
-        'RakutenTVTopMovies.es@Germany',
-        'https://i.imgur.com/Meew6eX.png',
-        'Rakuten TV Top Movies Germany (1080p)',
-        'https://cbb622b29f5d43b598991f3fa19de291.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-5985/master.m3u8'
-    ),
-}
-
-
-# ============================================================
-# AUSGESCHLOSSENE TVG-IDS
+# AUSSCHLÜSSE
 # ============================================================
 
 EXCLUDE_IDS = {
@@ -848,10 +809,6 @@ EXCLUDE_IDS = {
     "zeeone.de",
 }
 
-
-# ============================================================
-# AUSGESCHLOSSENE NAMEN
-# ============================================================
 
 EXCLUDE_NAME_WORDS = [
 
@@ -891,11 +848,7 @@ def normalize(value):
     }
 
     for old, new in replacements.items():
-
-        value = value.replace(
-            old,
-            new
-        )
+        value = value.replace(old, new)
 
     value = re.sub(
         r"[^a-z0-9@]+",
@@ -903,22 +856,17 @@ def normalize(value):
         value
     )
 
-    return " ".join(
-        value.split()
-    )
+    return " ".join(value.split())
 
 
 # ============================================================
 # TVG-ID NORMALISIERUNG
 #
-# NUR Qualitäts-Suffix entfernen.
+# Nur Qualitäts-Suffix entfernen.
 #
-# @Hamburg
-# @Niedersachsen
-# @Nord
-# @Thuringen
+# @HD / @SD / @FHD / @UHD / @4K
 #
-# bleiben erhalten.
+# Regionale Kennzeichnungen bleiben erhalten.
 # ============================================================
 
 def normalize_tvg_id(tvg_id):
@@ -938,10 +886,7 @@ def normalize_tvg_id(tvg_id):
 # ATTRIBUTE
 # ============================================================
 
-def get_attribute(
-    info,
-    attribute
-):
+def get_attribute(info, attribute):
 
     match = re.search(
         rf'{re.escape(attribute)}="([^"]*)"',
@@ -950,7 +895,6 @@ def get_attribute(
     )
 
     if match:
-
         return match.group(1).strip()
 
     return ""
@@ -982,10 +926,7 @@ def download(url):
         data = response.read()
 
     if not data:
-
-        raise RuntimeError(
-            "Leere Antwort"
-        )
+        raise RuntimeError("Leere Antwort")
 
     return data.decode(
         "utf-8",
@@ -997,10 +938,7 @@ def download(url):
 # M3U PARSER
 # ============================================================
 
-def parse_m3u(
-    text,
-    source
-):
+def parse_m3u(text, source):
 
     lines = text.splitlines()
 
@@ -1012,25 +950,17 @@ def parse_m3u(
 
         line = lines[i].strip()
 
-        if not line.startswith(
-            "#EXTINF:"
-        ):
+        if not line.startswith("#EXTINF:"):
 
             i += 1
             continue
 
         if i + 1 >= len(lines):
-
             break
 
         url = lines[i + 1].strip()
 
-        if not url:
-
-            i += 2
-            continue
-
-        if url.startswith("#"):
+        if not url or url.startswith("#"):
 
             i += 2
             continue
@@ -1080,62 +1010,13 @@ def parse_m3u(
             "source": source,
 
             "url": url,
-
         }
 
-        entries.append(
-            entry
-        )
+        entries.append(entry)
 
         i += 2
 
     return entries
-
-
-# ============================================================
-# FALLBACK-ENTRY
-# ============================================================
-
-def create_fallback_entry(
-    display_name
-):
-
-    data = RAKUTEN_FALLBACKS.get(
-        display_name
-    )
-
-    if not data:
-
-        return None
-
-    tvg_id, logo, name, url = data
-
-    return {
-
-        "info": (
-            f'#EXTINF:-1 tvg-id="{tvg_id}" '
-            f'tvg-logo="{logo}" '
-            f'group-title="09 Rakuten TV",'
-            f'{name}'
-        ),
-
-        "name": name,
-
-        "tvg_id": tvg_id,
-
-        "tvg_name": name,
-
-        "language": "German",
-
-        "country": "Germany",
-
-        "group": "09 Rakuten TV",
-
-        "source": "Rakuten Fallback",
-
-        "url": url,
-
-    }
 
 
 # ============================================================
@@ -1149,7 +1030,6 @@ def excluded(entry):
     )
 
     if tvg_id in EXCLUDE_IDS:
-
         return True
 
     combined = normalize(
@@ -1160,12 +1040,7 @@ def excluded(entry):
 
     for word in EXCLUDE_NAME_WORDS:
 
-        target = normalize(
-            word
-        )
-
-        if target in combined:
-
+        if normalize(word) in combined:
             return True
 
     return False
@@ -1177,25 +1052,23 @@ def excluded(entry):
 
 def is_geo_blocked(entry):
 
-    text = (
+    text = normalize(
         entry["info"]
         + " "
         + entry["name"]
         + " "
         + entry["tvg_name"]
-    ).lower()
+    )
 
     return (
-        "geo-blocked" in text
-        or "geo blocked" in text
+        "geo blocked" in text
         or "geoblocked" in text
-        or "[blocked]" in text
-        or "blocked" in text
+        or "geo blocked" in text
     )
 
 
 # ============================================================
-# HD ERKENNUNG
+# HD
 # ============================================================
 
 def is_hd(entry):
@@ -1208,9 +1081,7 @@ def is_hd(entry):
         + entry["tvg_name"]
     )
 
-    words = set(
-        text.split()
-    )
+    words = set(text.split())
 
     return (
         "hd" in words
@@ -1229,24 +1100,16 @@ def is_hd(entry):
 
 def stream_score(entry):
 
-    geo = is_geo_blocked(
-        entry
-    )
-
-    hd = is_hd(
-        entry
-    )
+    geo = is_geo_blocked(entry)
+    hd = is_hd(entry)
 
     if hd and not geo:
-
         return 0
 
     if not hd and not geo:
-
         return 1
 
     if hd and geo:
-
         return 2
 
     return 3
@@ -1256,17 +1119,13 @@ def stream_score(entry):
 # ID MATCH
 # ============================================================
 
-def id_matches(
-    entry,
-    ids
-):
+def id_matches(entry, ids):
 
     entry_id = normalize_tvg_id(
         entry["tvg_id"]
     )
 
     if not entry_id:
-
         return False
 
     for channel_id in ids:
@@ -1276,7 +1135,6 @@ def id_matches(
         )
 
         if entry_id == target:
-
             return True
 
     return False
@@ -1285,22 +1143,14 @@ def id_matches(
 # ============================================================
 # NAME MATCH
 #
-# ABSICHTLICH KEINE allgemeinen Teilstrings.
-#
-# Dadurch:
-#
-#   RTL
-#
-# matcht NICHT:
+# Sehr vorsichtig, damit z.B.
 #
 #   Totally Turtles
 #
+# niemals RTL wird.
 # ============================================================
 
-def name_matches(
-    entry,
-    names
-):
+def name_matches(entry, names):
 
     entry_name = normalize(
         entry["name"]
@@ -1311,37 +1161,96 @@ def name_matches(
     )
 
     values = {
-
         value
-
         for value in (
             entry_name,
             tvg_name
         )
-
         if value
+    }
+
+    # --------------------------------------------------------
+    # Exakter Name
+    # --------------------------------------------------------
+
+    for candidate in names:
+
+        target = normalize(candidate)
+
+        if target in values:
+            return True
+
+    # --------------------------------------------------------
+    # Sichere längere Teilmatches
+    # --------------------------------------------------------
+
+    safe_partial = {
+
+        "zdf info",
+        "zdf neo",
+
+        "sat 1 gold",
+
+        "kabel eins doku",
+        "kabel1 doku",
+
+        "prosieben maxx",
+
+        "rtl zwei",
+
+        "radio bremen fernsehen",
+        "radio bremen tv",
+
+        "radio weser tv",
+        "radio weser tv bremen",
+
+        "swr fernsehen rheinland pfalz",
+
+        "br fernsehen nord",
+
+        "terra mater wild",
+
+        "authentic history",
+
+        "nachrichten 360",
+
+        "oberpfalz tv",
+
+        "muenchen tv",
+
+        "noa4 hamburg",
+
+        "ndr niedersachsen",
+
+        "ndr hamburg",
+
+        "ndr fernsehen",
+
+        "welt der wunder",
+
+        "spiegel tv",
+
+        "dokusat",
 
     }
 
     for candidate in names:
 
-        target = normalize(
-            candidate
-        )
+        target = normalize(candidate)
 
-        if not target:
-
+        if target not in safe_partial:
             continue
 
-        if target in values:
+        for value in values:
 
-            return True
+            if target in value:
+                return True
 
     return False
 
 
 # ============================================================
-# MATCH
+# DEFINITION MATCH
 # ============================================================
 
 def matches_definition(
@@ -1349,32 +1258,25 @@ def matches_definition(
     definition
 ):
 
-    display_name, ids, names = definition
+    ids = definition.get("ids", [])
+    names = definition.get("names", [])
 
-    if id_matches(
-        entry,
-        ids
-    ):
-
+    if id_matches(entry, ids):
         return True
 
-    if name_matches(
-        entry,
-        names
-    ):
-
+    if name_matches(entry, names):
         return True
 
     return False
 
 
 # ============================================================
-# ALLE MATCHES
+# MATCHES EINER VARIANTE
 # ============================================================
 
-def find_matches(
+def find_variant_matches(
     entries,
-    definition
+    variant
 ):
 
     return [
@@ -1385,112 +1287,130 @@ def find_matches(
 
         if matches_definition(
             entry,
-            definition
+            variant
         )
 
     ]
 
 
 # ============================================================
-# DEDUP
+# BESTE VARIANTE
 #
-# @HD / @SD werden zusammengefasst.
-# Regionale Varianten bleiben getrennt.
+# WICHTIG:
+#
+# Variante 1 hat Vorrang vor Variante 2.
+#
+# Beispiel:
+#
+# NDR Niedersachsen vorhanden:
+#     -> Niedersachsen
+#
+# nicht:
+#     -> Hamburg
+#
+# Nur wenn Niedersachsen NICHT gefunden wird:
+#     -> Hamburg
 # ============================================================
 
-def deduplicate(
-    entries
+def find_best_variant(
+    entries,
+    variants
 ):
 
-    result = OrderedDict()
+    for variant_number, variant in enumerate(
+        variants,
+        start=1
+    ):
 
-    for entry in entries:
-
-        tvg_id = normalize_tvg_id(
-            entry["tvg_id"]
-        )
-
-        if not tvg_id:
-
-            continue
-
-        if tvg_id not in result:
-
-            result[tvg_id] = entry
-
-            continue
-
-        existing = result[tvg_id]
-
-        if (
-            stream_score(entry)
-            < stream_score(existing)
-        ):
-
-            result[tvg_id] = entry
-
-    return list(
-        result.values()
-    )
-
-
-# ============================================================
-# FIXED AUFBAUEN
-# ============================================================
-
-def build_fixed(
-    entries
-):
-
-    result = []
-
-    used_ids = set()
-
-    found_names = set()
-
-    for definition in FIXED_CHANNELS:
-
-        display_name = definition[0]
-
-        matches = find_matches(
+        matches = find_variant_matches(
             entries,
-            definition
+            variant
         )
+
+        if not matches:
+            continue
 
         matches.sort(
             key=stream_score
         )
 
+        return (
+            matches[0],
+            variant_number
+        )
+
+    return (
+        None,
+        None
+    )
+
+
+# ============================================================
+# FIXED AUFBAU
+# ============================================================
+
+def build_fixed(entries):
+
+    result = []
+
+    used_ids = set()
+
+    missing = []
+
+    for priority_number, definition in enumerate(
+        FIXED_CHANNELS,
+        start=1
+    ):
+
+        display_name = definition[0]
+        variants = definition[1]
+
         selected = None
+        selected_variant = None
 
-        for entry in matches:
+        for variant_number, variant in enumerate(
+            variants,
+            start=1
+        ):
 
-            base_id = normalize_tvg_id(
-                entry["tvg_id"]
+            matches = find_variant_matches(
+                entries,
+                variant
             )
 
-            if (
-                base_id
-                and base_id in used_ids
-            ):
+            # Bereits verwendete TVG-ID nicht doppelt
+            matches = [
 
+                entry
+
+                for entry in matches
+
+                if (
+                    normalize_tvg_id(
+                        entry["tvg_id"]
+                    )
+                    not in used_ids
+                )
+
+            ]
+
+            if not matches:
                 continue
 
-            selected = entry
+            matches.sort(
+                key=stream_score
+            )
+
+            selected = matches[0]
+            selected_variant = variant_number
 
             break
 
-        # ----------------------------------------------------
-        # Rakuten Fallback
-        # ----------------------------------------------------
-
         if selected is None:
 
-            selected = create_fallback_entry(
+            missing.append(
                 display_name
             )
-
-        if selected is None:
 
             continue
 
@@ -1498,39 +1418,20 @@ def build_fixed(
             selected["tvg_id"]
         )
 
+        selected["category"] = "00 Priorität"
+        selected["priority"] = priority_number
+        selected["display_name"] = display_name
+        selected["matched_variant"] = selected_variant
+
+        result.append(selected)
+
         if base_id:
-
-            if base_id in used_ids:
-
-                continue
-
-            used_ids.add(
-                base_id
-            )
-
-        selected["category"] = (
-            "00 Priorität"
-        )
-
-        selected["priority"] = (
-            len(result) + 1
-        )
-
-        selected["display_name"] = (
-            display_name
-        )
-
-        result.append(
-            selected
-        )
-
-        found_names.add(
-            display_name
-        )
+            used_ids.add(base_id)
 
     return (
         result,
-        used_ids
+        used_ids,
+        missing
     )
 
 
@@ -1546,15 +1447,8 @@ def get_category(entry):
         + entry["tvg_name"]
     )
 
-    # Rakuten immer ganz hinten
-
     if "rakuten tv" in text:
-
         return "09 Rakuten TV"
-
-    # --------------------------------------------------------
-    # Regional
-    # --------------------------------------------------------
 
     regional_words = [
 
@@ -1562,8 +1456,6 @@ def get_category(entry):
         "ndr hamburg",
 
         "noa4",
-        "noa 4",
-
         "hamburg 1",
         "hamburg1",
 
@@ -1581,19 +1473,13 @@ def get_category(entry):
         "br fernsehen nord",
 
         "swr fernsehen rheinland pfalz",
-
     ]
 
     if any(
         word in text
         for word in regional_words
     ):
-
         return "02 Regional"
-
-    # --------------------------------------------------------
-    # Dritte Programme
-    # --------------------------------------------------------
 
     third_words = [
 
@@ -1605,19 +1491,13 @@ def get_category(entry):
         "rbb",
         "sr fernsehen",
         "br fernsehen",
-
     ]
 
     if any(
         word in text
         for word in third_words
     ):
-
         return "03 Dritte Programme"
-
-    # --------------------------------------------------------
-    # Nachrichten
-    # --------------------------------------------------------
 
     news_words = [
 
@@ -1629,19 +1509,13 @@ def get_category(entry):
         "news",
         "rt de",
         "rt deutsch",
-
     ]
 
     if any(
         word in text
         for word in news_words
     ):
-
         return "04 Nachrichten"
-
-    # --------------------------------------------------------
-    # Dokumentation
-    # --------------------------------------------------------
 
     documentary_words = [
 
@@ -1652,19 +1526,13 @@ def get_category(entry):
         "science",
         "spiegel tv",
         "authentic history",
-
     ]
 
     if any(
         word in text
         for word in documentary_words
     ):
-
         return "05 Dokumentation & Wissen"
-
-    # --------------------------------------------------------
-    # Kinder
-    # --------------------------------------------------------
 
     children_words = [
 
@@ -1672,19 +1540,13 @@ def get_category(entry):
         "kinder",
         "kids",
         "junior",
-
     ]
 
     if any(
         word in text
         for word in children_words
     ):
-
         return "06 Kinder"
-
-    # --------------------------------------------------------
-    # Religion
-    # --------------------------------------------------------
 
     religion_words = [
 
@@ -1693,51 +1555,64 @@ def get_category(entry):
         "ewtn",
         "k tv",
         "erf",
-
     ]
 
     if any(
         word in text
         for word in religion_words
     ):
-
         return "07 Religion"
 
-    # --------------------------------------------------------
-    # Sport
-    # --------------------------------------------------------
-
     if "sport" in text:
-
         return "08 Sport"
-
-    # --------------------------------------------------------
-    # Rakuten
-    # --------------------------------------------------------
-
-    if "rakuten" in text:
-
-        return "09 Rakuten TV"
-
-    # --------------------------------------------------------
-    # Rest
-    # --------------------------------------------------------
 
     return "10 Weitere deutsche Sender"
 
 
 # ============================================================
-# REST SORTIEREN
+# REST DEDUP
 # ============================================================
 
-def sort_rest(
-    entries
-):
+def deduplicate(entries):
+
+    result = OrderedDict()
 
     for entry in entries:
 
-        entry["category"] = (
-            get_category(entry)
+        tvg_id = normalize_tvg_id(
+            entry["tvg_id"]
+        )
+
+        if not tvg_id:
+            continue
+
+        if tvg_id not in result:
+
+            result[tvg_id] = entry
+            continue
+
+        existing = result[tvg_id]
+
+        if (
+            stream_score(entry)
+            < stream_score(existing)
+        ):
+
+            result[tvg_id] = entry
+
+    return list(result.values())
+
+
+# ============================================================
+# REST SORTIERUNG
+# ============================================================
+
+def sort_rest(entries):
+
+    for entry in entries:
+
+        entry["category"] = get_category(
+            entry
         )
 
     category_order = {
@@ -1751,7 +1626,6 @@ def sort_rest(
         "08 Sport": 8,
         "09 Rakuten TV": 9,
         "10 Weitere deutsche Sender": 10,
-
     }
 
     entries.sort(
@@ -1785,16 +1659,12 @@ def clean_info(
 
     info = entry["info"]
 
-    # group-title entfernen
-
     info = re.sub(
         r'\s+group-title="[^"]*"',
         "",
         info,
         flags=re.IGNORECASE
     )
-
-    # alten Namen entfernen
 
     info = re.sub(
         r",.*$",
@@ -1813,9 +1683,7 @@ def clean_info(
 # M3U ERSTELLEN
 # ============================================================
 
-def build_m3u(
-    entries
-):
+def build_m3u(entries):
 
     output = [
 
@@ -1827,7 +1695,9 @@ def build_m3u(
         "# GER TV - Deutsche TV-Liste",
         "# Automatisch aktualisiert",
         "#",
-        "# 00 Priorität = feste Senderreihenfolge",
+        "# Mehrere Quellen",
+        "# Persönliche Senderpriorität",
+        "# Regionale Fallbacks",
         "# HD bevorzugt",
         "# Nicht Geo-blocked bevorzugt",
         "# Geo-blocked bleibt erhalten",
@@ -1835,25 +1705,20 @@ def build_m3u(
         "# ==================================================",
 
         "",
-
     ]
 
     current_category = None
 
     for entry in entries:
 
-        category = entry[
-            "category"
-        ]
+        category = entry["category"]
 
         if category != current_category:
 
             output.append("")
-
             output.append(
                 f"# ===== {category} ====="
             )
-
             output.append("")
 
             current_category = category
@@ -1876,12 +1741,10 @@ def build_m3u(
 
 
 # ============================================================
-# SICHERES SCHREIBEN
+# SICHER SCHREIBEN
 # ============================================================
 
-def safe_write(
-    content
-):
+def safe_write(content):
 
     with open(
         TEMP_OUTPUT,
@@ -1889,9 +1752,7 @@ def safe_write(
         encoding="utf-8"
     ) as file:
 
-        file.write(
-            content
-        )
+        file.write(content)
 
     with open(
         TEMP_OUTPUT,
@@ -1921,34 +1782,28 @@ def safe_write(
     if extinf_count < 20:
 
         try:
-            os.remove(
-                TEMP_OUTPUT
-            )
+            os.remove(TEMP_OUTPUT)
         except OSError:
             pass
 
         raise RuntimeError(
-            "Zu wenige Sender in neuer M3U: "
+            "Zu wenige Sender in der neuen M3U: "
             f"{extinf_count}"
         )
 
     if url_count < 20:
 
         try:
-            os.remove(
-                TEMP_OUTPUT
-            )
+            os.remove(TEMP_OUTPUT)
         except OSError:
             pass
 
         raise RuntimeError(
-            "Zu wenige URLs in neuer M3U: "
+            "Zu wenige URLs in der neuen M3U: "
             f"{url_count}"
         )
 
-    if os.path.exists(
-        OUTPUT
-    ):
+    if os.path.exists(OUTPUT):
 
         shutil.copy2(
             OUTPUT,
@@ -1978,7 +1833,7 @@ def main():
     successful_sources = 0
 
     # --------------------------------------------------------
-    # Quellen laden
+    # QUELLEN
     # --------------------------------------------------------
 
     for source_name, url in SOURCES:
@@ -1989,9 +1844,7 @@ def main():
                 f"Lade {source_name} ..."
             )
 
-            text = download(
-                url
-            )
+            text = download(url)
 
             entries = parse_m3u(
                 text,
@@ -2008,9 +1861,7 @@ def main():
                 f"  OK: {len(entries)} Einträge"
             )
 
-            all_entries.extend(
-                entries
-            )
+            all_entries.extend(entries)
 
             successful_sources += 1
 
@@ -2019,10 +1870,6 @@ def main():
             print(
                 f"  FEHLER: {error}"
             )
-
-    # --------------------------------------------------------
-    # Quellen prüfen
-    # --------------------------------------------------------
 
     print()
 
@@ -2052,7 +1899,7 @@ def main():
         )
 
     # --------------------------------------------------------
-    # Ausschlüsse
+    # AUSSCHLÜSSE
     # --------------------------------------------------------
 
     filtered = [
@@ -2071,28 +1918,20 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Deduplizieren
+    # Fixed zuerst
+    #
+    # Noch NICHT global deduplizieren.
+    #
+    # So kann z.B. eine benötigte Variante gefunden werden,
+    # bevor andere Quellen sie verdrängen.
     # --------------------------------------------------------
 
-    filtered = deduplicate(
-        filtered
-    )
-
-    print(
-        "Nach Deduplizierung:",
-        len(filtered)
-    )
-
-    # --------------------------------------------------------
-    # Fixed
-    # --------------------------------------------------------
-
-    fixed, used_ids = build_fixed(
+    fixed, used_ids, missing = build_fixed(
         filtered
     )
 
     # --------------------------------------------------------
-    # Rest
+    # ÜBRIGE EINTRÄGE
     # --------------------------------------------------------
 
     rest = [
@@ -2101,33 +1940,73 @@ def main():
 
         for entry in filtered
 
-        if (
-            not normalize_tvg_id(
-                entry["tvg_id"]
-            )
-            or normalize_tvg_id(
-                entry["tvg_id"]
-            ) not in used_ids
-        )
+        if normalize_tvg_id(
+            entry["tvg_id"]
+        ) not in used_ids
 
     ]
 
-    rest = sort_rest(
-        rest
+    # --------------------------------------------------------
+    # Rest deduplizieren
+    # --------------------------------------------------------
+
+    rest = deduplicate(rest)
+
+    # --------------------------------------------------------
+    # Rest sortieren
+    # --------------------------------------------------------
+
+    rest = sort_rest(rest)
+
+    # --------------------------------------------------------
+    # Rakuten aus dem Rest entfernen.
+    #
+    # Sie werden ausschließlich über die feste Rakuten-
+    # Definition einsortiert.
+    # --------------------------------------------------------
+
+    fixed_ids = {
+
+        normalize_tvg_id(
+            entry["tvg_id"]
+        )
+
+        for entry in fixed
+
+    }
+
+    # Bereits Fixed-Rakuten sind korrekt positioniert.
+    # Weitere Rakuten-Versionen sollen nicht vor ihnen landen.
+
+    non_rakuten_rest = []
+    rakuten_rest = []
+
+    for entry in rest:
+
+        text = normalize(
+            entry["name"]
+            + " "
+            + entry["tvg_name"]
+        )
+
+        if "rakuten tv" in text:
+
+            rakuten_rest.append(entry)
+
+        else:
+
+            non_rakuten_rest.append(entry)
+
+    rest = (
+        non_rakuten_rest
+        + rakuten_rest
     )
 
     # --------------------------------------------------------
-    # Endgültige Liste
+    # ENDGÜLTIGE LISTE
     # --------------------------------------------------------
 
-    entries = (
-        fixed
-        + rest
-    )
-
-    # --------------------------------------------------------
-    # Sicherheitsprüfung
-    # --------------------------------------------------------
+    entries = fixed + rest
 
     if len(entries) < 20:
 
@@ -2137,19 +2016,15 @@ def main():
         )
 
     # --------------------------------------------------------
-    # M3U schreiben
+    # M3U
     # --------------------------------------------------------
 
-    content = build_m3u(
-        entries
-    )
+    content = build_m3u(entries)
 
-    safe_write(
-        content
-    )
+    safe_write(content)
 
     # ========================================================
-    # AUSGABE FIXED
+    # AUSGABE
     # ========================================================
 
     print()
@@ -2174,44 +2049,40 @@ def main():
             else "OK"
         )
 
+        fallback = ""
+
+        if entry.get("matched_variant", 1) > 1:
+
+            fallback = (
+                f" FALLBACK#{entry['matched_variant']}"
+            )
+
         print(
 
             f"{number:02d}. "
             f"{entry['display_name']} "
-            f"[{hd}/{geo}] "
-            f"[{entry['source']}]"
+            f"[{hd}/{geo}]"
+            f"{fallback} "
+            f"[{entry['tvg_id']}]"
 
         )
 
     # --------------------------------------------------------
-    # Fehlende Fixed-Sender anzeigen
+    # Fehlende Fixed-Sender
     # --------------------------------------------------------
 
-    if len(fixed) < len(FIXED_CHANNELS):
+    if missing:
 
         print()
-        print(
-            "FEHLENDE FIXED-SENDER:"
-        )
+        print("==========================================")
+        print("NICHT GEFUNDENE PRIORITÄTS-SENDER")
+        print("==========================================")
 
-        found = {
-            entry["display_name"]
-            for entry in fixed
-        }
+        for name in missing:
 
-        for definition in FIXED_CHANNELS:
-
-            name = definition[0]
-
-            if name not in found:
-
-                print(
-                    f"  FEHLT: {name}"
-                )
-
-    # ========================================================
-    # ERGEBNIS
-    # ========================================================
+            print(
+                f"- {name}"
+            )
 
     print()
     print("==========================================")
@@ -2224,10 +2095,8 @@ def main():
     )
 
     print(
-        "Fixed:",
-        len(fixed),
-        "/",
-        len(FIXED_CHANNELS)
+        "Priorität:",
+        len(fixed)
     )
 
     print(
@@ -2236,7 +2105,6 @@ def main():
     )
 
     print()
-
     print(
         "Datei:",
         OUTPUT
@@ -2263,34 +2131,21 @@ if __name__ == "__main__":
     except Exception as error:
 
         print()
-
         print("==========================================")
         print("UPDATE FEHLGESCHLAGEN")
         print("==========================================")
-
-        print(
-            error
-        )
-
+        print(error)
         print()
-
         print(
             "Die vorhandene deutsch.m3u "
             "wurde NICHT überschrieben."
         )
 
-        if os.path.exists(
-            TEMP_OUTPUT
-        ):
+        if os.path.exists(TEMP_OUTPUT):
 
             try:
-
-                os.remove(
-                    TEMP_OUTPUT
-                )
-
+                os.remove(TEMP_OUTPUT)
             except OSError:
-
                 pass
 
         raise SystemExit(1)
