@@ -824,11 +824,6 @@ EXCLUDE_NAME_WORDS = [
     "xxx",
     "adult",
     "porn",
-
-    "deluxe music",
-    "music",
-    "musik",
-    "schlager",
 ]
 
 
