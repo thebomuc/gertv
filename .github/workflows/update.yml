@@ -14,17 +14,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Download IPTV-org Germany playlist
+      - name: Generate M3U
         run: |
-          curl -L \
-            "https://iptv-org.github.io/iptv/countries/de.m3u" \
-            -o /tmp/germany.m3u
-
-      - name: Copy playlist
-        run: |
-          cp /tmp/germany.m3u deutsch.m3u
+          python3 update.py
 
       - name: Commit changes
         run: |
