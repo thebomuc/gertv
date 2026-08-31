@@ -13,7 +13,7 @@ from collections import OrderedDict
 #
 #     deutsch.m3u
 #
-# Priorität:
+# REIHENFOLGE:
 #
 #   00 Persönliche feste Reihenfolge
 #   01 Weitere Private
@@ -38,16 +38,15 @@ from collections import OrderedDict
 #
 # WICHTIG:
 #
-# - Geo-blocked wird NICHT automatisch entfernt.
-# - Gibt es nur einen Geo-blocked Stream, bleibt er drin.
-# - @HD und @SD gelten als Varianten desselben Senders.
-# - Regionale Varianten wie @Hamburg / @Nord bleiben getrennt.
-# - RTL erscheint nur, wenn tatsächlich gefunden.
-# - Totally Turtles kann nicht als RTL erkannt werden.
-# - Rakuten TV kommt immer ans Ende.
-# - Bei einem fehlerhaften Download wird die alte M3U nicht
-#   überschrieben.
-# - Vor dem erfolgreichen Überschreiben wird ein Backup erstellt.
+# - Geo-blocked wird NICHT entfernt.
+# - Gibt es nur Geo-blocked, bleibt der Sender drin.
+# - @HD / @SD werden als Qualitätsvarianten behandelt.
+# - Regionale Varianten bleiben getrennt.
+# - RTL wird nur erkannt, wenn es wirklich RTL ist.
+# - "Totally Turtles" kann NICHT als RTL erkannt werden.
+# - Rakuten TV steht immer ganz am Ende.
+# - Bei Fehlern wird die bestehende M3U nicht überschrieben.
+# - Vor erfolgreichem Update wird ein Backup erstellt.
 #
 # ============================================================
 
@@ -102,26 +101,35 @@ SOURCES = [
         "Schleswig-Holstein",
         "https://iptv-org.github.io/iptv/subdivisions/de-sh.m3u"
     ),
+
+    # --------------------------------------------------------
+    # Zusätzliche deutsche M3U
+    #
+    # Wird zusätzlich geladen, damit Sender wie K-TV,
+    # die ggf. nicht in IPTV-org vorhanden sind, gefunden
+    # werden können.
+    # --------------------------------------------------------
+
+    (
+        "German TV Zusatzquelle",
+        "https://raw.githubusercontent.com/josxha/german-tv-m3u/main/german-tv.m3u"
+    ),
 ]
 
 
 # ============================================================
 # FESTE REIHENFOLGE
 #
-# Diese Reihenfolge steht immer ganz vorne.
+# Genau diese Reihenfolge wird vorne erzeugt.
 #
-# Sender, die aktuell nicht verfügbar sind, werden übersprungen.
+# Ist ein Sender aktuell nicht vorhanden, wird er übersprungen.
 #
-# RTL ist absichtlich hier zwischen ProSieben und den weiteren
-# privaten Sendern.
-#
-# Terra Mater Wild ist am Ende deiner persönlichen Reihenfolge.
 # ============================================================
 
 FIXED_CHANNELS = [
 
     # --------------------------------------------------------
-    # Hauptsender
+    # 01
     # --------------------------------------------------------
 
     (
@@ -134,6 +142,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 02
+    # --------------------------------------------------------
+
     (
         "ZDF",
         [
@@ -143,6 +155,10 @@ FIXED_CHANNELS = [
             "zdf",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 03
+    # --------------------------------------------------------
 
     (
         "ZDFinfo",
@@ -155,6 +171,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 04
+    # --------------------------------------------------------
+
     (
         "ZDFneo",
         [
@@ -165,6 +185,10 @@ FIXED_CHANNELS = [
             "zdf neo",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 05
+    # --------------------------------------------------------
 
     (
         "3sat",
@@ -177,7 +201,7 @@ FIXED_CHANNELS = [
     ),
 
     # --------------------------------------------------------
-    # Private Priorität
+    # 06
     # --------------------------------------------------------
 
     (
@@ -190,6 +214,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 07
+    # --------------------------------------------------------
+
     (
         "ProSieben",
         [
@@ -200,15 +228,9 @@ FIXED_CHANNELS = [
         ],
     ),
 
-    (
-        "RTL",
-        [
-            "rtl.de",
-        ],
-        [
-            "rtl",
-        ],
-    ),
+    # --------------------------------------------------------
+    # 08
+    # --------------------------------------------------------
 
     (
         "sixx",
@@ -219,6 +241,10 @@ FIXED_CHANNELS = [
             "sixx",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 09
+    # --------------------------------------------------------
 
     (
         "Sat.1 Gold",
@@ -232,7 +258,7 @@ FIXED_CHANNELS = [
     ),
 
     # --------------------------------------------------------
-    # Öffentlich-rechtlich
+    # 10
     # --------------------------------------------------------
 
     (
@@ -247,6 +273,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 11
+    # --------------------------------------------------------
+
     (
         "Phoenix",
         [
@@ -256,6 +286,10 @@ FIXED_CHANNELS = [
             "phoenix",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 12
+    # --------------------------------------------------------
 
     (
         "ARTE",
@@ -267,6 +301,10 @@ FIXED_CHANNELS = [
             "arte",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 13
+    # --------------------------------------------------------
 
     (
         "Tagesschau24",
@@ -280,7 +318,7 @@ FIXED_CHANNELS = [
     ),
 
     # --------------------------------------------------------
-    # Region / Dritte
+    # 14
     # --------------------------------------------------------
 
     (
@@ -301,15 +339,27 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 15
+    #
+    # WICHTIG:
+    # NDR Niedersachsen statt NDR Hamburg
+    # --------------------------------------------------------
+
     (
-        "NDR Hamburg",
+        "NDR Niedersachsen",
         [
-            "ndrfernsehen.de@hamburg",
+            "ndrfernsehen.de@niedersachsen",
+            "ndrfernsehen.de@ni",
         ],
         [
-            "ndr hamburg",
+            "ndr niedersachsen",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 16
+    # --------------------------------------------------------
 
     (
         "Noa 4 Hamburg",
@@ -319,8 +369,13 @@ FIXED_CHANNELS = [
         [
             "noa4 hamburg",
             "noa4 hh",
+            "noa 4 hamburg",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 17
+    # --------------------------------------------------------
 
     (
         "Hamburg 1",
@@ -333,6 +388,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 18
+    # --------------------------------------------------------
+
     (
         "Radio Weser TV Bremen",
         [
@@ -344,12 +403,14 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 19
+    # --------------------------------------------------------
+
     (
         "Radio Bremen Fernsehen",
         [
             "radiobremenfernsehen.de",
-            "radiobrem enfernsehen.de",
-            "radiobrem en tv.de",
         ],
         [
             "radio bremen fernsehen",
@@ -357,17 +418,24 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 20
+    # --------------------------------------------------------
+
     (
         "WDR Fernsehen",
         [
             "wdrfernsehen.de@koln",
             "wdrfernsehen.de@koeln",
-            "wdr.de",
         ],
         [
             "wdr fernsehen",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 21
+    # --------------------------------------------------------
 
     (
         "SWR Fernsehen Rheinland-Pfalz",
@@ -378,6 +446,10 @@ FIXED_CHANNELS = [
             "swr fernsehen rheinland pfalz",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 22
+    # --------------------------------------------------------
 
     (
         "hr-fernsehen",
@@ -390,6 +462,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 23
+    # --------------------------------------------------------
+
     (
         "SR Fernsehen",
         [
@@ -399,6 +475,10 @@ FIXED_CHANNELS = [
             "sr fernsehen",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 24
+    # --------------------------------------------------------
 
     (
         "rbb Fernsehen",
@@ -410,10 +490,13 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 25
+    # --------------------------------------------------------
+
     (
         "Oberpfalz TV",
         [
-            "oberpfalz tv.de",
             "oberpfalztv.de",
         ],
         [
@@ -421,6 +504,10 @@ FIXED_CHANNELS = [
             "oberpfalztv",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 26
+    # --------------------------------------------------------
 
     (
         "BR Fernsehen Nord",
@@ -432,6 +519,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 27
+    # --------------------------------------------------------
+
     (
         "München TV",
         [
@@ -442,11 +533,12 @@ FIXED_CHANNELS = [
             "muenchen tv",
             "münchen tv",
             "münchen.tv",
+            "munchen tv",
         ],
     ),
 
     # --------------------------------------------------------
-    # Nachrichten / Doku
+    # 28
     # --------------------------------------------------------
 
     (
@@ -459,6 +551,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 29
+    # --------------------------------------------------------
+
     (
         "SPIEGEL TV",
         [],
@@ -466,6 +562,10 @@ FIXED_CHANNELS = [
             "spiegel tv",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 30
+    # --------------------------------------------------------
 
     (
         "N24 Doku",
@@ -477,6 +577,10 @@ FIXED_CHANNELS = [
             "n24doku",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 31
+    # --------------------------------------------------------
 
     (
         "RT DE",
@@ -490,6 +594,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 32
+    # --------------------------------------------------------
+
     (
         "DokuSat",
         [],
@@ -497,6 +605,10 @@ FIXED_CHANNELS = [
             "dokusat",
         ],
     ),
+
+    # --------------------------------------------------------
+    # 33
+    # --------------------------------------------------------
 
     (
         "Authentic History",
@@ -507,7 +619,7 @@ FIXED_CHANNELS = [
     ),
 
     # --------------------------------------------------------
-    # Religion
+    # 34
     # --------------------------------------------------------
 
     (
@@ -521,6 +633,10 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 35
+    # --------------------------------------------------------
+
     (
         "EWTN",
         [
@@ -531,19 +647,29 @@ FIXED_CHANNELS = [
         ],
     ),
 
+    # --------------------------------------------------------
+    # 36
+    # --------------------------------------------------------
+
     (
         "K-TV",
         [
             "k-tv.de",
+            "ktv.de",
         ],
         [
             "k tv",
             "k-tv",
+            "k tv katholisches",
+            "katholisches fernsehen",
         ],
     ),
 
     # --------------------------------------------------------
-    # Ende der persönlichen Reihenfolge
+    # 37
+    #
+    # Bleibt hier am Ende der persönlichen Reihenfolge.
+    # Keine künstliche Platz-50-Logik.
     # --------------------------------------------------------
 
     (
@@ -561,10 +687,24 @@ FIXED_CHANNELS = [
 # ============================================================
 # WEITERE PRIVATE
 #
-# Diese kommen NACH RTL.
+# RTL steht absichtlich DIREKT nach ProSieben.
+#
+# Falls RTL irgendwann wieder verfügbar ist, landet es hier.
+#
+# Danach kommen die übrigen Privaten.
 # ============================================================
 
 PRIVATE_CHANNELS = [
+
+    (
+        "RTL",
+        [
+            "rtl.de",
+        ],
+        [
+            "rtl",
+        ],
+    ),
 
     (
         "Sat.1",
@@ -676,18 +816,16 @@ PRIVATE_CHANNELS = [
 
 
 # ============================================================
-# AUSGESCHLOSSENE TVG-IDS
+# AUSSCHLÜSSE
 # ============================================================
 
 EXCLUDE_IDS = {
+
     "oneadria.hr",
     "zeeone.de",
+
 }
 
-
-# ============================================================
-# AUSGESCHLOSSENE NAMEN
-# ============================================================
 
 EXCLUDE_NAME_WORDS = [
 
@@ -721,13 +859,16 @@ def normalize(value):
     value = value.lower()
 
     replacements = {
+
         "ä": "ae",
         "ö": "oe",
         "ü": "ue",
         "ß": "ss",
+
     }
 
     for old, new in replacements.items():
+
         value = value.replace(
             old,
             new
@@ -747,13 +888,17 @@ def normalize(value):
 # ============================================================
 # TVG-ID NORMALISIERUNG
 #
-# NUR Qualitäts-Suffix entfernen.
+# Nur Qualitäts-Suffixe werden entfernt.
+#
+# @HD / @SD / @FHD / @UHD / @4K
+#
+# Region bleibt erhalten:
 #
 # @Hamburg
+# @Niedersachsen
 # @Nord
 # @Thuringen
 #
-# bleiben erhalten!
 # ============================================================
 
 def normalize_tvg_id(tvg_id):
@@ -798,7 +943,9 @@ def get_attribute(
 def download(url):
 
     request = urllib.request.Request(
+
         url,
+
         headers={
             "User-Agent": (
                 "Mozilla/5.0 "
@@ -807,6 +954,7 @@ def download(url):
                 "Chrome/131 Safari/537.36"
             )
         }
+
     )
 
     with urllib.request.urlopen(
@@ -962,9 +1110,6 @@ def excluded(entry):
 
 # ============================================================
 # GEO BLOCKED
-#
-# Wir verlassen uns hier auf die Kennzeichnung in der
-# IPTV-org-M3U.
 # ============================================================
 
 def is_geo_blocked(entry):
@@ -978,9 +1123,13 @@ def is_geo_blocked(entry):
     )
 
     return (
+
         "geo blocked" in text
+
         or "geoblocked" in text
-        or "geo-blocked" in text
+
+        or "geo blocked" in text
+
     )
 
 
@@ -991,11 +1140,13 @@ def is_geo_blocked(entry):
 def is_hd(entry):
 
     text = normalize(
+
         entry["info"]
         + " "
         + entry["name"]
         + " "
         + entry["tvg_name"]
+
     )
 
     words = set(
@@ -1003,13 +1154,21 @@ def is_hd(entry):
     )
 
     return (
+
         "hd" in words
+
         or "fhd" in words
+
         or "uhd" in words
+
         or "4k" in words
+
         or "1080p" in words
+
         or "1080i" in words
+
         or "720p" in words
+
     )
 
 
@@ -1045,8 +1204,7 @@ def stream_score(entry):
 # ============================================================
 # ID MATCH
 #
-# Qualitäts-Suffixe werden ignoriert.
-# Region bleibt wichtig.
+# Exakte ID nach Qualitätsnormalisierung.
 # ============================================================
 
 def id_matches(
@@ -1080,17 +1238,17 @@ def id_matches(
 #
 # WICHTIG:
 #
-# Keine allgemeinen Teilstring-Matches für:
+# KEINE Teilstring-Suche bei kurzen Namen.
 #
-#   rtl
-#   zdf
-#   vox
-#   arte
-#   ndr
-#   swr
-#   sr
+# Dadurch:
 #
-# Dadurch kann "Totally Turtles" niemals RTL werden.
+#   RTL != Totally Turtles
+#
+#   ZDF != irgendwelcher anderer Sender
+#
+#   ARTE != Kunst-/Arte-Namensbestandteile
+#
+# usw.
 # ============================================================
 
 def name_matches(
@@ -1107,16 +1265,20 @@ def name_matches(
     )
 
     values = {
+
         value
+
         for value in (
             entry_name,
             tvg_name
         )
+
         if value
+
     }
 
     # --------------------------------------------------------
-    # Exakte Namen
+    # Exakter Name
     # --------------------------------------------------------
 
     for candidate in names:
@@ -1135,6 +1297,9 @@ def name_matches(
 
     # --------------------------------------------------------
     # Sichere längere Namen
+    #
+    # Nur eindeutige Namen dürfen als Teil eines längeren
+    # Sendernamens erkannt werden.
     # --------------------------------------------------------
 
     safe_partial = {
@@ -1170,7 +1335,15 @@ def name_matches(
 
         "muenchen tv",
 
+        "munchen tv",
+
         "noa4 hamburg",
+
+        "noa 4 hamburg",
+
+        "ard alpha",
+
+        "tagesschau 24",
 
     }
 
@@ -1195,9 +1368,6 @@ def name_matches(
 
 # ============================================================
 # MATCH
-#
-# ID immer zuerst.
-# Name nur als kontrollierter Fallback.
 # ============================================================
 
 def matches_definition(
@@ -1205,11 +1375,9 @@ def matches_definition(
     definition
 ):
 
-    display_name, ids, names = (
-        definition
-    )
+    display_name, ids, names = definition
 
-    # ID
+    # ID zuerst
     if id_matches(
         entry,
         ids
@@ -1217,7 +1385,7 @@ def matches_definition(
 
         return True
 
-    # Name
+    # kontrollierter Name-Fallback
     if name_matches(
         entry,
         names
@@ -1252,34 +1420,9 @@ def find_matches(
 
 
 # ============================================================
-# BESTER STREAM
-# ============================================================
-
-def find_best_match(
-    entries,
-    definition
-):
-
-    matches = find_matches(
-        entries,
-        definition
-    )
-
-    if not matches:
-
-        return None
-
-    matches.sort(
-        key=stream_score
-    )
-
-    return matches[0]
-
-
-# ============================================================
 # FIXED CHANNELS
 #
-# Genau EIN Stream pro Fixed-Sender.
+# Genau EIN Stream pro Sender.
 # ============================================================
 
 def build_fixed(
@@ -1292,9 +1435,7 @@ def build_fixed(
 
     for definition in FIXED_CHANNELS:
 
-        display_name = (
-            definition[0]
-        )
+        display_name = definition[0]
 
         matches = find_matches(
             entries,
@@ -1341,8 +1482,8 @@ def build_fixed(
             "00 Priorität"
         )
 
-        selected["priority"] = (
-            len(result)
+        selected["priority"] = len(
+            result
         )
 
         selected["display_name"] = (
@@ -1365,6 +1506,8 @@ def build_fixed(
 
 # ============================================================
 # WEITERE PRIVATE
+#
+# RTL kommt hier direkt als erstes.
 # ============================================================
 
 def build_private(
@@ -1450,13 +1593,15 @@ def build_private(
 def get_category(entry):
 
     text = normalize(
+
         entry["name"]
         + " "
         + entry["tvg_name"]
+
     )
 
     # --------------------------------------------------------
-    # Rakuten IMMER ganz hinten
+    # Rakuten immer ganz hinten
     # --------------------------------------------------------
 
     if "rakuten tv" in text:
@@ -1469,9 +1614,11 @@ def get_category(entry):
 
     regional_words = [
 
-        "ndr hamburg",
+        "ndr niedersachsen",
 
         "noa4",
+        "noa 4",
+
         "hamburg 1",
         "hamburg1",
 
@@ -1548,7 +1695,7 @@ def get_category(entry):
         return "04 Nachrichten"
 
     # --------------------------------------------------------
-    # Doku
+    # Dokumentation
     # --------------------------------------------------------
 
     documentary_words = [
@@ -1560,6 +1707,7 @@ def get_category(entry):
         "science",
         "spiegel tv",
         "authentic history",
+        "terra mater wild",
 
     ]
 
@@ -1629,9 +1777,7 @@ def get_category(entry):
 # ============================================================
 # DEDUPLIZIERUNG
 #
-# @HD / @SD werden zusammengefasst.
-#
-# Regionale IDs bleiben getrennt.
+# Qualitätsvarianten werden zusammengefasst.
 #
 # Beispiel:
 #
@@ -1642,10 +1788,10 @@ def get_category(entry):
 #
 # Aber:
 #
-#   NDRFernsehen.de@Hamburg
-#   NDRFernsehen.de@SchleswigHolstein
+#   NDR...@Niedersachsen
+#   NDR...@Hamburg
 #
-# = zwei verschiedene Sender.
+# = unterschiedliche regionale Sender.
 # ============================================================
 
 def deduplicate(
@@ -1741,7 +1887,7 @@ def sort_rest(
 
 
 # ============================================================
-# M3U INFO BEREINIGEN
+# M3U INFO
 # ============================================================
 
 def clean_info(
@@ -1751,7 +1897,7 @@ def clean_info(
 
     info = entry["info"]
 
-    # group-title ersetzen
+    # altes group-title entfernen
 
     info = re.sub(
         r'\s+group-title="[^"]*"',
@@ -1768,7 +1914,7 @@ def clean_info(
         info
     )
 
-    # tatsächlichen Namen behalten
+    # neuen group-title setzen
 
     return (
         f'{info} '
@@ -1794,12 +1940,12 @@ def build_m3u(
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste",
         "# Automatisch aktualisiert",
-        "# Quelle: IPTV-org",
         "#",
         "# Persönliche Senderpriorität",
         "# HD bevorzugt",
         "# Nicht Geo-blocked bevorzugt",
         "# Geo-blocked bleibt erhalten",
+        "# RTL nur bei echtem RTL-Match",
         "# Rakuten TV am Ende",
         "# ==================================================",
 
@@ -1853,7 +1999,7 @@ def safe_write(
 ):
 
     # --------------------------------------------------------
-    # Temporäre Datei
+    # Temporär schreiben
     # --------------------------------------------------------
 
     with open(
@@ -1867,7 +2013,7 @@ def safe_write(
         )
 
     # --------------------------------------------------------
-    # Datei überprüfen
+    # Prüfen
     # --------------------------------------------------------
 
     with open(
@@ -1900,35 +2046,45 @@ def safe_write(
     )
 
     # --------------------------------------------------------
-    # Sicherheitsprüfung
+    # Sicherheitsgrenzen
     # --------------------------------------------------------
 
     if extinf_count < 20:
 
         try:
+
             os.remove(
                 TEMP_OUTPUT
             )
+
         except OSError:
+
             pass
 
         raise RuntimeError(
+
             "Zu wenige Sender in der neuen M3U: "
             f"{extinf_count}"
+
         )
 
     if url_count < 20:
 
         try:
+
             os.remove(
                 TEMP_OUTPUT
             )
+
         except OSError:
+
             pass
 
         raise RuntimeError(
+
             "Zu wenige URLs in der neuen M3U: "
             f"{url_count}"
+
         )
 
     # --------------------------------------------------------
@@ -1945,7 +2101,7 @@ def safe_write(
         )
 
     # --------------------------------------------------------
-    # Erst jetzt ersetzen
+    # Atomar ersetzen
     # --------------------------------------------------------
 
     os.replace(
@@ -1961,15 +2117,19 @@ def safe_write(
 def main():
 
     print()
+
     print(
         "=========================================="
     )
+
     print(
         "GER TV - UPDATE"
     )
+
     print(
         "=========================================="
     )
+
     print()
 
     all_entries = []
@@ -1977,7 +2137,7 @@ def main():
     successful_sources = 0
 
     # --------------------------------------------------------
-    # Quellen laden
+    # Quellen
     # --------------------------------------------------------
 
     for source_name, url in SOURCES:
@@ -2020,7 +2180,7 @@ def main():
             )
 
     # --------------------------------------------------------
-    # Sicherheitsprüfung Quellen
+    # Quellenprüfung
     # --------------------------------------------------------
 
     print()
@@ -2046,8 +2206,10 @@ def main():
     if len(all_entries) < 50:
 
         raise RuntimeError(
+
             "Ungewöhnlich wenige Einträge geladen: "
             f"{len(all_entries)}"
+
         )
 
     # --------------------------------------------------------
@@ -2083,7 +2245,7 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Fixed
+    # Feste Reihenfolge
     # --------------------------------------------------------
 
     fixed, used_ids = build_fixed(
@@ -2092,11 +2254,16 @@ def main():
 
     # --------------------------------------------------------
     # Weitere Private
+    #
+    # RTL steht hier automatisch direkt vorne.
     # --------------------------------------------------------
 
     private, used_ids = build_private(
+
         filtered,
+
         used_ids
+
     )
 
     # --------------------------------------------------------
@@ -2138,8 +2305,10 @@ def main():
     if len(entries) < 20:
 
         raise RuntimeError(
+
             "Nach Verarbeitung zu wenige Sender: "
             f"{len(entries)}"
+
         )
 
     # --------------------------------------------------------
@@ -2173,20 +2342,31 @@ def main():
     )
 
     for number, entry in enumerate(
+
         fixed,
+
         start=1
+
     ):
 
         hd = (
+
             "HD"
+
             if is_hd(entry)
+
             else "SD"
+
         )
 
         geo = (
+
             "GEO"
+
             if is_geo_blocked(entry)
+
             else "OK"
+
         )
 
         print(
@@ -2213,14 +2393,38 @@ def main():
     )
 
     for number, entry in enumerate(
+
         private,
+
         start=1
+
     ):
+
+        hd = (
+
+            "HD"
+
+            if is_hd(entry)
+
+            else "SD"
+
+        )
+
+        geo = (
+
+            "GEO"
+
+            if is_geo_blocked(entry)
+
+            else "OK"
+
+        )
 
         print(
 
             f"{number:02d}. "
             f"{entry['display_name']} "
+            f"[{hd}/{geo}] "
             f"[{entry['tvg_id']}]"
 
         )
