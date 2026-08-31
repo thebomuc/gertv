@@ -2,57 +2,75 @@ import re
 import urllib.request
 from collections import OrderedDict
 
+
 # ============================================================
 # GER TV - persönliche deutsche M3U
 # ============================================================
 #
-# Priorität:
-#   1. Öffentlich-rechtlich
-#   2. Niedersachsen / Norddeutschland
-#   3. weitere Dritte
-#   4. Private
-#   5. Nachrichten / Doku
-#   6. Religion
+# Gruppen:
 #
-# Ausgeschlossen:
-#   - Musik
-#   - Shopping
-#   - Erotik
-#   - Zee One
-#   - ONE Adria
+# 01 Regional
+# 02 Öffentlich-Rechtlich
+# 03 Dritte Programme
+# 04 Private
+# 05 Nachrichten
+# 06 Dokumentation & Wissen
+# 07 Kinder
+# 08 Religion
+# 09 Sport
+# 10 Weitere deutsche Sender
 #
-# Wichtig:
-# Die Sender werden über IPTV-org tvg-id erkannt,
-# nicht über unzuverlässige Namenssuche.
+# Quelle:
+# IPTV-org
+#
+# https://iptv-org.github.io/iptv/
 # ============================================================
 
 
+OUTPUT = "deutsch.m3u"
+
+
+# ============================================================
+# QUELLEN
+# ============================================================
+
 SOURCES = [
-    ("Germany", "https://iptv-org.github.io/iptv/countries/de.m3u"),
+    ("Deutschland", "https://iptv-org.github.io/iptv/countries/de.m3u"),
+
+    # Regionen
     ("Niedersachsen", "https://iptv-org.github.io/iptv/subdivisions/de-ni.m3u"),
     ("Hamburg", "https://iptv-org.github.io/iptv/subdivisions/de-hh.m3u"),
     ("Schleswig-Holstein", "https://iptv-org.github.io/iptv/subdivisions/de-sh.m3u"),
     ("Mecklenburg-Vorpommern", "https://iptv-org.github.io/iptv/subdivisions/de-mv.m3u"),
 ]
 
-OUTPUT = "deutsch.m3u"
+
+# ============================================================
+# REGIONALE QUELLEN
+# ============================================================
+
+REGIONAL_SOURCES = {
+    "Niedersachsen",
+    "Hamburg",
+    "Schleswig-Holstein",
+    "Mecklenburg-Vorpommern",
+}
 
 
 # ============================================================
-# TOP 50
-#
-# IPTV-org IDs.
-#
-# Falls ein ID-Name bei IPTV-org geändert wird, erscheint
-# der Sender nicht künstlich als falscher Sender.
+# FESTE KATEGORIEN
 # ============================================================
 
-TOP_50 = [
+REGIONAL_IDS = {
+    "NDRNiedersachsen.de",
+    "RTLNordNiedersachsenBremen.de",
+    "RadioBremenTV.de",
+    "Hamburg1.de",
+    "1730SAT1REGIONALHamburgSchleswigHolstein.de",
+}
 
-    # --------------------------------------------------------
-    # Öffentlich-rechtlich
-    # --------------------------------------------------------
 
+PUBLIC_IDS = {
     "DasErste.de",
     "ZDF.de",
     "3sat.de",
@@ -64,21 +82,11 @@ TOP_50 = [
     "Tagesschau24.de",
     "ARDAlpha.de",
     "DeutscheWelle.de",
+    "KiKA.de",
+}
 
-    # --------------------------------------------------------
-    # Niedersachsen / Norddeutschland
-    # --------------------------------------------------------
 
-    "NDRNiedersachsen.de",
-    "RTLNordNiedersachsenBremen.de",
-    "RadioBremenTV.de",
-    "Hamburg1.de",
-    "1730SAT1REGIONALHamburgSchleswigHolstein.de",
-
-    # --------------------------------------------------------
-    # Weitere Dritte
-    # --------------------------------------------------------
-
+THIRD_PROGRAM_IDS = {
     "WDRKoeln.de",
     "BRFernsehen.de",
     "HRFernsehen.de",
@@ -88,11 +96,10 @@ TOP_50 = [
     "RBB.de",
     "SWR.de",
     "SRFernsehen.de",
+}
 
-    # --------------------------------------------------------
-    # Private
-    # --------------------------------------------------------
 
+PRIVATE_IDS = {
     "RTL.de",
     "RTLZWEI.de",
     "ProSieben.de",
@@ -107,42 +114,44 @@ TOP_50 = [
     "SAT1Gold.de",
     "TELE5.de",
     "DMAX.de",
+}
 
-    # --------------------------------------------------------
-    # Nachrichten / Doku
-    # --------------------------------------------------------
 
+NEWS_IDS = {
     "Welt.de",
     "N-TV.de",
     "EuronewsDeutsch.de",
     "N24Doku.de",
+}
 
-    # --------------------------------------------------------
-    # Religion
-    # --------------------------------------------------------
 
+DOCUMENTARY_IDS = {
+    "KabelEinsDoku.de",
+    "DMAX.de",
+    "N24Doku.de",
+}
+
+
+RELIGION_IDS = {
     "BibelTV.de",
     "K-TV.de",
     "EWTN.de",
     "ERF1.de",
-]
+}
 
 
 # ============================================================
-# NICHT GEWÜNSCHTE KANÄLE
+# AUSGESCHLOSSENE TVG-IDS
 # ============================================================
 
 EXCLUDE_IDS = {
-    # Musik / falsche ONE-Varianten
     "OneAdria.hr",
-
-    # Zee One / indisches Fernsehen
     "ZeeOne.de",
 }
 
 
 # ============================================================
-# Unerwünschte Kategorien / Namen
+# AUSGESCHLOSSENE NAMEN
 # ============================================================
 
 EXCLUDE_NAME_WORDS = [
@@ -193,110 +202,75 @@ def download(url):
 
 
 # ============================================================
+# ATTRIBUTE AUS EXTINF LESEN
+# ============================================================
+
+def get_attribute(info, attribute):
+
+    pattern = rf'{re.escape(attribute)}="([^"]*)"'
+
+    match = re.search(
+        pattern,
+        info,
+        re.IGNORECASE
+    )
+
+    if match:
+        return match.group(1).strip()
+
+    return ""
+
+
+# ============================================================
 # M3U PARSER
 # ============================================================
 
-def parse_m3u(text):
+def parse_m3u(text, source_name):
 
     lines = text.splitlines()
 
     entries = []
 
-    i = 0
+    for i, line in enumerate(lines):
 
-    while i < len(lines):
+        line = line.strip()
 
-        line = lines[i].strip()
+        if not line.startswith("#EXTINF:"):
+            continue
 
-        if line.startswith("#EXTINF:"):
+        if i + 1 >= len(lines):
+            continue
 
-            info = line
+        url = lines[i + 1].strip()
 
-            url = ""
+        if not url or url.startswith("#"):
+            continue
 
-            if i + 1 < len(lines):
-                url = lines[i + 1].strip()
+        # Sendername nach dem letzten Komma
+        match = re.search(
+            r",(.+)$",
+            line
+        )
 
-            if url and not url.startswith("#"):
+        name = (
+            match.group(1).strip()
+            if match
+            else ""
+        )
 
-                # Sendername
-                match = re.search(
-                    r",(.+)$",
-                    info
-                )
+        entry = {
+            "info": line,
+            "name": name,
+            "tvg_id": get_attribute(line, "tvg-id"),
+            "tvg_name": get_attribute(line, "tvg-name"),
+            "language": get_attribute(line, "tvg-language"),
+            "country": get_attribute(line, "tvg-country"),
+            "logo": get_attribute(line, "tvg-logo"),
+            "source": source_name,
+            "url": url,
+        }
 
-                name = (
-                    match.group(1).strip()
-                    if match
-                    else ""
-                )
-
-                # tvg-id
-                match_id = re.search(
-                    r'tvg-id="([^"]*)"',
-                    info,
-                    re.IGNORECASE
-                )
-
-                tvg_id = (
-                    match_id.group(1).strip()
-                    if match_id
-                    else ""
-                )
-
-                # tvg-name
-                match_name = re.search(
-                    r'tvg-name="([^"]*)"',
-                    info,
-                    re.IGNORECASE
-                )
-
-                tvg_name = (
-                    match_name.group(1).strip()
-                    if match_name
-                    else ""
-                )
-
-                # language
-                match_lang = re.search(
-                    r'tvg-language="([^"]*)"',
-                    info,
-                    re.IGNORECASE
-                )
-
-                language = (
-                    match_lang.group(1).strip()
-                    if match_lang
-                    else ""
-                )
-
-                # country
-                match_country = re.search(
-                    r'tvg-country="([^"]*)"',
-                    info,
-                    re.IGNORECASE
-                )
-
-                country = (
-                    match_country.group(1).strip()
-                    if match_country
-                    else ""
-                )
-
-                entries.append({
-                    "info": info,
-                    "name": name,
-                    "tvg_name": tvg_name,
-                    "tvg_id": tvg_id,
-                    "language": language,
-                    "country": country,
-                    "url": url,
-                })
-
-            i += 2
-
-        else:
-            i += 1
+        entries.append(entry)
 
     return entries
 
@@ -360,125 +334,217 @@ def excluded(entry):
 def get_category(entry):
 
     tvg_id = entry["tvg_id"]
-    name = normalize(entry["name"])
+    name = normalize(
+        entry["name"]
+        + " "
+        + entry["tvg_name"]
+    )
 
-    # Religion
-    if tvg_id in {
-        "BibelTV.de",
-        "K-TV.de",
-        "EWTN.de",
-        "ERF1.de",
-    }:
-        return "09 Religion"
+    source = entry["source"]
 
-    # Norden
-    if tvg_id in {
-        "NDRNiedersachsen.de",
-        "RTLNordNiedersachsenBremen.de",
-        "RadioBremenTV.de",
-        "Hamburg1.de",
-        "1730SAT1REGIONALHamburgSchleswigHolstein.de",
-    }:
-        return "02 Niedersachsen & Norddeutschland"
+    # --------------------------------------------------------
+    # 01 REGIONAL
+    # --------------------------------------------------------
 
-    # Doku
-    if tvg_id in {
-        "KabelEinsDoku.de",
-        "DMAX.de",
-        "N24Doku.de",
-    }:
-        return "06 Dokumentation & Wissen"
+    if tvg_id in REGIONAL_IDS:
+        return "01 Regional"
 
-    # Nachrichten
-    if tvg_id in {
-        "Welt.de",
-        "N-TV.de",
-        "EuronewsDeutsch.de",
-    }:
+    if source in REGIONAL_SOURCES:
+
+        regional_words = [
+            "regional",
+            "ndr niedersachsen",
+            "ndr hamburg",
+            "hamburg",
+            "schleswig holstein",
+            "mecklenburg",
+            "vorpommern",
+            "bremen",
+            "nord",
+        ]
+
+        if any(
+            word in name
+            for word in regional_words
+        ):
+            return "01 Regional"
+
+
+    # --------------------------------------------------------
+    # 08 RELIGION
+    # --------------------------------------------------------
+
+    if tvg_id in RELIGION_IDS:
+        return "08 Religion"
+
+
+    # --------------------------------------------------------
+    # 05 NACHRICHTEN
+    # --------------------------------------------------------
+
+    if tvg_id in NEWS_IDS:
         return "05 Nachrichten"
 
-    # Kinder
-    if tvg_id in {
-        "KiKA.de",
-    }:
-        return "08 Kinder"
+    news_words = [
+        "nachrichten",
+        "news",
+        "welt",
+        "n-tv",
+        "ntv",
+        "euronews",
+    ]
 
-    # Öffentlich-rechtlich
-    if tvg_id in {
-        "DasErste.de",
-        "ZDF.de",
-        "3sat.de",
-        "Arte.de",
-        "Phoenix.de",
-        "ZDFneo.de",
-        "ZDFinfo.de",
-        "One.de",
-        "Tagesschau24.de",
-        "ARDAlpha.de",
-        "DeutscheWelle.de",
-    }:
-        return "01 Öffentlich-Rechtlich"
+    if any(
+        word in name
+        for word in news_words
+    ):
+        return "05 Nachrichten"
 
-    # Dritte
-    if tvg_id in {
-        "WDRKoeln.de",
-        "BRFernsehen.de",
-        "HRFernsehen.de",
-        "MDRSachsen.de",
-        "MDRSachsenAnhalt.de",
-        "MDRThueringen.de",
-        "RBB.de",
-        "SWR.de",
-        "SRFernsehen.de",
-    }:
+
+    # --------------------------------------------------------
+    # 06 DOKUMENTATION
+    # --------------------------------------------------------
+
+    if tvg_id in DOCUMENTARY_IDS:
+        return "06 Dokumentation & Wissen"
+
+    documentary_words = [
+        "doku",
+        "dokumentation",
+        "documentary",
+        "wissen",
+        "history",
+        "science",
+    ]
+
+    if any(
+        word in name
+        for word in documentary_words
+    ):
+        return "06 Dokumentation & Wissen"
+
+
+    # --------------------------------------------------------
+    # 07 KINDER
+    # --------------------------------------------------------
+
+    if tvg_id == "KiKA.de":
+        return "07 Kinder"
+
+    children_words = [
+        "kika",
+        "kinder",
+        "kids",
+        "junior",
+    ]
+
+    if any(
+        word in name
+        for word in children_words
+    ):
+        return "07 Kinder"
+
+
+    # --------------------------------------------------------
+    # 09 SPORT
+    # --------------------------------------------------------
+
+    if "sport" in name:
+        return "09 Sport"
+
+
+    # --------------------------------------------------------
+    # 01 ÖFFENTLICH-RECHTLICH
+    # --------------------------------------------------------
+
+    if tvg_id in PUBLIC_IDS:
+        return "02 Öffentlich-Rechtlich"
+
+
+    # --------------------------------------------------------
+    # 03 DRITTE PROGRAMME
+    # --------------------------------------------------------
+
+    if tvg_id in THIRD_PROGRAM_IDS:
         return "03 Dritte Programme"
 
-    # Private
-    if tvg_id in {
-        "RTL.de",
-        "RTLZWEI.de",
-        "ProSieben.de",
-        "SAT1.de",
-        "VOX.de",
-        "KabelEins.de",
-        "NITRO.de",
-        "VOXup.de",
-        "sixx.de",
-        "ProSiebenMAXX.de",
-        "SAT1Gold.de",
-        "TELE5.de",
-    }:
+
+    # --------------------------------------------------------
+    # 04 PRIVATE
+    # --------------------------------------------------------
+
+    if tvg_id in PRIVATE_IDS:
         return "04 Private"
 
-    # Sport
-    if "sport" in name:
-        return "10 Sport"
 
-    return "11 Weitere deutsche Sender"
+    # --------------------------------------------------------
+    # 10 WEITERE
+    # --------------------------------------------------------
 
-
-# ============================================================
-# TOP-PRIORITÄT
-# ============================================================
-
-def priority(entry):
-
-    tvg_id = entry["tvg_id"]
-
-    try:
-        return TOP_50.index(tvg_id)
-
-    except ValueError:
-        return 9999
+    return "10 Weitere deutsche Sender"
 
 
 # ============================================================
-# M3U INFO BEREINIGEN
+# HD-PRIORITÄT
 # ============================================================
 
-def clean_info(info, name, group):
+def is_hd(entry):
 
-    # group-title ersetzen
+    name = normalize(
+        entry["name"]
+    )
+
+    tvg_name = normalize(
+        entry["tvg_name"]
+    )
+
+    return (
+        "hd" in name
+        or "hd" in tvg_name
+    )
+
+
+# ============================================================
+# DEDUPLIZIERUNG
+# ============================================================
+
+def deduplicate(entries):
+
+    by_id = OrderedDict()
+
+    for entry in entries:
+
+        tvg_id = entry["tvg_id"]
+
+        # Ohne ID können wir nicht sauber deduplizieren.
+        if not tvg_id:
+            continue
+
+        if tvg_id not in by_id:
+
+            by_id[tvg_id] = entry
+            continue
+
+        existing = by_id[tvg_id]
+
+        # HD-Version bevorzugen
+        if is_hd(entry) and not is_hd(existing):
+            by_id[tvg_id] = entry
+
+    return list(
+        by_id.values()
+    )
+
+
+# ============================================================
+# EXTINF BEREINIGEN
+# ============================================================
+
+def clean_info(entry, category):
+
+    info = entry["info"]
+
+    # Altes group-title entfernen
     info = re.sub(
         r'\s+group-title="[^"]*"',
         "",
@@ -486,7 +552,7 @@ def clean_info(info, name, group):
         flags=re.IGNORECASE
     )
 
-    # alten Sendernamen hinter letztem Komma entfernen
+    # Alten Namen nach Komma entfernen
     info = re.sub(
         r",.*$",
         "",
@@ -495,9 +561,144 @@ def clean_info(info, name, group):
 
     return (
         f'{info} '
-        f'group-title="{group}",'
-        f'{name}'
+        f'group-title="{category}",'
+        f'{entry["name"]}'
     )
+
+
+# ============================================================
+# SORTIERUNG
+# ============================================================
+
+CATEGORY_ORDER = {
+    "01 Regional": 1,
+    "02 Öffentlich-Rechtlich": 2,
+    "03 Dritte Programme": 3,
+    "04 Private": 4,
+    "05 Nachrichten": 5,
+    "06 Dokumentation & Wissen": 6,
+    "07 Kinder": 7,
+    "08 Religion": 8,
+    "09 Sport": 9,
+    "10 Weitere deutsche Sender": 10,
+}
+
+
+def sort_entries(entries):
+
+    entries.sort(
+        key=lambda entry: (
+            CATEGORY_ORDER.get(
+                entry["category"],
+                99
+            ),
+            normalize(
+                entry["name"]
+            ),
+        )
+    )
+
+    return entries
+
+
+# ============================================================
+# M3U SCHREIBEN
+# ============================================================
+
+def write_m3u(entries):
+
+    output = [
+        "#EXTM3U",
+        "",
+        "# ==================================================",
+        "# GER TV - Deutsche TV-Liste",
+        "# Automatisch aktualisiert",
+        "# Quelle: IPTV-org",
+        "#",
+        "# Regional",
+        "# Öffentlich-Rechtlich",
+        "# Dritte Programme",
+        "# Private",
+        "# Nachrichten",
+        "# Dokumentation & Wissen",
+        "# Kinder",
+        "# Religion",
+        "# Sport",
+        "# Weitere deutsche Sender",
+        "# ==================================================",
+        "",
+    ]
+
+    current_category = None
+
+    for entry in entries:
+
+        category = entry["category"]
+
+        if category != current_category:
+
+            output.append("")
+            output.append(
+                f"# ===== {category} ====="
+            )
+            output.append("")
+
+            current_category = category
+
+        output.append(
+            clean_info(
+                entry,
+                category
+            )
+        )
+
+        output.append(
+            entry["url"]
+        )
+
+    with open(
+        OUTPUT,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(
+            "\n".join(output)
+            + "\n"
+        )
+
+
+# ============================================================
+# STATISTIK
+# ============================================================
+
+def print_statistics(entries):
+
+    print()
+    print("==========================================")
+    print("KATEGORIEN")
+    print("==========================================")
+
+    counts = {}
+
+    for entry in entries:
+
+        category = entry["category"]
+
+        counts[category] = (
+            counts.get(category, 0)
+            + 1
+        )
+
+    for category in CATEGORY_ORDER:
+
+        print(
+            f"{category}: "
+            f"{counts.get(category, 0)}"
+        )
+
+    print()
+    print("Gesamt:", len(entries))
 
 
 # ============================================================
@@ -508,8 +709,14 @@ def main():
 
     all_entries = []
 
+    print()
+    print("==========================================")
+    print("GER TV")
+    print("==========================================")
+    print()
+
     # --------------------------------------------------------
-    # Quellen
+    # Quellen laden
     # --------------------------------------------------------
 
     for source_name, url in SOURCES:
@@ -518,19 +725,25 @@ def main():
 
             text = download(url)
 
-            entries = parse_m3u(text)
+            entries = parse_m3u(
+                text,
+                source_name
+            )
 
             print(
                 f"{source_name}: "
                 f"{len(entries)} Einträge"
             )
 
-            all_entries.extend(entries)
+            all_entries.extend(
+                entries
+            )
 
         except Exception as error:
 
             print(
-                f"FEHLER bei {source_name}: "
+                f"FEHLER bei "
+                f"{source_name}: "
                 f"{error}"
             )
 
@@ -539,6 +752,7 @@ def main():
         "Insgesamt geladen:",
         len(all_entries)
     )
+
 
     # --------------------------------------------------------
     # Ausschlüsse
@@ -555,224 +769,133 @@ def main():
         len(filtered)
     )
 
+
     # --------------------------------------------------------
-    # Nur echte deutsche Sender bevorzugen
-    #
-    # tvg-country kann mehrere Länder enthalten.
-    # DE muss vorhanden sein.
+    # Nur deutsche Sender
     # --------------------------------------------------------
 
     german = []
 
     for entry in filtered:
 
-        country = entry["country"].upper()
+        country = normalize(
+            entry["country"]
+        )
 
         language = normalize(
             entry["language"]
         )
 
-        if (
-            "DE" in country
-            or "GERMANY" in country
-            or "DEUTSCH" in language
-            or entry["tvg_id"].endswith(".de")
-        ):
-            german.append(entry)
-
-    # Falls eine Quelle keine tvg-country Angaben hat,
-    # nicht alles verlieren.
-    if len(german) < 20:
-        german = filtered
-
-    # --------------------------------------------------------
-    # Nach tvg-id deduplizieren
-    #
-    # Ein Sender kann in mehreren Quellen stehen.
-    # Wir wollen nur EINEN.
-    # --------------------------------------------------------
-
-    by_id = OrderedDict()
-
-    for entry in german:
-
         tvg_id = entry["tvg_id"]
 
-        if not tvg_id:
-            continue
+        is_german = (
+            "de" in country.split()
+            or "germany" in country
+            or "deutsch" in language
+            or tvg_id.endswith(".de")
+        )
 
-        if tvg_id not in by_id:
+        if is_german:
 
-            by_id[tvg_id] = entry
+            german.append(entry)
 
-        else:
 
-            existing = by_id[tvg_id]
+    # --------------------------------------------------------
+    # Falls tvg-country bei der Quelle fehlt
+    # --------------------------------------------------------
 
-            # HD bevorzugen
-            old_name = normalize(
-                existing["name"]
-            )
+    if len(german) < 20:
 
-            new_name = normalize(
-                entry["name"]
-            )
+        print(
+            "Warnung: "
+            "zu wenige deutsche Sender "
+            "über Metadaten erkannt."
+        )
 
-            if (
-                "hd" in new_name
-                and "hd" not in old_name
-            ):
-                by_id[tvg_id] = entry
+        print(
+            "Verwende gefilterte Liste."
+        )
 
-    entries = list(
-        by_id.values()
+        german = filtered
+
+
+    print(
+        "Deutsche Sender:",
+        len(german)
+    )
+
+
+    # --------------------------------------------------------
+    # Deduplizieren
+    # --------------------------------------------------------
+
+    entries = deduplicate(
+        german
     )
 
     print(
-        "Nach tvg-id-Deduplizierung:",
+        "Nach Deduplizierung:",
         len(entries)
     )
 
+
     # --------------------------------------------------------
-    # Metadaten
+    # Kategorien
     # --------------------------------------------------------
 
     for entry in entries:
-
-        entry["priority"] = priority(entry)
 
         entry["category"] = get_category(
             entry
         )
 
+
     # --------------------------------------------------------
     # Sortieren
     # --------------------------------------------------------
 
-    category_order = {
-        "01 Öffentlich-Rechtlich": 1,
-        "02 Niedersachsen & Norddeutschland": 2,
-        "03 Dritte Programme": 3,
-        "04 Private": 4,
-        "05 Nachrichten": 5,
-        "06 Dokumentation & Wissen": 6,
-        "07 Unterhaltung": 7,
-        "08 Kinder": 8,
-        "09 Religion": 9,
-        "10 Sport": 10,
-        "11 Weitere deutsche Sender": 11,
-    }
-
-    entries.sort(
-        key=lambda entry: (
-            entry["priority"],
-            category_order.get(
-                entry["category"],
-                99
-            ),
-            normalize(
-                entry["name"]
-            ),
-        )
+    entries = sort_entries(
+        entries
     )
 
-    # --------------------------------------------------------
-    # M3U
-    # --------------------------------------------------------
-
-    output = [
-        "#EXTM3U",
-        "",
-        "# ==================================================",
-        "# GER TV - Deutsche TV-Liste",
-        "# Automatisch aktualisiert",
-        "# Quelle: IPTV-org",
-        "# Musik / Shopping / Erotik ausgeschlossen",
-        "# ==================================================",
-        "",
-    ]
-
-    current_category = None
-
-    for entry in entries:
-
-        group = entry["category"]
-
-        if group != current_category:
-
-            output.append("")
-            output.append(
-                f"# ===== {group} ====="
-            )
-            output.append("")
-
-            current_category = group
-
-        info = clean_info(
-            entry["info"],
-            entry["name"],
-            group
-        )
-
-        output.append(info)
-        output.append(entry["url"])
-
-    with open(
-        OUTPUT,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        file.write(
-            "\n".join(output)
-            + "\n"
-        )
 
     # --------------------------------------------------------
-    # Ausgabe
+    # M3U schreiben
     # --------------------------------------------------------
 
-    found_top = [
-        entry
-        for entry in entries
-        if entry["priority"] < 9999
-    ]
+    write_m3u(
+        entries
+    )
+
+
+    # --------------------------------------------------------
+    # Statistik
+    # --------------------------------------------------------
+
+    print_statistics(
+        entries
+    )
+
+
+    # --------------------------------------------------------
+    # Fertig
+    # --------------------------------------------------------
 
     print()
     print("==========================================")
     print("FERTIG")
     print("==========================================")
-
-    print(
-        "Gesamt:",
-        len(entries)
-    )
-
-    print(
-        "Top-Sender gefunden:",
-        len(found_top)
-    )
-
-    print()
-    print("TOP-PRIORITÄT:")
-
-    for number, entry in enumerate(
-        found_top,
-        start=1
-    ):
-
-        print(
-            f"{number:02d}. "
-            f"{entry['name']} "
-            f"[{entry['tvg_id']}]"
-        )
-
     print()
     print(
         "Datei:",
         OUTPUT
     )
+    print()
 
+
+# ============================================================
+# START
+# ============================================================
 
 if __name__ == "__main__":
     main()
