@@ -13,13 +13,24 @@ from collections import OrderedDict
 #
 #     deutsch.m3u
 #
-# MEHRERE QUELLEN
-# ----------------
-# Alle Quellen werden geladen und zusammengeführt.
+# REIHENFOLGE
+# -----------
+# 1. Persönliche FIXED / PRIORITÄT exakt in dieser Reihenfolge
+# 2. Danach alle übrigen Sender alphabetisch A-Z
 #
-# FIXED / PRIORITÄT
-# -----------------
-# Die persönliche Reihenfolge bleibt exakt erhalten.
+# QUELLEN
+# -------
+# Quellen besitzen eine feste Priorität.
+#
+# Eine neue Quelle ersetzt NICHT automatisch einen bereits
+# vorhandenen Stream aus einer höher priorisierten Quelle.
+#
+# Innerhalb derselben Quellen-Priorität entscheidet:
+#
+#   1. HD + nicht Geo-blocked
+#   2. SD + nicht Geo-blocked
+#   3. HD + Geo-blocked
+#   4. SD + Geo-blocked
 #
 # REGIONAL-FALLBACK
 # -----------------
@@ -28,18 +39,17 @@ from collections import OrderedDict
 #   NDR Niedersachsen
 #       ↓ falls nicht gefunden
 #   NDR Hamburg
+#       ↓ falls nicht gefunden
+#   allgemeiner NDR
 #
-# STREAM-PRIORITÄT
-# ----------------
-#   1. HD + nicht Geo-blocked
-#   2. SD + nicht Geo-blocked
-#   3. HD + Geo-blocked
-#   4. SD + Geo-blocked
+# KODI
+# ----
+# Fremde tvg-chno-Werte werden entfernt.
+# Kodi soll die Reihenfolge der erzeugten M3U verwenden.
 #
-# RAKUTEN
+# NETPLUS
 # -------
-# Die fünf gewünschten Rakuten-TV-Sender stehen am Ende
-# der persönlichen Prioritätsliste.
+# viamotionhsi.netplus.ch wird grundsätzlich ausgeschlossen.
 #
 # ============================================================
 
@@ -122,6 +132,61 @@ SOURCES = [
 
 
 # ============================================================
+# QUELLEN-PRIORITÄT
+# ============================================================
+#
+# Kleine Zahl = höhere Priorität.
+#
+# Die Reihenfolge deiner bisherigen Quellen bleibt erhalten.
+# Die drei zusätzlichen Quellen kommen danach als Fallback.
+#
+# Wichtig:
+# Die Quellen-Priorität kommt VOR dem Stream-Score.
+#
+# Also:
+#
+#   bessere Quelle + SD
+#
+# kann gegenüber
+#
+#   schlechtere Quelle + HD
+#
+# gewinnen.
+#
+# Dadurch ersetzen neue Quellen nicht ungefragt deine
+# bisherigen funktionierenden Streams.
+# ============================================================
+
+SOURCE_PRIORITY = {
+
+    "Deutschland": 1,
+
+    "Bayern": 2,
+    "Berlin": 3,
+    "Brandenburg": 4,
+    "Hamburg": 5,
+    "Mecklenburg-Vorpommern": 6,
+    "Niedersachsen": 7,
+    "Schleswig-Holstein": 8,
+
+    "German TV M3U": 9,
+
+    # Neue Quellen ausschließlich als Fallback
+    "Kodinerds": 10,
+    "Free-TV/IPTV Deutschland": 11,
+    "deutsche-iptv-playlist": 12,
+}
+
+
+def source_score(entry):
+
+    return SOURCE_PRIORITY.get(
+        entry.get("source", ""),
+        99
+    )
+
+
+# ============================================================
 # FESTE PRIORITÄT
 #
 # Reihenfolge exakt nach Wunsch.
@@ -137,7 +202,10 @@ SOURCES = [
 #   ]
 #
 # Die ERSTE gefundene Variante gewinnt.
-# Innerhalb derselben Variante entscheidet stream_score().
+# Innerhalb derselben Variante:
+#
+#   Quelle → Stream-Qualität
+#
 # ============================================================
 
 FIXED_CHANNELS = [
@@ -857,6 +925,21 @@ EXCLUDE_NAME_WORDS = [
 
 
 # ============================================================
+# AUSGESCHLOSSENE STREAM-URLS
+# ============================================================
+#
+# Netplus funktioniert außerhalb des entsprechenden Schweizer
+# Netzes/VPN nicht zuverlässig und soll deshalb komplett aus
+# der deutschen Liste verschwinden.
+# ============================================================
+
+EXCLUDE_URL_PARTS = [
+
+    "viamotionhsi.netplus.ch",
+]
+
+
+# ============================================================
 # NORMALISIERUNG
 # ============================================================
 
@@ -1067,6 +1150,20 @@ def excluded(entry):
         if normalize(word) in combined:
             return True
 
+    # --------------------------------------------------------
+    # URL-Ausschlüsse
+    # --------------------------------------------------------
+
+    url = entry.get(
+        "url",
+        ""
+    ).lower()
+
+    for blocked in EXCLUDE_URL_PARTS:
+
+        if blocked.lower() in url:
+            return True
+
     return False
 
 
@@ -1087,7 +1184,6 @@ def is_geo_blocked(entry):
     return (
         "geo blocked" in text
         or "geoblocked" in text
-        or "geo blocked" in text
     )
 
 
@@ -1121,6 +1217,15 @@ def is_hd(entry):
 # ============================================================
 # STREAM SCORE
 # ============================================================
+#
+# Wird NUR innerhalb derselben Quellen-Priorität verwendet.
+#
+#   0 = HD + nicht Geo-blocked
+#   1 = SD + nicht Geo-blocked
+#   2 = HD + Geo-blocked
+#   3 = SD + Geo-blocked
+#
+# ============================================================
 
 def stream_score(entry):
 
@@ -1137,6 +1242,28 @@ def stream_score(entry):
         return 2
 
     return 3
+
+
+# ============================================================
+# KOMBINIERTER STREAM-SCORE
+# ============================================================
+#
+# Quelle ist wichtiger als Stream-Qualität.
+#
+# Beispiel:
+#
+# Quelle 1 + SD
+#       ist besser als
+# Quelle 12 + HD
+#
+# ============================================================
+
+def selection_score(entry):
+
+    return (
+        source_score(entry),
+        stream_score(entry),
+    )
 
 
 # ============================================================
@@ -1319,8 +1446,7 @@ def find_variant_matches(
 
 # ============================================================
 # BESTE VARIANTE
-#
-# WICHTIG:
+# ============================================================
 #
 # Variante 1 hat Vorrang vor Variante 2.
 #
@@ -1334,6 +1460,11 @@ def find_variant_matches(
 #
 # Nur wenn Niedersachsen NICHT gefunden wird:
 #     -> Hamburg
+#
+# Innerhalb der Variante:
+#
+#     Quelle → Stream-Qualität
+#
 # ============================================================
 
 def find_best_variant(
@@ -1355,7 +1486,7 @@ def find_best_variant(
             continue
 
         matches.sort(
-            key=stream_score
+            key=selection_score
         )
 
         return (
@@ -1392,6 +1523,10 @@ def build_fixed(entries):
         selected = None
         selected_variant = None
 
+        # ----------------------------------------------------
+        # Varianten strikt in der vorgegebenen Reihenfolge
+        # ----------------------------------------------------
+
         for variant_number, variant in enumerate(
             variants,
             start=1
@@ -1421,8 +1556,12 @@ def build_fixed(entries):
             if not matches:
                 continue
 
+            # ------------------------------------------------
+            # Quelle zuerst, Stream-Qualität danach
+            # ------------------------------------------------
+
             matches.sort(
-                key=stream_score
+                key=selection_score
             )
 
             selected = matches[0]
@@ -1596,6 +1735,16 @@ def get_category(entry):
 # ============================================================
 # REST DEDUP
 # ============================================================
+#
+# Auch hier gilt:
+#
+#     Quelle → Stream-Qualität
+#
+# und nicht mehr:
+#
+#     Stream-Qualität über alle Quellen
+#
+# ============================================================
 
 def deduplicate(entries):
 
@@ -1618,8 +1767,8 @@ def deduplicate(entries):
         existing = result[tvg_id]
 
         if (
-            stream_score(entry)
-            < stream_score(existing)
+            selection_score(entry)
+            < selection_score(existing)
         ):
 
             result[tvg_id] = entry
@@ -1630,6 +1779,14 @@ def deduplicate(entries):
 # ============================================================
 # REST SORTIERUNG
 # ============================================================
+#
+# WICHTIG:
+#
+# Nach FIXED kommt KEINE Kategorie-Sortierung mehr.
+#
+# Alles wird schlicht alphabetisch A-Z sortiert.
+#
+# ============================================================
 
 def sort_rest(entries):
 
@@ -1639,34 +1796,11 @@ def sort_rest(entries):
             entry
         )
 
-    category_order = {
-
-        "02 Regional": 2,
-        "03 Dritte Programme": 3,
-        "04 Nachrichten": 4,
-        "05 Dokumentation & Wissen": 5,
-        "06 Kinder": 6,
-        "07 Religion": 7,
-        "08 Sport": 8,
-        "09 Rakuten TV": 9,
-        "10 Weitere deutsche Sender": 10,
-    }
-
     entries.sort(
-
         key=lambda entry: (
-
-            category_order.get(
-                entry["category"],
-                99
-            ),
-
-            normalize(
-                entry["name"]
-            ),
-
+            normalize(entry["name"]),
+            normalize(entry["tvg_id"]),
         )
-
     )
 
     return entries
@@ -1683,12 +1817,36 @@ def clean_info(
 
     info = entry["info"]
 
+    # --------------------------------------------------------
+    # Fremde Kanalnummer entfernen.
+    #
+    # Dadurch kann Kodi nicht anhand von tvg-chno aus einer
+    # externen Quelle die Reihenfolge verändern.
+    # --------------------------------------------------------
+
+    info = re.sub(
+        r'\s+tvg-chno="[^"]*"',
+        "",
+        info,
+        flags=re.IGNORECASE
+    )
+
+    # --------------------------------------------------------
+    # Altes group-title entfernen.
+    # --------------------------------------------------------
+
     info = re.sub(
         r'\s+group-title="[^"]*"',
         "",
         info,
         flags=re.IGNORECASE
     )
+
+    # --------------------------------------------------------
+    # Alles hinter dem letzten Komma entfernen.
+    #
+    # Der Sendername wird anschließend selbst gesetzt.
+    # --------------------------------------------------------
 
     info = re.sub(
         r",.*$",
@@ -1722,9 +1880,11 @@ def build_m3u(entries):
         "# Mehrere Quellen",
         "# Persönliche Senderpriorität",
         "# Regionale Fallbacks",
-        "# HD bevorzugt",
+        "# Quelle vor Stream-Qualität",
+        "# HD bevorzugt innerhalb einer Quelle",
         "# Nicht Geo-blocked bevorzugt",
         "# Geo-blocked bleibt erhalten",
+        "# Netplus ausgeschlossen",
         "# Rakuten TV am Ende der Priorität",
         "# ==================================================",
 
@@ -1916,6 +2076,7 @@ def main():
     source_counts = OrderedDict()
 
     for entry in all_entries:
+
         source = entry["source"]
 
         source_counts[source] = (
@@ -1928,10 +2089,10 @@ def main():
     print("==========================================")
 
     for source, count in source_counts.items():
+
         print(
             f"{source}: {count} Einträge"
         )
-
 
     if successful_sources == 0:
 
@@ -1950,6 +2111,8 @@ def main():
     # AUSSCHLÜSSE
     # --------------------------------------------------------
 
+    before_filter = len(all_entries)
+
     filtered = [
 
         entry
@@ -1960,13 +2123,24 @@ def main():
 
     ]
 
+    excluded_count = (
+        before_filter
+        - len(filtered)
+    )
+
+    print()
+    print(
+        "Ausgeschlossen:",
+        excluded_count
+    )
+
     print(
         "Nach Ausschlüssen:",
         len(filtered)
     )
 
     # --------------------------------------------------------
-    # Fixed zuerst
+    # FIXED ZUERST
     #
     # Noch NICHT global deduplizieren.
     #
@@ -1995,16 +2169,20 @@ def main():
     ]
 
     # --------------------------------------------------------
-    # Rest deduplizieren
+    # REST DEDUPLIZIEREN
     # --------------------------------------------------------
 
-    rest = deduplicate(rest)
+    rest = deduplicate(
+        rest
+    )
 
     # --------------------------------------------------------
-    # Rest sortieren
+    # REST ALPHABETISCH
     # --------------------------------------------------------
 
-    rest = sort_rest(rest)
+    rest = sort_rest(
+        rest
+    )
 
     # --------------------------------------------------------
     # Rakuten aus dem Rest entfernen.
@@ -2012,19 +2190,6 @@ def main():
     # Sie werden ausschließlich über die feste Rakuten-
     # Definition einsortiert.
     # --------------------------------------------------------
-
-    fixed_ids = {
-
-        normalize_tvg_id(
-            entry["tvg_id"]
-        )
-
-        for entry in fixed
-
-    }
-
-    # Bereits Fixed-Rakuten sind korrekt positioniert.
-    # Weitere Rakuten-Versionen sollen nicht vor ihnen landen.
 
     non_rakuten_rest = []
     rakuten_rest = []
@@ -2045,6 +2210,13 @@ def main():
 
             non_rakuten_rest.append(entry)
 
+    # --------------------------------------------------------
+    # Rakuten bleibt ganz am Ende des Restes.
+    #
+    # Die tatsächlich gefundenen Fixed-Rakuten stehen bereits
+    # an der entsprechenden Position innerhalb FIXED_CHANNELS.
+    # --------------------------------------------------------
+
     rest = (
         non_rakuten_rest
         + rakuten_rest
@@ -2052,9 +2224,15 @@ def main():
 
     # --------------------------------------------------------
     # ENDGÜLTIGE LISTE
+    #
+    # FIXED zuerst
+    # danach Rest alphabetisch
     # --------------------------------------------------------
 
-    entries = fixed + rest
+    entries = (
+        fixed
+        + rest
+    )
 
     if len(entries) < 20:
 
@@ -2067,9 +2245,13 @@ def main():
     # M3U
     # --------------------------------------------------------
 
-    content = build_m3u(entries)
+    content = build_m3u(
+        entries
+    )
 
-    safe_write(content)
+    safe_write(
+        content
+    )
 
     # ========================================================
     # AUSGABE
@@ -2099,10 +2281,14 @@ def main():
 
         fallback = ""
 
-        if entry.get("matched_variant", 1) > 1:
+        if entry.get(
+            "matched_variant",
+            1
+        ) > 1:
 
             fallback = (
-                f" FALLBACK#{entry['matched_variant']}"
+                f" FALLBACK#"
+                f"{entry['matched_variant']}"
             )
 
         print(
@@ -2132,6 +2318,10 @@ def main():
             print(
                 f"- {name}"
             )
+
+    # ========================================================
+    # ERGEBNIS
+    # ========================================================
 
     print()
     print("==========================================")
@@ -2190,10 +2380,14 @@ if __name__ == "__main__":
             "wurde NICHT überschrieben."
         )
 
-        if os.path.exists(TEMP_OUTPUT):
+        if os.path.exists(
+            TEMP_OUTPUT
+        ):
 
             try:
-                os.remove(TEMP_OUTPUT)
+                os.remove(
+                    TEMP_OUTPUT
+                )
             except OSError:
                 pass
 
