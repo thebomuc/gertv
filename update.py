@@ -99,6 +99,25 @@ SOURCES = [
         "German TV M3U",
         "https://raw.githubusercontent.com/josxha/german-tv-m3u/main/german-tv.m3u"
     ),
+
+    # --------------------------------------------------------
+    # ZUSÄTZLICHE FALLBACK-QUELLEN
+    # --------------------------------------------------------
+
+    (
+        "Kodinerds",
+        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u"
+    ),
+
+    (
+        "Free-TV/IPTV Deutschland",
+        "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_germany.m3u8"
+    ),
+
+    (
+        "deutsche-iptv-playlist",
+        "https://raw.githubusercontent.com/tgru-dev/deutsche-iptv-playlist/main/ip-tv.m3u"
+    ),
 ]
 
 
@@ -1890,6 +1909,30 @@ def main():
         len(all_entries)
     )
 
+    # --------------------------------------------------------
+    # QUELLENSTATISTIK
+    # --------------------------------------------------------
+
+    source_counts = OrderedDict()
+
+    for entry in all_entries:
+        source = entry["source"]
+
+        source_counts[source] = (
+            source_counts.get(source, 0) + 1
+        )
+
+    print()
+    print("==========================================")
+    print("QUELLEN")
+    print("==========================================")
+
+    for source, count in source_counts.items():
+        print(
+            f"{source}: {count} Einträge"
+        )
+
+
     if successful_sources == 0:
 
         raise RuntimeError(
@@ -2068,7 +2111,8 @@ def main():
             f"{entry['display_name']} "
             f"[{hd}/{geo}]"
             f"{fallback} "
-            f"[{entry['tvg_id']}]"
+            f"[{entry['tvg_id']}] "
+            f"Quelle: {entry['source']}"
 
         )
 
