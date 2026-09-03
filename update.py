@@ -2,6 +2,11 @@ import re
 import os
 import shutil
 import urllib.request
+import urllib.error
+import socket
+import threading
+from urllib.parse import urlparse, urljoin
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import OrderedDict
 
 
@@ -110,25 +115,36 @@ SOURCES = [
         "https://raw.githubusercontent.com/josxha/german-tv-m3u/main/german-tv.m3u"
     ),
 
-    # --------------------------------------------------------
-    # ZUSÄTZLICHE FALLBACK-QUELLEN
-    # --------------------------------------------------------
+]
 
+
+# ============================================================
+# ZUSÄTZLICHE FALLBACK-QUELLEN
+# ============================================================
+#
+# Diese Quellen werden NICHT beim normalen Quellenlauf geladen.
+# Sie werden ausschließlich dann lazy geladen, wenn ein Fixed-
+# Sender in den normalen Quellen nicht gefunden wurde.
+# ============================================================
+
+FALLBACK_SOURCES = [
     (
         "Kodinerds",
         "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u"
     ),
-
     (
         "Free-TV/IPTV Deutschland",
         "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_germany.m3u8"
     ),
-
     (
         "deutsche-iptv-playlist",
         "https://raw.githubusercontent.com/tgru-dev/deutsche-iptv-playlist/main/ip-tv.m3u"
     ),
 ]
+
+# Pro Lauf wird jede Fallback-Quelle höchstens einmal geladen.
+FALLBACK_ENTRIES_CACHE = {}
+FALLBACK_SOURCE_ERRORS = {}
 
 
 # ============================================================
@@ -1005,6 +1021,538 @@ def get_attribute(info, attribute):
         return match.group(1).strip()
 
     return ""
+
+
+# ============================================================
+# STREAM-HEALTH-CHECK
+# ============================================================
+#
+# WICHTIG:
+# Diese Prüfung wird NUR für Kandidaten aus den zusätzlichen
+# FALLBACK_SOURCES ausgeführt.
+#
+# Prüfketten:
+#
+#   HTTP/HTTPS:
+#       DNS -> TCP -> HTTP -> Nutzdaten
+#
+#   HLS:
+#       DNS -> TCP -> HTTP -> Playlist -> Media-Playlist
+#       -> erstes echtes Segment
+#
+#   RTSP/RTMP/TCP:
+#       DNS -> TCP
+#
+# Ein TCP-Connect allein beweist bei RTSP/RTMP nicht, dass ein
+# gültiger Videostream geliefert wird. Dafür wäre ein externer
+# Protokoll-Client wie ffprobe erforderlich.
+# ============================================================
+
+HEALTHCHECK_TIMEOUT = 8
+HEALTHCHECK_WORKERS = 12
+HEALTHCHECK_READ_BYTES = 64 * 1024
+HLS_MAX_BYTES = 2 * 1024 * 1024
+
+STREAM_HEALTH_CACHE = {}
+STREAM_HEALTH_LOCK = threading.Lock()
+
+
+def get_host_port(url):
+    parsed = urlparse(url)
+
+    if not parsed.hostname:
+        raise RuntimeError("Kein Host in URL")
+
+    if parsed.port:
+        port = parsed.port
+    elif parsed.scheme in ("http", "ws"):
+        port = 80
+    elif parsed.scheme in ("https", "wss"):
+        port = 443
+    elif parsed.scheme == "rtsp":
+        port = 554
+    elif parsed.scheme == "rtmp":
+        port = 1935
+    elif parsed.scheme == "tcp":
+        port = 80
+    else:
+        raise RuntimeError(
+            f"Nicht unterstütztes Protokoll: {parsed.scheme}"
+        )
+
+    return parsed.hostname, port
+
+
+def check_tcp(url):
+    host, port = get_host_port(url)
+
+    with socket.create_connection(
+        (host, port),
+        timeout=HEALTHCHECK_TIMEOUT
+    ):
+        return True
+
+
+def http_read(url, max_bytes=HEALTHCHECK_READ_BYTES):
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 "
+                "(Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 "
+                "Chrome/131 Safari/537.36"
+            ),
+            "Accept": (
+                "application/vnd.apple.mpegurl,"
+                "application/x-mpegURL,"
+                "video/*,*/*"
+            ),
+            "Connection": "close",
+        }
+    )
+
+    with urllib.request.urlopen(
+        request,
+        timeout=HEALTHCHECK_TIMEOUT
+    ) as response:
+
+        status = response.getcode()
+
+        if status < 200 or status >= 400:
+            raise RuntimeError(
+                f"HTTP Status {status}"
+            )
+
+        data = response.read(max_bytes)
+
+        if not data:
+            raise RuntimeError(
+                "Leere HTTP-Antwort"
+            )
+
+        return response, data
+
+
+def looks_like_hls(url, response, data):
+    lower_url = url.lower()
+
+    content_type = (
+        response.headers.get(
+            "Content-Type",
+            ""
+        ).lower()
+    )
+
+    if ".m3u8" in lower_url:
+        return True
+
+    if (
+        "mpegurl" in content_type
+        or "m3u" in content_type
+    ):
+        return True
+
+    return b"#EXTM3U" in data
+
+
+def hls_first_uri(playlist_url, data):
+    text = data.decode(
+        "utf-8",
+        errors="replace"
+    )
+
+    lines = [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip()
+    ]
+
+    # Master-Playlist: erste Variant-Playlist.
+    for index, line in enumerate(lines):
+        if line.startswith("#EXT-X-STREAM-INF:"):
+            for candidate in lines[index + 1:]:
+                if not candidate.startswith("#"):
+                    return urljoin(
+                        playlist_url,
+                        candidate
+                    )
+
+    # Media-Playlist: erstes echtes Segment.
+    # Wir suchen bewusst erst nach EXTINF, damit z.B. eine
+    # EXT-X-KEY- oder EXT-X-MAP-URI nicht fälschlich als
+    # normales erstes Segment behandelt wird.
+    for index, line in enumerate(lines):
+        if line.startswith("#EXTINF:"):
+            for candidate in lines[index + 1:]:
+                if not candidate.startswith("#"):
+                    return urljoin(
+                        playlist_url,
+                        candidate
+                    )
+
+    # Fallback für einfache Playlists ohne EXTINF.
+    for line in lines:
+        if not line.startswith("#"):
+            return urljoin(
+                playlist_url,
+                line
+            )
+
+    raise RuntimeError(
+        "Keine HLS-URI gefunden"
+    )
+
+
+def check_hls(playlist_url, playlist_data):
+    if b"#EXTM3U" not in playlist_data:
+        raise RuntimeError(
+            "Keine gültige HLS-Playlist"
+        )
+
+    child_url = hls_first_uri(
+        playlist_url,
+        playlist_data
+    )
+
+    # Master -> Media Playlist.
+    if ".m3u8" in child_url.lower():
+        child_response, child_data = http_read(
+            child_url,
+            max_bytes=HLS_MAX_BYTES
+        )
+
+        if not looks_like_hls(
+            child_url,
+            child_response,
+            child_data
+        ):
+            raise RuntimeError(
+                "Ungültige HLS Media-Playlist"
+            )
+
+        segment_url = hls_first_uri(
+            child_url,
+            child_data
+        )
+    else:
+        segment_url = child_url
+
+    # Erstes tatsächliches Segment abrufen.
+    _, segment_data = http_read(
+        segment_url,
+        max_bytes=HEALTHCHECK_READ_BYTES
+    )
+
+    if not segment_data:
+        raise RuntimeError(
+            "Erstes Stream-Segment ist leer"
+        )
+
+    return {
+        "type": "hls",
+        "playlist": playlist_url,
+        "segment": segment_url,
+        "bytes": len(segment_data),
+    }
+
+
+def check_http_stream(url):
+    response, data = http_read(url)
+
+    if looks_like_hls(
+        url,
+        response,
+        data
+    ):
+        return check_hls(
+            url,
+            data
+        )
+
+    if len(data) < 4:
+        raise RuntimeError(
+            "Zu wenig Nutzdaten"
+        )
+
+    return {
+        "type": "http",
+        "status": response.getcode(),
+        "bytes": len(data),
+    }
+
+
+def check_non_http_stream(url):
+    check_tcp(url)
+
+    return {
+        "type": urlparse(url).scheme.lower(),
+        "tcp": True,
+    }
+
+
+def check_stream_health(url):
+    if not url:
+        return False
+
+    with STREAM_HEALTH_LOCK:
+        cached = STREAM_HEALTH_CACHE.get(url)
+
+    if cached is not None:
+        return cached
+
+    try:
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+
+        if scheme in ("http", "https"):
+            check_http_stream(url)
+
+        elif scheme in (
+            "rtsp",
+            "rtmp",
+            "tcp",
+            "ws",
+            "wss",
+        ):
+            check_non_http_stream(url)
+
+        else:
+            raise RuntimeError(
+                f"Nicht unterstütztes Protokoll: {scheme}"
+            )
+
+        result = True
+
+    except Exception as error:
+        print(
+            f"      DOWN: {url} -> {error}"
+        )
+        result = False
+
+    with STREAM_HEALTH_LOCK:
+        STREAM_HEALTH_CACHE[url] = result
+
+    return result
+
+
+def load_fallback_source(source_name, url):
+    """
+    Lazy Loader: Die Fallback-Quelle wird erst beim ersten
+    tatsächlichen Bedarf geladen und danach im Speicher behalten.
+    """
+
+    if source_name in FALLBACK_ENTRIES_CACHE:
+        return FALLBACK_ENTRIES_CACHE[source_name]
+
+    if source_name in FALLBACK_SOURCE_ERRORS:
+        return []
+
+    try:
+        print(
+            f"    Lade Fallback-Quelle {source_name} ..."
+        )
+
+        text = download(url)
+
+        entries = parse_m3u(
+            text,
+            source_name
+        )
+
+        if not entries:
+            raise RuntimeError(
+                "Keine M3U-Einträge gefunden"
+            )
+
+        FALLBACK_ENTRIES_CACHE[source_name] = entries
+
+        print(
+            f"      OK: {len(entries)} Einträge"
+        )
+
+        return entries
+
+    except Exception as error:
+        FALLBACK_SOURCE_ERRORS[source_name] = str(error)
+
+        print(
+            f"      FEHLER: {error}"
+        )
+
+        return []
+
+
+def find_healthy_fallback_matches(
+    source_entries,
+    variant
+):
+    """
+    Es werden ausschließlich die Kandidaten dieses Senders
+    geprüft, niemals die komplette Fallback-M3U.
+    """
+
+    matches = find_variant_matches(
+        source_entries,
+        variant
+    )
+
+    matches = [
+        entry
+        for entry in matches
+        if not excluded(entry)
+    ]
+
+    if not matches:
+        return []
+
+    healthy = []
+
+    for entry in matches:
+        url = entry.get("url", "")
+
+        if check_stream_health(url):
+            healthy.append(entry)
+
+    return healthy
+
+
+def build_fixed_with_fallbacks(entries):
+    """
+    Zuerst exakt die bestehende Fixed-Logik.
+
+    Nur wenn ein Fixed-Sender in KEINER normalen Variante
+    gefunden wird, werden die drei zusätzlichen Quellen
+    lazy geladen.
+
+    Die Fallback-Quellen werden dabei in ihrer Prioritäts-
+    reihenfolge geprüft. Innerhalb einer Variante gilt weiterhin:
+
+        Quelle -> Stream-Qualität
+
+    Wichtig:
+    Ein Fallback wird nicht global für alle Sender geladen.
+    """
+
+    result, used_ids, missing = build_fixed(entries)
+
+    if not missing:
+        return result, used_ids, missing
+
+    definitions_by_name = OrderedDict(
+        FIXED_CHANNELS
+    )
+
+    missing_set = set(missing)
+
+    print()
+    print("==========================================")
+    print("FALLBACK-QUELLEN")
+    print("==========================================")
+    print(
+        f"Fehlende Fixed-Sender: {len(missing_set)}"
+    )
+
+    # Bereits ausgewählte Fixed-Sender werden aus den
+    # Kandidaten ausgeschlossen.
+    selected_by_name = {
+        entry.get("display_name")
+        for entry in result
+    }
+
+    new_missing = []
+
+    for display_name in missing:
+        if display_name in selected_by_name:
+            continue
+
+        definition = definitions_by_name.get(
+            display_name
+        )
+
+        if definition is None:
+            new_missing.append(display_name)
+            continue
+
+        variants = definition[1]
+
+        selected = None
+        selected_variant = None
+
+        # Varianten strikt in der bestehenden Reihenfolge.
+        for variant_number, variant in enumerate(
+            variants,
+            start=1
+        ):
+
+            fallback_candidates = []
+
+            # Alle drei alternativen Quellen dürfen für diese
+            # Variante Kandidaten liefern. Geprüft werden aber
+            # ausschließlich passende Sender-URLs.
+            for source_name, source_url in FALLBACK_SOURCES:
+
+                source_entries = load_fallback_source(
+                    source_name,
+                    source_url
+                )
+
+                if not source_entries:
+                    continue
+
+                matches = find_healthy_fallback_matches(
+                    source_entries,
+                    variant
+                )
+
+                if matches:
+                    fallback_candidates.extend(
+                        matches
+                    )
+
+            # Erst wenn diese Variante mindestens einen
+            # erreichbaren Kandidaten besitzt, wird sie gewählt.
+            if fallback_candidates:
+                fallback_candidates.sort(
+                    key=selection_score
+                )
+
+                selected = fallback_candidates[0]
+                selected_variant = variant_number
+                break
+
+        if selected is None:
+            new_missing.append(display_name)
+            continue
+
+        base_id = normalize_tvg_id(
+            selected["tvg_id"]
+        )
+
+        # Keine doppelte TVG-ID.
+        if base_id and base_id in used_ids:
+            new_missing.append(display_name)
+            continue
+
+        selected["category"] = "00 Priorität"
+        selected["priority"] = (
+            len(result) + 1
+        )
+        selected["display_name"] = display_name
+        selected["matched_variant"] = selected_variant
+
+        result.append(selected)
+
+        if base_id:
+            used_ids.add(base_id)
+
+        print(
+            f"    Fallback OK: {display_name} "
+            f"-> {selected['source']} "
+            f"(Variante {selected_variant})"
+        )
+
+    return result, used_ids, new_missing
 
 
 # ============================================================
@@ -2148,7 +2696,7 @@ def main():
     # bevor andere Quellen sie verdrängen.
     # --------------------------------------------------------
 
-    fixed, used_ids, missing = build_fixed(
+    fixed, used_ids, missing = build_fixed_with_fallbacks(
         filtered
     )
 
