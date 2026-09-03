@@ -1157,10 +1157,7 @@ def looks_like_hls(url, response, data):
 
 
 def hls_first_uri(playlist_url, data):
-    text = data.decode(
-        "utf-8",
-        errors="replace"
-    )
+    text = data.decode("utf-8", errors="replace")
 
     lines = [
         line.strip()
@@ -1168,40 +1165,26 @@ def hls_first_uri(playlist_url, data):
         if line.strip()
     ]
 
-    # Master-Playlist: erste Variant-Playlist.
+    if not lines:
+        raise RuntimeError("HLS-Playlist ist leer")
+
     for index, line in enumerate(lines):
         if line.startswith("#EXT-X-STREAM-INF:"):
             for candidate in lines[index + 1:]:
                 if not candidate.startswith("#"):
-                    return urljoin(
-                        playlist_url,
-                        candidate
-                    )
+                    return urljoin(playlist_url, candidate)
 
-    # Media-Playlist: erstes echtes Segment.
-    # Wir suchen bewusst erst nach EXTINF, damit z.B. eine
-    # EXT-X-KEY- oder EXT-X-MAP-URI nicht fälschlich als
-    # normales erstes Segment behandelt wird.
     for index, line in enumerate(lines):
         if line.startswith("#EXTINF:"):
             for candidate in lines[index + 1:]:
                 if not candidate.startswith("#"):
-                    return urljoin(
-                        playlist_url,
-                        candidate
-                    )
+                    return urljoin(playlist_url, candidate)
 
-    # Fallback für einfache Playlists ohne EXTINF.
     for line in lines:
         if not line.startswith("#"):
-            return urljoin(
-                playlist_url,
-                line
-            )
+            return urljoin(playlist_url, line)
 
-    raise RuntimeError(
-        "Keine HLS-URI gefunden"
-    )
+    raise RuntimeError("Keine HLS-URI gefunden")
 
 
 def check_hls(playlist_url, playlist_data):
