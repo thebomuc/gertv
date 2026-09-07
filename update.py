@@ -2478,28 +2478,32 @@ def build_m3u(entries):
         url_lower = url.lower()
 
         # -------------------------------------------------------------------------
-        # INTELLIGENTE AUTOMATISCHE SENDER-ERKENNUNG (KODI- & WINDOWS-FIXES)
+        # VOLLAUTOMATISCHE PROBLEM-ERKENNUNG & KODI-FIXES
         # -------------------------------------------------------------------------
 
-        # FIX 1: Werbesender mit dynamischen Auflösungswechseln (Sky News, Pluto TV, Rakuten)
-        # Benötigen zwingend InputStream.Adaptive als HLS-Stream.
+        # FIX 1: Werbesender mit extremen Codec-Sprüngen (Pluto TV, Sky News, Rakuten, Samsung TV)
         if any(x in name or x in tvg_id for x in ["sky news", "skynews", "pluto", "rakuten", "samsung tv"]):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # FIX 2: Antik-TV & Smart-TV Teststreams (z.B. ProSieben, Sat.1, Kabel Eins von antik.sk)
-        # Erkennung: Endet auf .m3u8, enthält aber ein Tizen/WebOS/Dash-Signal.
-        # Diese Streams müssen in Kodi als DASH (mpd) erzwungen werden, obwohl .m3u8 dransteht.
-        elif "antik.sk" in url_lower and any(x in url_lower for x in ["tizen", "dash", "webos"]):
+        # FIX 2: Der intelligente Antik.sk (ProSieben, Sixx, Kabel Eins, Arte HD) Manager
+        elif "antik.sk" in url_lower:
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output.append('#KODIPROP:inputstream.adaptive.manifest_type=mpd')
+            
+            # Manche Antik-Sender (z.B. ProSieben, Sat.1) senden getarntes DASH (Tizen-Format).
+            # Wenn "tizen" oder "dash" in der URL steht, erzwingen wir MPD.
+            if any(x in url_lower for x in ["tizen", "dash", "webos"]):
+                output.append('#KODIPROP:inputstream.adaptive.manifest_type=mpd')
+            else:
+                # Arte HD, Sixx, Kabel Eins laufen hierdurch im stabilen HLS-Puffermodus.
+                output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+                
             output.append(url)
 
-        # FIX 3: Rohe Multicast-Netzwerkstreams (udp:// oder rtp://)
-        # Fügt automatisch das für Windows-Kodi zwingend erforderliche '@'-Zeichen hinzu.
+        # FIX 3: Unvollständige Multicast-Netzwerkstreams (udp:// oder rtp://) für Windows
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
@@ -2510,8 +2514,7 @@ def build_m3u(entries):
             output.append(info_line)
             output.append(fixed_url)
 
-        # STANDARD-MODUS: Für alle normalen, stabilen Sender
-        # Keine Modifikationen in der M3U, um maximale Kompatibilität mit dem iPhone zu wahren.
+        # STANDARD-MODUS: Für absolut unkomplizierte Drittanbieter-Streams
         else:
             output.append(info_line)
             output.append(url)
