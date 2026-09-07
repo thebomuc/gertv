@@ -2569,9 +2569,6 @@ def safe_write(content):
 
 
 
-
-
-
 def main():
 
     print()
@@ -2638,60 +2635,6 @@ def main():
     print("Erfolgreiche Hauptquellen:", successful_sources, "/", len(SOURCES))
     print("Erfolgreiche Fallback-Streams integriert:", len(healthy_fallback_entries))
     print("Insgesamt geladen:", len(all_entries))
-
-    # [Ab hier folgt unverändert deine QUELLENSTATISTIK ab Zeile 736...]
-    # --------------------------------------------------------
-    # QUELLEN
-    # --------------------------------------------------------
-
-    for source_name, url in SOURCES:
-
-        try:
-
-            print(
-                f"Lade {source_name} ..."
-            )
-
-            text = download(url)
-
-            entries = parse_m3u(
-                text,
-                source_name
-            )
-
-            if not entries:
-
-                raise RuntimeError(
-                    "Keine M3U-Einträge gefunden."
-                )
-
-            print(
-                f"  OK: {len(entries)} Einträge"
-            )
-
-            all_entries.extend(entries)
-
-            successful_sources += 1
-
-        except Exception as error:
-
-            print(
-                f"  FEHLER: {error}"
-            )
-
-    print()
-
-    print(
-        "Erfolgreiche Quellen:",
-        successful_sources,
-        "/",
-        len(SOURCES)
-    )
-
-    print(
-        "Insgesamt geladen:",
-        len(all_entries)
-    )
 
     # --------------------------------------------------------
     # QUELLENSTATISTIK
@@ -2765,11 +2708,6 @@ def main():
 
     # --------------------------------------------------------
     # FIXED ZUERST
-    #
-    # Noch NICHT global deduplizieren.
-    #
-    # So kann z.B. eine benötigte Variante gefunden werden,
-    # bevor andere Quellen sie verdrängen.
     # --------------------------------------------------------
 
     fixed, used_ids, missing = build_fixed_with_fallbacks(
@@ -2810,9 +2748,6 @@ def main():
 
     # --------------------------------------------------------
     # Rakuten aus dem Rest entfernen.
-    #
-    # Sie werden ausschließlich über die feste Rakuten-
-    # Definition einsortiert.
     # --------------------------------------------------------
 
     non_rakuten_rest = []
@@ -2834,13 +2769,6 @@ def main():
 
             non_rakuten_rest.append(entry)
 
-    # --------------------------------------------------------
-    # Rakuten bleibt ganz am Ende des Restes.
-    #
-    # Die tatsächlich gefundenen Fixed-Rakuten stehen bereits
-    # an der entsprechenden Position innerhalb FIXED_CHANNELS.
-    # --------------------------------------------------------
-
     rest = (
         non_rakuten_rest
         + rakuten_rest
@@ -2848,9 +2776,6 @@ def main():
 
     # --------------------------------------------------------
     # ENDGÜLTIGE LISTE
-    #
-    # FIXED zuerst
-    # danach Rest alphabetisch
     # --------------------------------------------------------
 
     entries = (
