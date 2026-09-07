@@ -2472,24 +2472,46 @@ def build_m3u(entries):
 
         # Basis-Informationzeile des Senders generieren
         info_line = clean_info(entry, category)
-        url = entry["url"]
+        url = entry.get("url", "")
         name = entry.get("name", "").lower()
         tvg_id = entry.get("tvg_id", "").lower()
+        url_lower = url.lower()
 
-        # FIX: Sky News (Kodi-Absturz bei Werbung abfangen)
-        if "sky news" in name or "skynews" in tvg_id:
+        # -------------------------------------------------------------------------
+        # INTELLIGENTE AUTOMATISCHE SENDER-ERKENNUNG (KODI- & WINDOWS-FIXES)
+        # -------------------------------------------------------------------------
+
+        # FIX 1: Werbesender mit dynamischen Auflösungswechseln (Sky News, Pluto TV, Rakuten)
+        # Benötigen zwingend InputStream.Adaptive als HLS-Stream.
+        if any(x in name or x in tvg_id for x in ["sky news", "skynews", "pluto", "rakuten", "samsung tv"]):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # FIX: Multicast-Streams (udp://) für Windows-Kodi anpassen
-        elif url.lower().startswith("udp://") and not url.lower().startswith("udp://@"):
+        # FIX 2: Antik-TV & Smart-TV Teststreams (z.B. ProSieben, Sat.1, Kabel Eins von antik.sk)
+        # Erkennung: Endet auf .m3u8, enthält aber ein Tizen/WebOS/Dash-Signal.
+        # Diese Streams müssen in Kodi als DASH (mpd) erzwungen werden, obwohl .m3u8 dransteht.
+        elif "antik.sk" in url_lower and any(x in url_lower for x in ["tizen", "dash", "webos"]):
+            output.append(info_line)
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=mpd')
+            output.append(url)
+
+        # FIX 3: Rohe Multicast-Netzwerkstreams (udp:// oder rtp://)
+        # Fügt automatisch das für Windows-Kodi zwingend erforderliche '@'-Zeichen hinzu.
+        elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
             output.append(fixed_url)
+            
+        elif url_lower.startswith("rtp://") and not url_lower.startswith("rtp://@"):
+            fixed_url = url.replace("rtp://", "rtp://@", 1).replace("RTP://", "rtp://@", 1)
+            output.append(info_line)
+            output.append(fixed_url)
 
-        # Standard-Verhalten für alle anderen Sender
+        # STANDARD-MODUS: Für alle normalen, stabilen Sender
+        # Keine Modifikationen in der M3U, um maximale Kompatibilität mit dem iPhone zu wahren.
         else:
             output.append(info_line)
             output.append(url)
