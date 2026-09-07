@@ -1525,9 +1525,13 @@ def build_fixed_with_fallbacks(entries):
                 )
 
                 if fallback_candidates:
-                    selected = fallback_candidates[0]
-                    selected_variant = variant_number
-                    break
+                    fallback_candidates.sort(key=selection_score)
+                    # KORREKTUR: Nur zugreifen, wenn die Liste nicht leer ist
+                    if len(fallback_candidates) > 0:
+                        selected = fallback_candidates[0]
+                        selected_variant = variant_number
+                        break
+
 
             if selected is not None:
                 break
