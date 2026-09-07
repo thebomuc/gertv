@@ -2127,10 +2127,10 @@ def build_fixed(entries):
                 key=selection_score
             )
 
-            selected = matches[0]
-            selected_variant = variant_number
-
-            break
+            if matches:
+               selected = matches[0]
+               selected_variant = variant_number
+               break
 
         if selected is None:
 
