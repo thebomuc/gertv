@@ -8,7 +8,7 @@ import threading
 import traceback
 from urllib.parse import urlparse, urljoin
 from collections import OrderedDict
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ============================================================
 # GER TV - update.py
