@@ -1494,7 +1494,7 @@ def build_fixed_with_fallbacks(entries):
             new_missing.append(display_name)
             continue
 
-        variants = definition[1]
+        variants = definition
 
         selected = None
         selected_variant = None
