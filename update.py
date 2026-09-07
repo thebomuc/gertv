@@ -2432,7 +2432,7 @@ def build_m3u(entries):
 
     output = [
 
-        "#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"',
+        '#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"',
 
         "",
 
