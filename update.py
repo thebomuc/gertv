@@ -2432,7 +2432,7 @@ def build_m3u(entries):
 
     output = [
 
-        "#EXTM3U",
+        "#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"',
 
         "",
 
@@ -2470,16 +2470,29 @@ def build_m3u(entries):
 
             current_category = category
 
-        output.append(
-            clean_info(
-                entry,
-                category
-            )
-        )
+        # Basis-Informationzeile des Senders generieren
+        info_line = clean_info(entry, category)
+        url = entry["url"]
+        name = entry.get("name", "").lower()
+        tvg_id = entry.get("tvg_id", "").lower()
 
-        output.append(
-            entry["url"]
-        )
+        # FIX: Sky News (Kodi-Absturz bei Werbung abfangen)
+        if "sky news" in name or "skynews" in tvg_id:
+            output.append(info_line)
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output.append(url)
+
+        # FIX: Multicast-Streams (udp://) für Windows-Kodi anpassen
+        elif url.lower().startswith("udp://") and not url.lower().startswith("udp://@"):
+            fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
+            output.append(info_line)
+            output.append(fixed_url)
+
+        # Standard-Verhalten für alle anderen Sender
+        else:
+            output.append(info_line)
+            output.append(url)
 
     return (
         "\n".join(output)
