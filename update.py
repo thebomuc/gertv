@@ -2515,11 +2515,12 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
 
-        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Wir verbieten hier InputStream Adaptive ausdrücklich!)
-        if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN & PEARL.TV (Nutzen die adaptive Engine für fehlerfreie Wiedergabe)
+        elif any(x in name or x in id_lower for x in adaptive_channels) or "pearl" in name:
             output.append(info_line)
-            output.append('#KODIPROP:inputstream=None')  # <-- Zwingt Pluto in den Standard-Player (wie beim iPhone)
-            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output.append(url)
 
         # 2. FIX FÜR ARD/ZDF MEDIATHEKEN (Nutzen die adaptive Engine für dauerhaftes Full HD)
         elif any(x in name or x in id_lower for x in adaptive_channels):
