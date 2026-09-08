@@ -2507,7 +2507,7 @@ def build_m3u(entries):
         id_lower = entry.get("tvg_id", "").lower()
         logo_lower = entry.get("tvg_logo", "").lower()
 
-        # DIE SENDER, DIE UNTER WINDOWS KOPIE-PUFFERUNG BRAUCHEN (NUR ARD/ZDF MEDIATHEKEN)
+        # DIE HAUPTSENDER, DIE UNTER WINDOWS KOPIE-PUFFERUNG BRAUCHEN (ARD/ZDF MEDIATHEKEN)
         adaptive_channels = [
             "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
             "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
@@ -2515,19 +2515,20 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
 
-        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Nativ mit sauberer iPhone-Pipe-Tarnung)
+        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Wir verbieten hier InputStream Adaptive ausdrücklich!)
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
+            output.append('#KODIPROP:inputstream=None')  # <-- Zwingt Pluto in den Standard-Player (wie beim iPhone)
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
-        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN (Nutzen stabil die adaptive Engine, ohne User-Agent)
+        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN (Nutzen die adaptive Engine für dauerhaftes Full HD)
         elif any(x in name or x in id_lower for x in adaptive_channels):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
+        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird (KEIN Adaptive)
         elif "antik.sk" in url_lower:
             fallback_info_line = info_line.replace(",", ",[Teststream-Schleife] ")
             output.append(fallback_info_line)
@@ -2544,11 +2545,10 @@ def build_m3u(entries):
             output.append(info_line)
             output.append(fixed_url)
 
-        # 5. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, RTL, etc.): Direkt in den nackten Windows-Player
+        # 5. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, RTL, etc.): Normaler, nackter Windows-Player
         else:
             output.append(info_line)
             output.append(url)
-
 
     return (
         "\n".join(output)
