@@ -2512,24 +2512,23 @@ def build_m3u(entries):
             "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
             "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
-            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de", "pearl.tv"
+            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
 
-        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Kodi nutzt hierdurch den Standard-Player)
+        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS
+        # KEIN #KODIPROP! Nur die reine Pipe-Tarnung. Das lässt Kodi absolut fehlerfrei einlesen.
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
-            # KORREKTUR: "default" zwingt Kodi in den Standard-Player, statt nach einem Addon namens "None" zu suchen
-            output.append('#KODIPROP:inputstream=default')
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
-        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN & PEARL.TV (Nutzen die adaptive Engine für fehlerfreie Wiedergabe)
+        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN & PEARL.TV (Nutzen stabil InputStream Adaptive)
         elif any(x in name or x in id_lower for x in adaptive_channels) or "pearl" in name:
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird (KEIN Adaptive)
+        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
         elif "antik.sk" in url_lower:
             fallback_info_line = info_line.replace(",", ",[Teststream-Schleife] ")
             output.append(fallback_info_line)
