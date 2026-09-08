@@ -2475,51 +2475,27 @@ def build_m3u(entries):
         url = entry.get("url", "")
         name = entry.get("name", "").lower()
         tvg_id = entry.get("tvg_id", "").lower()
-        url_lower = url.lower()
 
-        # -------------------------------------------------------------------------
-        # EXKLUSIVER PLUTO TV & SKY NEWS FIX (Benötigen iPhone-Tarnung + HLS-Engine)
-        # -------------------------------------------------------------------------
+        # NUR FÜR PLUTO TV: iPhone-Tarnung erzwingen
         if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]):
             output.append(info_line)
-            # 1. Wir zwingen Kodi, für diesen einzelnen Sender den iPhone-Agent zu nutzen
-            output.append('#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
-            # 2. Wir stabilisieren den Stream gegen Werbeunterbrechungen
-            output.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            output.append(url)
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
-        # -------------------------------------------------------------------------
-        # ANTIK.SK FIX (Arte, Sixx, Kabel Eins, ProSieben, Sat.1)
-        # -------------------------------------------------------------------------
-        elif "antik.sk" in url_lower:
-            output.append(info_line)
-            # WICHTIG: Kein iPhone-Agent! Antik-Server wollen den puren Windows-Kodi-Stream.
-            output.append('#KODIPROP:inputstream=inputstream.adaptive')
-            
-            # Unterscheidung zwischen DASH (ProSieben/Sat.1 Tizen) und normalem HLS (Arte/Sixx)
-            if any(x in url_lower for x in ["tizen", "dash", "webos"]):
-                output.append('#KODIPROP:inputstream.adaptive.manifest_type=mpd')
-            else:
-                output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-                
-            output.append(url)
-
-        # -------------------------------------------------------------------------
-        # MULTICAST FIX (udp:// oder rtp://)
-        # -------------------------------------------------------------------------
+        # 2. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
             output.append(fixed_url)
+            
+        elif url_lower.startswith("rtp://") and not url_lower.startswith("rtp://@"):
+            fixed_url = url.replace("rtp://", "rtp://@", 1).replace("RTP://", "rtp://@", 1)
+            output.append(info_line)
+            output.append(fixed_url)
 
-        # -------------------------------------------------------------------------
-        # STANDARD-MODUS (Alle anderen unkomplizierten Sender)
-        # -------------------------------------------------------------------------
+        # 3. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, Arte, etc.): Absolut unverändert lassen wie vorher
         else:
             output.append(info_line)
             output.append(url)
-
 
     return (
         "\n".join(output)
