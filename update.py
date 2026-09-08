@@ -2432,7 +2432,7 @@ def build_m3u(entries):
 
     output = [
 
-        '#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"',
+        "#EXTM3U",
 
         "",
 
@@ -2478,46 +2478,48 @@ def build_m3u(entries):
         url_lower = url.lower()
 
         # -------------------------------------------------------------------------
-        # VOLLAUTOMATISCHE PROBLEM-ERKENNUNG & KODI-FIXES
+        # EXKLUSIVER PLUTO TV & SKY NEWS FIX (Benötigen iPhone-Tarnung + HLS-Engine)
         # -------------------------------------------------------------------------
-
-        # FIX 1: Werbesender mit extremen Codec-Sprüngen (Pluto TV, Sky News, Rakuten, Samsung TV)
-        if any(x in name or x in tvg_id for x in ["sky news", "skynews", "pluto", "rakuten", "samsung tv"]):
+        if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]):
             output.append(info_line)
+            # 1. Wir zwingen Kodi, für diesen einzelnen Sender den iPhone-Agent zu nutzen
+            output.append('#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
+            # 2. Wir stabilisieren den Stream gegen Werbeunterbrechungen
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # FIX 2: Der intelligente Antik.sk (ProSieben, Sixx, Kabel Eins, Arte HD) Manager
+        # -------------------------------------------------------------------------
+        # ANTIK.SK FIX (Arte, Sixx, Kabel Eins, ProSieben, Sat.1)
+        # -------------------------------------------------------------------------
         elif "antik.sk" in url_lower:
             output.append(info_line)
+            # WICHTIG: Kein iPhone-Agent! Antik-Server wollen den puren Windows-Kodi-Stream.
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             
-            # Manche Antik-Sender (z.B. ProSieben, Sat.1) senden getarntes DASH (Tizen-Format).
-            # Wenn "tizen" oder "dash" in der URL steht, erzwingen wir MPD.
+            # Unterscheidung zwischen DASH (ProSieben/Sat.1 Tizen) und normalem HLS (Arte/Sixx)
             if any(x in url_lower for x in ["tizen", "dash", "webos"]):
                 output.append('#KODIPROP:inputstream.adaptive.manifest_type=mpd')
             else:
-                # Arte HD, Sixx, Kabel Eins laufen hierdurch im stabilen HLS-Puffermodus.
                 output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
                 
             output.append(url)
 
-        # FIX 3: Unvollständige Multicast-Netzwerkstreams (udp:// oder rtp://) für Windows
+        # -------------------------------------------------------------------------
+        # MULTICAST FIX (udp:// oder rtp://)
+        # -------------------------------------------------------------------------
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
             output.append(fixed_url)
-            
-        elif url_lower.startswith("rtp://") and not url_lower.startswith("rtp://@"):
-            fixed_url = url.replace("rtp://", "rtp://@", 1).replace("RTP://", "rtp://@", 1)
-            output.append(info_line)
-            output.append(fixed_url)
 
-        # STANDARD-MODUS: Für absolut unkomplizierte Drittanbieter-Streams
+        # -------------------------------------------------------------------------
+        # STANDARD-MODUS (Alle anderen unkomplizierten Sender)
+        # -------------------------------------------------------------------------
         else:
             output.append(info_line)
             output.append(url)
+
 
     return (
         "\n".join(output)
