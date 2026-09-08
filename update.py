@@ -2532,15 +2532,6 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
-
-        # 3. FIX FÜR REINE PLUTO TV STREAMS (Standardkonformer iPhone User-Agent für GoTV & iOS-Kodi)
-        elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            # Wir bauen den iPhone User-Agent direkt in die Info-Zeile ein, damit die URL sauber bleibt
-            iphone_info_line = info_line.replace("#EXTINF:-1", '#EXTINF:-1 http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"')
-            output.append(iphone_info_line)
-            
-            # Die URL bleibt absolut rein, damit GoTV sie problemlos importiert
-            output.append(url)
             
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
@@ -2548,12 +2539,6 @@ def build_m3u(entries):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            output.append(url)
-
-        # 5. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
-        elif "antik.sk" in url_lower:
-            fallback_info_line = info_line.replace(",", ",[Teststream-Schleife] ")
-            output.append(fallback_info_line)
             output.append(url)
 
         # 6. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
