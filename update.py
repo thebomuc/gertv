@@ -132,6 +132,10 @@ FALLBACK_SOURCES = [
         "Kodinerds",
         "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u"
     ),
+        (
+        "Kodinerds Master-Liste",
+        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/kodi/kodi_tv_main.m3u"
+    ),
     (
         "Free-TV/IPTV Deutschland",
         "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_germany.m3u8"
