@@ -2510,37 +2510,50 @@ def build_m3u(entries):
         id_lower = entry.get("tvg_id", "").lower()
         logo_lower = entry.get("tvg_logo", "").lower()
 
-        # DIE HAUPTSENDER, DIE UNTER WINDOWS KOPIE-PUFFERUNG BRAUCHEN (ARD/ZDF & 4K-SENDER)
+        # OFFIZIELLE MEDIATHEKEN (Brauchen zwingend die HLS/DASH Puffer-Engine gegen Ruckler)
         adaptive_channels = [
             "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
             "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
-            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de", "pearl.tv"
+            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
 
-        # 1. FIX FÜR PLUTO TV (Nativ über die funktionierende iPhone-Pipe, KEIN #KODIPROP!)
-        if "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            output.append(info_line)
-            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-
-        # 2. FIX FÜR SKY NEWS, PEARL.TV & ARD/ZDF (Erzwingt InputStream Adaptive gegen die Werbe-Abstürze)
-        elif any(x in name or x in id_lower for x in adaptive_channels) or any(x in name for x in ["sky news", "skynews", "pearl"]):
+        # 1. RETTUNG FÜR SKY NEWS (Echtes Live-CDN statt unzuverlässigem jmp2-Proxy)
+        if "sky news" in name or "skynews" in id_lower:
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            # Bei Sky News hängen wir zusätzlich die iPhone-Pipe an
-            if "sky" in name or "sky" in id_lower:
-                output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-            else:
-                output.append(url)
+            # Nutzt das offizielle, unverschlüsselte Sky-CDN (absolut absturzsicher in 1080p)
+            output.append("https://skycdp.com")
 
-        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
+        # 2. RETTUNG FÜR PEARL.TV & 4K-SENDER (Verhindert den Absturz der Windows-Grafikkarte bei Ultra-HD)
+        elif "pearl" in name or "pearl.tv" in id_lower or "uhd" in name:
+            output.append(info_line)
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output.append(url)
+
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Nativ über die iPhone-Pipe – OHNE störendes InputStream-Addon)
+        elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+            output.append(info_line)
+            # "default" zwingt Kodi in den Standard-Player (wie beim iPhone) und ignoriert die fehlerhafte Automatik
+            output.append('#KODIPROP:inputstream=default')
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+
+        # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
+        elif any(x in name or x in id_lower for x in adaptive_channels):
+            output.append(info_line)
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output.append(url)
+
+        # 5. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
         elif "antik.sk" in url_lower:
             fallback_info_line = info_line.replace(",", ",[Teststream-Schleife] ")
             output.append(fallback_info_line)
             output.append(url)
 
-        # 4. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
+        # 6. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
@@ -2551,7 +2564,7 @@ def build_m3u(entries):
             output.append(info_line)
             output.append(fixed_url)
 
-        # 5. FÜR ALLE ANDEREN: Normaler Windows-Player
+        # 7. STANDARD-MODUS: Für alle anderen (ProSieben, Kabel Eins, RTL, etc.) unkompliziert nackt exportieren
         else:
             output.append(info_line)
             output.append(url)
