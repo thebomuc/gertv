@@ -63,6 +63,11 @@ OUTPUT = "deutsch.m3u"
 BACKUP_OUTPUT = "deutsch.m3u.bak"
 TEMP_OUTPUT = "deutsch.m3u.tmp"
 
+# NEU: Globale Variablen für die iPhone-M3U
+OUTPUT_IOS = "deutsch_iphone.m3u"
+BACKUP_OUTPUT_IOS = "deutsch_iphone.m3u.bak"
+TEMP_OUTPUT_IOS = "deutsch_iphone.m3u.tmp"
+
 
 # ============================================================
 # QUELLEN
@@ -2569,11 +2574,9 @@ def build_m3u(entries):
 # ============================================================
 
 def safe_write(content_win, content_ios):
-    OUTPUT_IOS = "deutsch_iphone.m3u"
-    TEMP_OUTPUT_IOS = "deutsch_iphone.m3u.tmp"
-    BACKUP_OUTPUT_IOS = "deutsch_iphone.m3u.bak"
+    global OUTPUT, BACKUP_OUTPUT, TEMP_OUTPUT, OUTPUT_IOS, BACKUP_OUTPUT_IOS, TEMP_OUTPUT_IOS
 
-    # --- 1. WINDOWS LISTE SCHREIBEN (Deine Original-Logik) ---
+    # --- 1. WINDOWS LISTE SCHREIBEN ---
     with open(TEMP_OUTPUT, "w", encoding="utf-8") as file:
         file.write(content_win)
 
@@ -2586,13 +2589,13 @@ def safe_write(content_win, content_ios):
     if extinf_count < 20 or url_count < 20:
         try: os.remove(TEMP_OUTPUT)
         except OSError: pass
-        raise RuntimeError("Zu wenige Sender/URLs in der Windows M3U.")
+        raise RuntimeError(f"Zu wenige Sender ({extinf_count}) oder URLs ({url_count}) in der Windows M3U.")
 
     if os.path.exists(OUTPUT):
         shutil.copy2(OUTPUT, BACKUP_OUTPUT)
     os.replace(TEMP_OUTPUT, OUTPUT)
 
-    # --- 2. IPHONE LISTE SCHREIBEN (Gespiegelte Logik für iPhone) ---
+    # --- 2. IPHONE LISTE SCHREIBEN ---
     with open(TEMP_OUTPUT_IOS, "w", encoding="utf-8") as file:
         file.write(content_ios)
 
@@ -2605,18 +2608,11 @@ def safe_write(content_win, content_ios):
     if extinf_count_ios < 20 or url_count_ios < 20:
         try: os.remove(TEMP_OUTPUT_IOS)
         except OSError: pass
-        raise RuntimeError("Zu wenige Sender/URLs in der iPhone M3U.")
+        raise RuntimeError(f"Zu wenige Sender ({extinf_count_ios}) oder URLs ({url_count_ios}) in der iPhone M3U.")
 
     if os.path.exists(OUTPUT_IOS):
         shutil.copy2(OUTPUT_IOS, BACKUP_OUTPUT_IOS)
     os.replace(TEMP_OUTPUT_IOS, OUTPUT_IOS)
-
-
-
-# ============================================================
-# HAUPTPROGRAMM
-# ============================================================
-
 
 
 # ============================================================
