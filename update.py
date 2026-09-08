@@ -2456,26 +2456,17 @@ def clean_info(
     )
 
 # ============================================================
-# M3U ERSTELLEN (Basisstruktur beibehalten, generiert zwei Listen)
+# M3U ERSTELLEN (Identische Listen - iPhone filtert nur das URL-Ende)
 # ============================================================
 
 def build_m3u(entries):
 
-    # Wir erstellen zwei getrennte Listen für Windows und das iPhone
-    output_win = [
+    output = [
         "#EXTM3U",
         "",
         "# ==================================================",
-        "# GER TV - Deutsche TV-Liste (WINDOWS VERSION)",
-        "# ==================================================",
-        "",
-    ]
-    
-    output_ios = [
-        "#EXTM3U",
-        "",
-        "# ==================================================",
-        "# GER TV - Deutsche TV-Liste (IPHONE & GOTV VERSION)",
+        "# GER TV - Deutsche TV-Liste",
+        "# Automatisch aktualisiert",
         "# ==================================================",
         "",
     ]
@@ -2488,15 +2479,11 @@ def build_m3u(entries):
 
         if category != current_category:
 
-            # Kategorie-Trenner für Windows
-            output_win.append("")
-            output_win.append(f"# ===== {category} =====")
-            output_win.append("")
-            
-            # Kategorie-Trenner für iPhone
-            output_ios.append("")
-            output_ios.append(f"# ===== {category} =====")
-            output_ios.append("")
+            output.append("")
+            output.append(
+                f"# ===== {category} ====="
+            )
+            output.append("")
 
             current_category = category
 
@@ -2521,60 +2508,55 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
         
-        # FIX FÜR REINE PLUTO TV STREAMS (Hier splitten wir das Verhalten auf zwei Listen auf)
+        # 1. FIX FÜR REINE PLUTO TV STREAMS (Deine Windows-Funktion als Standard)      
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            # 1. Windows-Eintrag (Deine exakt funktionierende Zeile)
-            output_win.append(info_line)
-            output_win.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-            
-            # 2. iPhone-Eintrag (Vollkommen nackt und rein für GoTV Import)
-            output_ios.append(info_line)
-            output_ios.append(url)
+            output.append(info_line)
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
-        # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
-        elif any(x in name or x in id_lower for x in adaptive_channels):
-            # Windows kriegt KODIPROP
-            output_win.append(info_line)
-            output_win.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output_win.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            output_win.append(url)
-            
-            # iPhone kriegt sauberen Stream ohne KODIPROP Absturzrisiko
-            output_ios.append(info_line)
-            output_ios.append(url)
+        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN
+        elif any(x in id_lower for x in adaptive_channels):
+            output.append(info_line)
+            output.append('#KODIPROP:inputstream=inputstream.adaptive')
+            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output.append(url)
 
-        # 6. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
+        # 3. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
-            output_win.append(info_line)
-            output_win.append(fixed_url)
-            output_ios.append(info_line)
-            output_ios.append(fixed_url)
+            output.append(info_line)
+            output.append(fixed_url)
             
         elif url_lower.startswith("rtp://") and not url_lower.startswith("rtp://@"):
             fixed_url = url.replace("rtp://", "rtp://@", 1).replace("RTP://", "rtp://@", 1)
-            output_win.append(info_line)
-            output_win.append(fixed_url)
-            output_ios.append(info_line)
-            output_ios.append(fixed_url)
+            output.append(info_line)
+            output.append(fixed_url)
 
-        # 7. STANDARD-MODUS: Für alle anderen (ProSieben, Kabel Eins, RTL, etc.) unkompliziert nackt exportieren
+        # 4. STANDARD-MODUS: Für alle anderen (ProSieben, RTL, etc.) unkompliziert nackt exportieren
         else:
-            output_win.append(info_line)
-            output_win.append(url)
-            output_ios.append(info_line)
-            output_ios.append(url)
+            output.append(info_line)
+            output.append(url)
 
-    # Gibt beide Textblöcke zurück
-    return ("\n".join(output_win) + "\n", "\n".join(output_ios) + "\n")
+    # Der fertige Text für Windows (mit |User-Agent)
+    content_win = "\n".join(output) + "\n"
+    
+    # Der identische Text für das iPhone, wo wir NUR das störende URL-Ende entfernen!
+    content_ios = content_win.replace("|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15", "")
+
+    return (content_win, content_ios)
 
 
 # ============================================================
-# SICHER SCHREIBEN (Deine Basis-Funktion kopiert & erweitert für iPhone)
+# SICHER SCHREIBEN
 # ============================================================
 
 def safe_write(content_win, content_ios):
-    global OUTPUT, BACKUP_OUTPUT, TEMP_OUTPUT, OUTPUT_IOS, BACKUP_OUTPUT_IOS, TEMP_OUTPUT_IOS
+    # Die globalen Variablen aus dem Skriptkopf holen
+    global OUTPUT, BACKUP_OUTPUT, TEMP_OUTPUT
+    
+    # Pfade für die iPhone-Ausgabe definieren
+    OUTPUT_IOS = "deutsch_iphone.m3u"
+    TEMP_OUTPUT_IOS = "deutsch_iphone.m3u.tmp"
+    BACKUP_OUTPUT_IOS = "deutsch_iphone.m3u.bak"
 
     # --- 1. WINDOWS LISTE SCHREIBEN ---
     with open(TEMP_OUTPUT, "w", encoding="utf-8") as file:
@@ -2589,7 +2571,7 @@ def safe_write(content_win, content_ios):
     if extinf_count < 20 or url_count < 20:
         try: os.remove(TEMP_OUTPUT)
         except OSError: pass
-        raise RuntimeError(f"Zu wenige Sender ({extinf_count}) oder URLs ({url_count}) in der Windows M3U.")
+        raise RuntimeError("Zu wenige Sender/URLs in der Windows M3U.")
 
     if os.path.exists(OUTPUT):
         shutil.copy2(OUTPUT, BACKUP_OUTPUT)
@@ -2608,12 +2590,11 @@ def safe_write(content_win, content_ios):
     if extinf_count_ios < 20 or url_count_ios < 20:
         try: os.remove(TEMP_OUTPUT_IOS)
         except OSError: pass
-        raise RuntimeError(f"Zu wenige Sender ({extinf_count_ios}) oder URLs ({url_count_ios}) in der iPhone M3U.")
+        raise RuntimeError("Zu wenige Sender/URLs in der iPhone M3U.")
 
     if os.path.exists(OUTPUT_IOS):
         shutil.copy2(OUTPUT_IOS, BACKUP_OUTPUT_IOS)
     os.replace(TEMP_OUTPUT_IOS, OUTPUT_IOS)
-
 
 # ============================================================
 # HAUPTPROGRAMM
