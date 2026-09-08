@@ -2459,7 +2459,9 @@ def build_m3u(entries):
 
     output = [
 
-        "#EXTM3U",
+        #"#EXTM3U",
+        #'#EXTM3U m3u-autoload=true http-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"'
+        '#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"'
 
         "",
 
@@ -2534,16 +2536,16 @@ def build_m3u(entries):
             output.append(url)
 
         # 3. FIX FÜR REINE PLUTO TV STREAMS (Über ffmpegdirect für Windows getarnt als iPhone)
-        elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            output.append(info_line)
+        #elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+            #output.append(info_line)
             
             # Wir zwingen Windows-Kodi, das robustere ffmpegdirect zu nutzen
-            output.append("#KODIPROP:inputstream=inputstream.ffmpegdirect")
-            output.append("#KODIPROP:inputstream.ffmpegdirect.mime_type=application/x-mpegURL")
+            #output.append("#KODIPROP:inputstream=inputstream.ffmpegdirect")
+            #output.append("#KODIPROP:inputstream.ffmpegdirect.mime_type=application/x-mpegURL")
             
             # Wir hängen den iPhone-User-Agent direkt an die URL für Windows an.
             # Da wir KEIN inputstream.adaptive erzwingen, stört sich das Windows-Kodi nicht daran.
-            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+            #output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
             
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
