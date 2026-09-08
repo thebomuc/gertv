@@ -2515,10 +2515,11 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de", "pearl.tv"
         ]
 
-        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Klammern exakt korrigiert!)
+        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Kodi nutzt hierdurch den Standard-Player)
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
-            output.append('#KODIPROP:inputstream=None')
+            # KORREKTUR: "default" zwingt Kodi in den Standard-Player, statt nach einem Addon namens "None" zu suchen
+            output.append('#KODIPROP:inputstream=default')
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
         # 2. FIX FÜR ARD/ZDF MEDIATHEKEN & PEARL.TV (Nutzen die adaptive Engine für fehlerfreie Wiedergabe)
