@@ -59,14 +59,16 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ============================================================
 
 
-OUTPUT = "deutsch.m3u"
-BACKUP_OUTPUT = "deutsch.m3u.bak"
-TEMP_OUTPUT = "deutsch.m3u.tmp"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# NEU: Globale Variablen für die iPhone-M3U
-OUTPUT_IOS = "deutsch_iphone.m3u"
-BACKUP_OUTPUT_IOS = "deutsch_iphone.m3u.bak"
-TEMP_OUTPUT_IOS = "deutsch_iphone.m3u.tmp"
+OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u")
+BACKUP_OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u.bak")
+TEMP_OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u.tmp")
+
+# Globale Variablen für die iPhone-M3U
+OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u")
+BACKUP_OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u.bak")
+TEMP_OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u.tmp")
 
 
 # ============================================================
@@ -2568,32 +2570,40 @@ def build_m3u(entries):
 # ============================================================
 
 def safe_write(content_win, content_ios):
-    
-    # 1. WINDOWS DATEI DIREKT SCHREIBEN (Keine globalen Namenskonflikte)
-    with open("deutsch.m3u.tmp", "w", encoding="utf-8") as file:
-        file.write(content_win)
-        
-    if os.path.exists("deutsch.m3u"):
-        if os.path.exists("deutsch.m3u.bak"):
-            try: os.remove("deutsch.m3u.bak")
-            except OSError: pass
-        os.rename("deutsch.m3u", "deutsch.m3u.bak")
-        
-    os.rename("deutsch.m3u.tmp", "deutsch.m3u")
 
-    # 2. IPHONE DATEI DIREKT SCHREIBEN (Einfach, robust und ohne Umwege)
-    with open("deutsch_iphone.m3u.tmp", "w", encoding="utf-8") as file:
+    # 1. WINDOWS-DATEI SICHER SCHREIBEN
+    with open(TEMP_OUTPUT, "w", encoding="utf-8") as file:
+        file.write(content_win)
+
+    if os.path.exists(OUTPUT):
+        if os.path.exists(BACKUP_OUTPUT):
+            try:
+                os.remove(BACKUP_OUTPUT)
+            except OSError:
+                pass
+
+        os.replace(OUTPUT, BACKUP_OUTPUT)
+
+    os.replace(TEMP_OUTPUT, OUTPUT)
+
+    # 2. IPHONE-DATEI SICHER SCHREIBEN
+    with open(TEMP_OUTPUT_IOS, "w", encoding="utf-8") as file:
         file.write(content_ios)
-        
-    if os.path.exists("deutsch_iphone.m3u"):
-        if os.path.exists("deutsch_iphone.m3u.bak"):
-            try: os.remove("deutsch_iphone.m3u.bak")
-            except OSError: pass
-        os.rename("deutsch_iphone.m3u", "deutsch_iphone.m3u.bak")
-        
-    os.rename("deutsch_iphone.m3u.tmp", "deutsch_iphone.m3u")
-    
+
+    if os.path.exists(OUTPUT_IOS):
+        if os.path.exists(BACKUP_OUTPUT_IOS):
+            try:
+                os.remove(BACKUP_OUTPUT_IOS)
+            except OSError:
+                pass
+
+        os.replace(OUTPUT_IOS, BACKUP_OUTPUT_IOS)
+
+    os.replace(TEMP_OUTPUT_IOS, OUTPUT_IOS)
+
     print("-> Dateisystem: Beide M3U-Dateien wurden physikalisch geschrieben!")
+    print(f"   Windows: {OUTPUT} ({os.path.getsize(OUTPUT)} Bytes)")
+    print(f"   iPhone : {OUTPUT_IOS} ({os.path.getsize(OUTPUT_IOS)} Bytes)")
 
 
 # ============================================================
