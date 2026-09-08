@@ -2533,20 +2533,14 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. FIX FÜR REINE PLUTO TV STREAMS (Spezial-Handling für Apple- vs. Nicht-Apple-Geräte)
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Standardkonformer iPhone User-Agent für GoTV & iOS-Kodi)
         elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            import platform
-            output.append(info_line)
+            # Wir bauen den iPhone User-Agent direkt in die Info-Zeile ein, damit die URL sauber bleibt
+            iphone_info_line = info_line.replace("#EXTINF:-1", '#EXTINF:-1 http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"')
+            output.append(iphone_info_line)
             
-            # Wenn das Betriebssystem NICHT iOS (iPhone/iPad) und NICHT macOS ist
-            if platform.system() not in ["Darwin", "iOS"]:
-                # Windows, Android & Co. brauchen das InputStream-Addon und den User-Agent
-                output.append("#KODIPROP:inputstream=inputstream.adaptive")
-                output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-                output.append(f"{url}|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            else:
-                # Das iPhone und andere Apple-Geräte erhalten den puren Stream ohne Addon-Zusätze
-                output.append(url)
+            # Die URL bleibt absolut rein, damit GoTV sie problemlos importiert
+            output.append(url)
             
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
