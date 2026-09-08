@@ -2532,6 +2532,16 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
+
+        # 4. FIX FÜR HAMBURG 1 (Inklusive Browser-Tarnung für VLC & GoTV)
+        elif "hamburg1.de" in url_lower:
+            # Wir hängen den zwingend erforderlichen User-Agent und Referer an die Info-Zeile an
+            h1_info = info_line.replace("#EXTINF:-1", '#EXTINF:-1 http-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" http-referrer="https://www.hamburg1.de/"')
+            output.append(h1_info)
+            
+            # Die URL bleibt absolut sauber – das schützt den Import in der GoTV-App
+            neue_url = "https://hamburg1-jw.cdn.vustreams.com/live/09120205-afa3-4048-a965-318eb0cacffc/live.isml/.m3u8"
+            output.append(neue_url)
             
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
