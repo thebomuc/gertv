@@ -2507,35 +2507,33 @@ def build_m3u(entries):
         id_lower = entry.get("tvg_id", "").lower()
         logo_lower = entry.get("tvg_logo", "").lower()
 
-        # DIE PERFEKTE ADAPTIVE-LISTE: Alle stabilen Mediatheken-Sender & Pluto/Sky
+        # DIE SENDER, DIE UNTER WINDOWS KOPIE-PUFFERUNG BRAUCHEN (NUR ARD/ZDF MEDIATHEKEN)
         adaptive_channels = [
             "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
             "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
-            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de",
-            "pluto", "sky news", "skynews"
+            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
 
-        # 1. FIX FÜR STABILE HAUPTSENDER, DRITTE PROGRAMME & PLUTO TV / SKY NEWS
-        if any(x in name or x in id_lower for x in adaptive_channels) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS (Nativ mit sauberer iPhone-Pipe-Tarnung)
+        if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
-            # Erzwingt die stabile Streaming-Engine in Windows-Kodi
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+
+        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN (Nutzen stabil die adaptive Engine, ohne User-Agent)
+        elif any(x in name or x in id_lower for x in adaptive_channels):
+            output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            
-            # Trennung: Pluto & Sky News bekommen die iPhone-Tarnung, ARD/ZDF laufen normal
-            if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-                output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-            else:
-                output.append(url)
+            output.append(url)
 
-        # 2. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird (KEIN InputStream!)
+        # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
         elif "antik.sk" in url_lower:
             fallback_info_line = info_line.replace(",", ",[Teststream-Schleife] ")
             output.append(fallback_info_line)
             output.append(url)
 
-        # 3. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
+        # 4. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output.append(info_line)
@@ -2546,10 +2544,11 @@ def build_m3u(entries):
             output.append(info_line)
             output.append(fixed_url)
 
-        # 4. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, RTL, etc.): Direkt in den nackten Windows-Player
+        # 5. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, RTL, etc.): Direkt in den nackten Windows-Player
         else:
             output.append(info_line)
             output.append(url)
+
 
     return (
         "\n".join(output)
