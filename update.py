@@ -2520,18 +2520,17 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
         # Doppeleintrag: Erstellt einen sauberen Stream für das iPhone und einen funktionierenden für Windows
-        # Perfekte Kombination: Windows tarnt sich, iPhone bleibt komplett unberührt und sauber
+        # Perfekte Kombination OHNE doppelte Sender: ffmpegdirect für Windows, iPhone bleibt nackt
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             
-            # Diese Zeilen liest NUR Windows-Kodi aus. Das iPhone (GoTV) ignoriert sie blind!
-            output.append("#KODIPROP:inputstream=inputstream.adaptive")
-            output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-            output.append('#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
+            # Diese Zeilen liest NUR Windows-Kodi. ffmpegdirect verarbeitet die Header fehlerfrei!
+            output.append("#KODIPROP:inputstream=inputstream.ffmpegdirect")
+            output.append("#KODIPROP:inputstream.ffmpegdirect.mime_type=application/x-mpegURL")
+            output.append('#KODIPROP:inputstream.ffmpegdirect.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
             
-            # Die URL bleibt absolut nackt und rein -> Perfekt für den Import auf dem iPhone!
+            # Die URL bleibt absolut rein -> Perfekt für GoTV auf dem iPhone!
             output.append(url)
-
 
         # 3. FIX FÜR REINE PLUTO TV STREAMS (Über ffmpegdirect für Windows getarnt als iPhone)
         #elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
