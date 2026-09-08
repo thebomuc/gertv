@@ -2519,8 +2519,8 @@ def build_m3u(entries):
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
-        # Alles in einer einzigen Zeile verhindert den Einrückungsfehler:
-        if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in tvg_logo:
+        # Alles in einer einzigen Zeile verhindert den Einrückungsfehler:        
+        if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
