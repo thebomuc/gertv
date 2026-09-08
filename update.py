@@ -2533,19 +2533,18 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. FIX FÜR REINE PLUTO TV STREAMS (Windows tarnt sich als iPhone - Liste bleibt sauber für iOS)
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Über ffmpegdirect für Windows getarnt als iPhone)
         elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             
-            # Kodi-Properties (Werden NUR unter Windows-Kodi aktiv, Apple-Geräte ignorieren das komplett)
-            # output.append("#KODIPROP:inputstream=inputstream.adaptive")
-            # output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-            # Windows nutzt hierüber den echten iPhone-User-Agent:
-            output.append('#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
+            # Wir zwingen Windows-Kodi, das robustere ffmpegdirect zu nutzen
+            output.append("#KODIPROP:inputstream=inputstream.ffmpegdirect")
+            output.append("#KODIPROP:inputstream.ffmpegdirect.mime_type=application/x-mpegURL")
             
-            # Die URL bleibt absolut sauber – perfekt für GoTV und iPhone-Kodi
-            output.append(url)
-
+            # Wir hängen den iPhone-User-Agent direkt an die URL für Windows an.
+            # Da wir KEIN inputstream.adaptive erzwingen, stört sich das Windows-Kodi nicht daran.
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+            
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
         elif any(x in name or x in id_lower for x in adaptive_channels):
