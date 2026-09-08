@@ -1,4 +1,4 @@
-#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"
+#EXTM3U
 
 # ==================================================
 # GER TV - Deutsche TV-Liste
@@ -111,24 +111,14 @@ https://53ff3982.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmxheH
 #EXTINF:-1 tvg-id="WeltderWunderTV.de@SD" tvg-logo="https://i.imgur.com/DLXssJe.png" group-title="00 Priorität",Welt der Wunder TV (576p)
 https://wdw.iptv-playoutcenter.de/wdw/wdw1/playlist.m3u8
 #EXTINF:-1 tvg-id="RakutenTVActionMovies.es@Germany" tvg-logo="https://i.imgur.com/Meew6eX.png" group-title="00 Priorität",Rakuten TV Action Movies Germany (1080p)
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=hls
 https://284824cf70404fdfb6ddf9349009c710.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6066/master.m3u8
 #EXTINF:-1 tvg-id="RakutenTVComedyMovies.es@Germany" tvg-logo="https://i.imgur.com/Meew6eX.png" group-title="00 Priorität",Rakuten TV Comedy Movies Germany (1080p)
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=hls
 https://ecac08c9e2214375b907d6825aaf9a01.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6182/master.m3u8
 #EXTINF:-1 tvg-id="RakutenTVDramaMovies.es@Germany" tvg-logo="https://i.imgur.com/Meew6eX.png" group-title="00 Priorität",Rakuten TV Drama Movies Germany (1080p)
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=hls
 https://968754c2483045c1a9a7f677caec35b6.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6096/master.m3u8
 #EXTINF:-1 tvg-id="RakutenTVFamilyMovies.es@Germany" tvg-logo="https://i.imgur.com/Meew6eX.png" group-title="00 Priorität",Rakuten TV Family Movies Germany (1080p)
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=hls
 https://af230031eeac45f3b78d4f8a13265105.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6209/master.m3u8
 #EXTINF:-1 tvg-id="RakutenTVTopMovies.es@Germany" tvg-logo="https://i.imgur.com/Meew6eX.png" group-title="00 Priorität",Rakuten TV Top Movies Germany (1080p)
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=hls
 https://cbb622b29f5d43b598991f3fa19de291.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-5985/master.m3u8
 
 # ===== 04 Nachrichten =====
@@ -248,6 +238,7 @@ https://mcdn.br.de/br/fs/bfs_nord/hls/de/master.m3u8
 #EXTINF:-1 tvg-name="BR Süd" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Logo_BR_Fernsehen_2021.svg/500px-Logo_BR_Fernsehen_2021.svg.png" tvg-id="BRFernsehenSud.de" tvg-country="DE" group-title="10 Weitere deutsche Sender",BR Süd Ⓖ
 https://mcdn.br.de/br/fs/bfs_sued/hls/de/master.m3u8
 #EXTINF:-1 tvg-id="CCPlutoTV.de@DACH" tvg-logo="https://images.pluto.tv/channels/5d4947590ba40f75dc29c26b/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",CC Pluto TV
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8
@@ -259,8 +250,6 @@ https://jmp2.uk/plu-611e7f224676bf00076a4d8d.m3u8
 https://chemnitz.iptv-playoutcenter.de/chemnitz/chemnitzfernsehen.stream_1/playlist.m3u8
 #EXTINF:-1 tvg-id="CiraTV.de@SD" tvg-logo="https://i.imgur.com/YFnmSLW.png" group-title="10 Weitere deutsche Sender",Cira TV (1080p)
 https://hlspackager.akamaized.net/live/DB/CIRA_TV/HLS/CIRA_TV.m3u8
-#EXTINF:-1 tvg-name="CNN International" tvg-id="CNNInternationalEurope.us" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/cnninternational.png" group-title="10 Weitere deutsche Sender",CNN International
-https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8
 #EXTINF:-1 tvg-id="ComedyCentral.de@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png" group-title="10 Weitere deutsche Sender",Comedy Central
 https://ma.anixa.tv/clips/stream/comedy_central/playlist.php
 #EXTINF:-1 tvg-id="ComedyCentralSouthPark.de@DACH" tvg-logo="https://images.pluto.tv/channels/60c716084d842c00085f6e64/colorLogoPNG_1748434979824.png" group-title="10 Weitere deutsche Sender",Comedy Central South Park
@@ -270,10 +259,12 @@ https://swrdasdingvr-hls.akamaized.net/hls/live/2018681/dasdingvr/master.m3u8
 #EXTINF:-1 tvg-name="DASDING-VisualRadio" tvg-id="Dasding.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/radio/dasding.png" group-title="10 Weitere deutsche Sender",DASDING-VisualRadio
 https://swrdasdingvr-hls.akamaized.net/hls/live/2018681/dasdingvr/master.m3u8
 #EXTINF:-1 tvg-id="DAZNDartsxPlutoTV.de@DACH" tvg-logo="https://images.pluto.tv/channels/64b67f0424ade50008a3be17/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",DAZN Darts x Pluto TV
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-64b67f0424ade50008a3be17.m3u8
 #EXTINF:-1 tvg-id="DAZNHeldinnenxPlutoTV.de@DACH" tvg-logo="https://images.pluto.tv/channels/64afe50c5dc16600087f3227/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",DAZN Heldinnen x Pluto TV
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-64afe50c5dc16600087f3227.m3u8
@@ -452,6 +443,7 @@ https://jmp2.uk/plu-5db6a697d5f34a000934cd13.m3u8
 #EXTINF:-1 tvg-id="MTVDating.de@DACH" tvg-logo="https://images.pluto.tv/channels/5caf330ea5068259a32320fd/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",MTV Dating (720p)
 https://jmp2.uk/plu-5caf330ea5068259a32320fd.m3u8
 #EXTINF:-1 tvg-id="MTVPlutoTV.de@DACH" tvg-logo="https://images.pluto.tv/channels/5caf325764025859afdd6c4d/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",MTV Pluto TV
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5caf325764025859afdd6c4d.m3u8
@@ -477,8 +469,6 @@ https://ndrvisualradiohls.akamaized.net/hls/live/2018951/ndrvr_mv_ndr1/master.m3
 
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenHamburg.de" tvg-country="DE" group-title="02 Regional",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
-#EXTINF:-1 tvg-name="NDR Hamburg HD" tvg-id="ndr.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" group-title="02 Regional",NDR Hamburg HD
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 
 # ===== 03 Dritte Programme =====
 
@@ -491,6 +481,8 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenSchleswigHolstein.de" tvg-country="DE" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 #EXTINF:-1 tvg-id="NDRFernsehen.de@SchleswigHolstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png" group-title="03 Dritte Programme",NDR Schleswig-Holstein (720p)
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
+#EXTINF:-1 tvg-name="NDR Schleswig-Holstein HD" tvg-id="ndr.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" group-title="03 Dritte Programme",NDR Schleswig-Holstein HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
@@ -591,63 +583,77 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-id="Pearl.tv.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV Südtirol" tvg-id="peer.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-suedtirol.png" group-title="10 Weitere deutsche Sender",Peer TV Südtirol
-https://iptv.peer.biz/live/peertv.m3u8
+#EXTINF:-1 tvg-name="Peer TV Alto Adige" tvg-id="peer.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-alto-adige.png" group-title="10 Weitere deutsche Sender",Peer TV Alto Adige
+https://iptv.peer.biz/live/peertv-it.m3u8
 #EXTINF:-1 tvg-id="PerryMason.de@DACH" tvg-logo="https://images.pluto.tv/channels/64eddc3485efec00085b0369/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Perry Mason
 https://jmp2.uk/plu-64eddc3485efec00085b0369.m3u8
 #EXTINF:-1 tvg-id="PlutoTVAction.de@DACH" tvg-logo="https://images.pluto.tv/channels/65004605110545000842035d/colorLogoPNG_1751356419664.png" group-title="10 Weitere deutsche Sender",Pluto TV Action
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-65004605110545000842035d.m3u8
 #EXTINF:-1 tvg-id="PlutoTVAnimals.de@DACH" tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Animals
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8
 #EXTINF:-1 tvg-id="PlutoTVAnime.de@DACH" tvg-logo="https://images.pluto.tv/channels/608181d420fc8500075f612a/colorLogoPNG_1747395463053.png" group-title="10 Weitere deutsche Sender",Pluto TV Anime
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-608181d420fc8500075f612a.m3u8
 #EXTINF:-1 tvg-id="PlutoTVBritischeSerien.de@DACH" tvg-logo="https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Britische Serien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-677e5a3d7bffa6000808dbf2.m3u8
 #EXTINF:-1 tvg-id="PlutoTVBudTerence.de@DACH" tvg-logo="https://images.pluto.tv/channels/64be7398e4391c0008cdedfe/colorLogoPNG_1776936976930.png" group-title="10 Weitere deutsche Sender",Pluto TV Bud & Terence
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-64be7398e4391c0008cdedfe.m3u8
 #EXTINF:-1 tvg-id="PlutoTVComedyTherapie.de@DACH" tvg-logo="https://images.pluto.tv/channels/69b968ba255fecb01f602257/colorLogoPNG_1777380677093.png" group-title="10 Weitere deutsche Sender",Pluto TV Comedy Therapie
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69b968ba255fecb01f602257.m3u8
 #EXTINF:-1 tvg-id="PlutoTVCrime.de@DACH" tvg-logo="https://images.pluto.tv/channels/5e7b6c60fd20c50007910bf5/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Crime
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5e7b6c60fd20c50007910bf5.m3u8
 #EXTINF:-1 tvg-id="PlutoTVDeutscheComedy.de@DACH" tvg-logo="https://images.pluto.tv/channels/6672f49f61a39900089db68e/colorLogoPNG_1748857141516.png" group-title="10 Weitere deutsche Sender",Pluto TV Deutsche Comedy
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-6672f49f61a39900089db68e.m3u8
 #EXTINF:-1 tvg-id="PlutoTVExplore.de@DACH" tvg-logo="https://images.pluto.tv/channels/5ad9b8551b95267e225e59c1/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Explore
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5ad9b8551b95267e225e59c1.m3u8
 #EXTINF:-1 tvg-id="PlutoTVFerneGalaxien.de@DACH" tvg-logo="https://images.pluto.tv/channels/68ada46d5190a45dc9c45af1/colorLogoPNG_1773754781519.png" group-title="10 Weitere deutsche Sender",Pluto TV Ferne Galaxien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-68ada46d5190a45dc9c45af1.m3u8
 #EXTINF:-1 tvg-id="PlutoTVFood.de@DACH" tvg-logo="https://images.pluto.tv/channels/5dc280c9aa218c0009724b4b/colorLogoPNG_1769092247484.png" group-title="10 Weitere deutsche Sender",Pluto TV Food
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5dc280c9aa218c0009724b4b.m3u8
 #EXTINF:-1 tvg-id="PlutoTVFranBesteMamaMomente.de@DACH" tvg-logo="https://images.pluto.tv/channels/69b968e011fc7b9e27c0d958/colorLogoPNG_1777469414817.png" group-title="10 Weitere deutsche Sender",Pluto TV Fran: Beste Mama-Momente
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69b968e011fc7b9e27c0d958.m3u8
 #EXTINF:-1 tvg-id="PlutoTVHaialarm.de@DACH" tvg-logo="https://images.pluto.tv/channels/69b015c5d29cc97de7da4af8/colorLogoPNG_1779802132594.png" group-title="10 Weitere deutsche Sender",Pluto TV Haialarm
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69b015c5d29cc97de7da4af8.m3u8
 #EXTINF:-1 tvg-id="PlutoTVHistorischeSerien.de@DACH" tvg-logo="https://images.pluto.tv/channels/68ada3395190a45dc9c445cf/colorLogoPNG_1760957063422.png" group-title="10 Weitere deutsche Sender",Pluto TV Historische Serien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-68ada3395190a45dc9c445cf.m3u8
@@ -655,6 +661,7 @@ https://jmp2.uk/plu-68ada3395190a45dc9c445cf.m3u8
 # ===== 05 Dokumentation & Wissen =====
 
 #EXTINF:-1 tvg-id="PlutoTVHistory.de@DACH" tvg-logo="https://images.pluto.tv/channels/5d767b1c126c65d0a307355f/colorLogoPNG.png" group-title="05 Dokumentation & Wissen",Pluto TV History
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5d767b1c126c65d0a307355f.m3u8
@@ -662,58 +669,72 @@ https://jmp2.uk/plu-5d767b1c126c65d0a307355f.m3u8
 # ===== 10 Weitere deutsche Sender =====
 
 #EXTINF:-1 tvg-id="PlutoTVHorror.de@DACH" tvg-logo="https://images.pluto.tv/channels/62f4f4b88157cf00075c22db/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Horror
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-62f4f4b88157cf00075c22db.m3u8
 #EXTINF:-1 tvg-id="PlutoTVHorrorSerien.de@DACH" tvg-logo="https://images.pluto.tv/channels/67ff7d9c7fc25e0e72451bc9/colorLogoPNG_1749796239058.png" group-title="10 Weitere deutsche Sender",Pluto TV Horror-Serien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-67ff7d9c7fc25e0e72451bc9.m3u8
 #EXTINF:-1 tvg-id="PlutoTVKultComedies.de@DACH" tvg-logo="https://images.pluto.tv/channels/66337de656fc840008ff7a65/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Kult Comedies
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-66337de656fc840008ff7a65.m3u8
 #EXTINF:-1 tvg-id="PlutoTVKultfilme.de@DACH" tvg-logo="https://images.pluto.tv/channels/5dde47b63585b500099f74ec/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Kultfilme
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5dde47b63585b500099f74ec.m3u8
 #EXTINF:-1 tvg-id="PlutoTVLaughsinSpanish.de@DACH" tvg-logo="https://images.pluto.tv/channels/69a554179a3f3bb488c7d2be/colorLogoPNG_1774964411015.png" group-title="10 Weitere deutsche Sender",Pluto TV Laughs in Spanish
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69a554179a3f3bb488c7d2be.m3u8
 #EXTINF:-1 tvg-id="PlutoTVMovies.de@DACH" tvg-logo="https://images.pluto.tv/channels/5c5c3b948002db3c3e0b262e/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Movies
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5c5c3b948002db3c3e0b262e.m3u8
 #EXTINF:-1 tvg-id="PlutoTVMystery.de@DACH" tvg-logo="https://images.pluto.tv/channels/617aad99b68ef100072608cd/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Mystery
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-617aad99b68ef100072608cd.m3u8
 #EXTINF:-1 tvg-id="PlutoTVNature.de@DACH" tvg-logo="https://images.pluto.tv/channels/5be1c3f9851dd5632e2c91b2/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Nature
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5be1c3f9851dd5632e2c91b2.m3u8
 #EXTINF:-1 tvg-id="PlutoTVNordicCrime.de@DACH" tvg-logo="https://images.pluto.tv/channels/67d984408d8dc3d7754dccf2/colorLogoPNG_1746817551952.png" group-title="10 Weitere deutsche Sender",Pluto TV Nordic Crime
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-67d984408d8dc3d7754dccf2.m3u8
 #EXTINF:-1 tvg-id="PlutoTVParanormal.de@DACH" tvg-logo="https://images.pluto.tv/channels/5f98487036af340008da1e37/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Paranormal
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5f98487036af340008da1e37.m3u8
 #EXTINF:-1 tvg-id="PlutoTVPolizeiserien.de@DACH" tvg-logo="https://images.pluto.tv/channels/64be64445dc166000899ce75/colorLogoPNG_1753350668041.png" group-title="10 Weitere deutsche Sender",Pluto TV Polizeiserien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-64be64445dc166000899ce75.m3u8
 #EXTINF:-1 tvg-id="PlutoTVReportagen.de@DACH" tvg-logo="https://images.pluto.tv/channels/68ada3edf84960586ad31c7d/colorLogoPNG_1760078189640.png" group-title="10 Weitere deutsche Sender",Pluto TV Reportagen
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-68ada3edf84960586ad31c7d.m3u8
 #EXTINF:-1 tvg-id="PlutoTVRomance.de@DACH" tvg-logo="https://images.pluto.tv/channels/5dc287ce3086a20009f5024c/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Romance
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5dc287ce3086a20009f5024c.m3u8
 #EXTINF:-1 tvg-id="PlutoTVSciFi.de@DACH" tvg-logo="https://images.pluto.tv/channels/60ed498c4248a400077c0b9d/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Sci-Fi
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-60ed498c4248a400077c0b9d.m3u8
@@ -721,6 +742,7 @@ https://jmp2.uk/plu-60ed498c4248a400077c0b9d.m3u8
 # ===== 05 Dokumentation & Wissen =====
 
 #EXTINF:-1 tvg-id="PlutoTVScience.de@DACH" tvg-logo="https://images.pluto.tv/channels/5d767b4889bca2ce7b73ef2e/colorLogoPNG.png" group-title="05 Dokumentation & Wissen",Pluto TV Science
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5d767b4889bca2ce7b73ef2e.m3u8
@@ -728,46 +750,57 @@ https://jmp2.uk/plu-5d767b4889bca2ce7b73ef2e.m3u8
 # ===== 10 Weitere deutsche Sender =====
 
 #EXTINF:-1 tvg-id="PlutoTVSerie.de@DACH" tvg-logo="https://images.pluto.tv/channels/5dc190f7bfed110009d934c3/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Serie
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5dc190f7bfed110009d934c3.m3u8
 #EXTINF:-1 tvg-id="PlutoTVSitcoms.de@DACH" tvg-logo="https://images.pluto.tv/channels/5d767ab2b456c8cf265ce921/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Sitcoms
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-5d767ab2b456c8cf265ce921.m3u8
 #EXTINF:-1 tvg-id="PlutoTVSnooker900.de@DACH" tvg-logo="https://images.pluto.tv/channels/68ac5543a1ac0c90f2c8943e/colorLogoPNG_1760517341343.png" group-title="10 Weitere deutsche Sender",Pluto TV Snooker 900 (720p)
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-68ac5543a1ac0c90f2c8943e.m3u8
 #EXTINF:-1 tvg-id="PlutoTVSpace.de@DACH" tvg-logo="https://images.pluto.tv/channels/61409f8d6feb30000766b675/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Space
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-61409f8d6feb30000766b675.m3u8
 #EXTINF:-1 tvg-id="PlutoTVStarTrek.de@DACH" tvg-logo="https://images.pluto.tv/channels/6152ee71bf99590007893a11/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Star Trek
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-6152ee71bf99590007893a11.m3u8
 #EXTINF:-1 tvg-id="PlutoTVStarTrekAnimation.de@DACH" tvg-logo="https://images.pluto.tv/channels/69492467ae33e24d916e56cf/colorLogoPNG_1770896970638.png" group-title="10 Weitere deutsche Sender",Pluto TV Star Trek: Animation
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69492467ae33e24d916e56cf.m3u8
 #EXTINF:-1 tvg-id="PlutoTVTrueCrime.de@DACH" tvg-logo="https://images.pluto.tv/channels/615333098185f00008715a56/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV True Crime
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-615333098185f00008715a56.m3u8
 #EXTINF:-1 tvg-id="PlutoTVWeihnachtenimSommer.de@DACH" tvg-logo="https://images.pluto.tv/channels/642ad072283aa4000806148c/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Pluto TV Weihnachten im Sommer
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-642ad072283aa4000806148c.m3u8
 #EXTINF:-1 tvg-id="PlutoTVWestern.de@DACH" tvg-logo="https://images.pluto.tv/channels/630dd3b2605f140007e002f5/colorLogoPNG_1732030684562.png" group-title="10 Weitere deutsche Sender",Pluto TV Western
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-630dd3b2605f140007e002f5.m3u8
 #EXTINF:-1 tvg-id="PlutoTVWesternSerien.de@DACH" tvg-logo="https://images.pluto.tv/channels/682453215c646751955e1204/colorLogoPNG_1758265241676.png" group-title="10 Weitere deutsche Sender",Pluto TV Western Serien
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-682453215c646751955e1204.m3u8
 #EXTINF:-1 tvg-id="PlutoTVWorstofBundy.de@DACH" tvg-logo="https://images.pluto.tv/channels/69b968ca1c36025fd0a3d92d/colorLogoPNG_1777369824096.png" group-title="10 Weitere deutsche Sender",Pluto TV Worst of Bundy
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://jmp2.uk/plu-69b968ca1c36025fd0a3d92d.m3u8
@@ -842,10 +875,12 @@ https://freqsyndlin.servustv.com/771_playlist.m3u8
 # ===== 04 Nachrichten =====
 
 #EXTINF:-1 tvg-name="Sky News" tvg-id="SkyNews.uk" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/skynews.png" group-title="04 Nachrichten",Sky News
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://www.youtube.com/embed/9Auq9mYxFEE
 #EXTINF:-1 tvg-name="Sky News Extra" tvg-id="SkyNewsExtra.au" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/skynewsextra.png" group-title="04 Nachrichten",Sky News Extra
+#KODIPROP:inputstream.adaptive.stream_headers=user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://skynewsau-live.akamaized.net/hls/live/2002690/skynewsau-extra2/master.m3u8
