@@ -2520,20 +2520,18 @@ def build_m3u(entries):
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
         # Doppeleintrag: Erstellt einen sauberen Stream für das iPhone und einen funktionierenden für Windows
+        # Perfekte Kombination: Windows tarnt sich, iPhone bleibt komplett unberührt und sauber
         if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+            output.append(info_line)
             
-            # --- 1. EINTRAG FÜR IPHONE (GoTV & iOS-Kodi) ---
-            # Wir kennzeichnen die Kategorie im Namen, damit du siehst, welcher für das Handy ist
-            iphone_info = info_line.replace(f'group-title="{category}"', f'group-title="{category} (iOS)"')
-            output.append(iphone_info)
-            # Absolut nackte URL -> Lädt ohne Fehler auf dem iPhone
+            # Diese Zeilen liest NUR Windows-Kodi aus. Das iPhone (GoTV) ignoriert sie blind!
+            output.append("#KODIPROP:inputstream=inputstream.adaptive")
+            output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+            output.append('#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
+            
+            # Die URL bleibt absolut nackt und rein -> Perfekt für den Import auf dem iPhone!
             output.append(url)
-            
-            # --- 2. EINTRAG FÜR WINDOWS (Dein funktionierender Original-Code) ---
-            win_info = info_line.replace(f'group-title="{category}"', f'group-title="{category} (Windows)"')
-            output.append(win_info)
-            # Dein exakter Windows-Code, der nachweislich funktioniert
-            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+
 
         # 3. FIX FÜR REINE PLUTO TV STREAMS (Über ffmpegdirect für Windows getarnt als iPhone)
         #elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
