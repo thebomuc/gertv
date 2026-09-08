@@ -2538,8 +2538,8 @@ def build_m3u(entries):
             output.append(info_line)
             
             # Kodi-Properties (Werden NUR unter Windows-Kodi aktiv, Apple-Geräte ignorieren das komplett)
-            output.append("#KODIPROP:inputstream=inputstream.adaptive")
-            output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+            # output.append("#KODIPROP:inputstream=inputstream.adaptive")
+            # output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
             # Windows nutzt hierüber den echten iPhone-User-Agent:
             output.append('#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
             
