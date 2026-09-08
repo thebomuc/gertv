@@ -2459,9 +2459,9 @@ def build_m3u(entries):
 
     output = [
 
-        #"#EXTM3U",
+        "#EXTM3U",
         #'#EXTM3U m3u-autoload=true http-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"'
-        '#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"'
+        #'#EXTM3U http-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"'
 
         "",
 
@@ -2519,21 +2519,10 @@ def build_m3u(entries):
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
             "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
         ]
-
-        # 1. RETTUNG FÜR SKY NEWS (Echtes Live-CDN statt unzuverlässigem jmp2-Proxy)
-        if "sky news" in name or "skynews" in id_lower:
+        # Alles in einer einzigen Zeile verhindert den Einrückungsfehler:
+        if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in tvg_logo:
             output.append(info_line)
-            output.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            # Nutzt das offizielle, unverschlüsselte Sky-CDN (absolut absturzsicher in 1080p)
-            output.append("https://skycdp.com")
-
-        # 2. RETTUNG FÜR PEARL.TV & 4K-SENDER (Verhindert den Absturz der Windows-Grafikkarte bei Ultra-HD)
-        elif "pearl" in name or "pearl.tv" in id_lower or "uhd" in name:
-            output.append(info_line)
-            output.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            output.append(url)
+            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
         # 3. FIX FÜR REINE PLUTO TV STREAMS (Über ffmpegdirect für Windows getarnt als iPhone)
         #elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
