@@ -2475,6 +2475,7 @@ def build_m3u(entries):
         url = entry.get("url", "")
         name = entry.get("name", "").lower()
         tvg_id = entry.get("tvg_id", "").lower()
+        url_lower = url.lower()
 
         # NUR FÜR PLUTO TV: iPhone-Tarnung erzwingen
         if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]):
