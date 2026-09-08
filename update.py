@@ -2500,6 +2500,9 @@ def build_m3u(entries):
         # Basis-Informationzeile des Senders generieren
         info_line = clean_info(entry, category)
         url = entry.get("url", "")
+        if not url:
+            continue
+            
         name = entry.get("name", "").lower()
         url_lower = url.lower()
 
@@ -2512,21 +2515,24 @@ def build_m3u(entries):
             "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
             "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
             "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
-            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
+            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de", "pearl.tv"
         ]
 
-        # 1. FIX FÜR REINE PLUTO TV & SKY NEWS STREAMS
-        # KEIN #KODIPROP! Nur die reine Pipe-Tarnung. Das lässt Kodi absolut fehlerfrei einlesen.
-        if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+        # 1. FIX FÜR PLUTO TV (Nativ über die funktionierende iPhone-Pipe, KEIN #KODIPROP!)
+        if "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
-        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN & PEARL.TV (Nutzen stabil InputStream Adaptive)
-        elif any(x in name or x in id_lower for x in adaptive_channels) or "pearl" in name:
+        # 2. FIX FÜR SKY NEWS, PEARL.TV & ARD/ZDF (Erzwingt InputStream Adaptive gegen die Werbe-Abstürze)
+        elif any(x in name or x in id_lower for x in adaptive_channels) or any(x in name for x in ["sky news", "skynews", "pearl"]):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
-            output.append(url)
+            # Bei Sky News hängen wir zusätzlich die iPhone-Pipe an
+            if "sky" in name or "sky" in id_lower:
+                output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
+            else:
+                output.append(url)
 
         # 3. ANTIK.SK WARNUNG: Falls ein privater Teststream als Notfall-Fallback genutzt wird
         elif "antik.sk" in url_lower:
@@ -2545,7 +2551,7 @@ def build_m3u(entries):
             output.append(info_line)
             output.append(fixed_url)
 
-        # 5. FÜR ALLE ANDEREN (ProSieben, Kabel Eins, RTL, etc.): Normaler, nackter Windows-Player
+        # 5. FÜR ALLE ANDEREN: Normaler Windows-Player
         else:
             output.append(info_line)
             output.append(url)
