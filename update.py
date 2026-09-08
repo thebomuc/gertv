@@ -1,6 +1,7 @@
 import re
 import os
 import shutil
+import subprocess
 import urllib.request
 import urllib.error
 import socket
@@ -2606,6 +2607,32 @@ def safe_write(content_win, content_ios):
     print(f"   iPhone : {OUTPUT_IOS} ({os.path.getsize(OUTPUT_IOS)} Bytes)")
 
 
+
+
+def stage_ios_in_github_actions():
+    """
+    Der bestehende GitHub-Workflow staged nur deutsch.m3u.
+    Wenn das Script unter GitHub Actions laeuft, wird deshalb die
+    erzeugte deutsch_iphone.m3u hier selbst fuer denselben Commit
+    vorgemerkt. Lokal passiert nichts.
+    """
+
+    if os.environ.get("GITHUB_ACTIONS", "").lower() != "true":
+        return
+
+    try:
+        subprocess.run(
+            ["git", "add", "--", OUTPUT_IOS],
+            cwd=SCRIPT_DIR,
+            check=True,
+        )
+        print("-> GitHub Actions: deutsch_iphone.m3u fuer Commit vorgemerkt.")
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise RuntimeError(
+            f"deutsch_iphone.m3u konnte nicht mit git add vorgemerkt werden: {error}"
+        ) from error
+
+
 # ============================================================
 # HAUPTPROGRAMM
 # ============================================================
@@ -2842,6 +2869,7 @@ def main():
     # --------------------------------------------------------
 
     safe_write(content_win, content_ios)
+    stage_ios_in_github_actions()
 
     # ========================================================
     # AUSGABE
