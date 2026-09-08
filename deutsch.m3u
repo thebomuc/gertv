@@ -1,7 +1,8 @@
 #EXTM3U
 
 # ==================================================
-# GER TV - Deutsche TV-Liste (WINDOWS VERSION)
+# GER TV - Deutsche TV-Liste
+# Automatisch aktualisiert
 # ==================================================
 
 
@@ -483,13 +484,13 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
+#EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern HD" tvg-id="ndr.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern HD
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenSchleswigHolstein.de" tvg-country="DE" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 #EXTINF:-1 tvg-id="NDRFernsehen.de@SchleswigHolstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png" group-title="03 Dritte Programme",NDR Schleswig-Holstein (720p)
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
-#EXTINF:-1 tvg-name="NDR Schleswig-Holstein HD" tvg-id="ndr.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" group-title="03 Dritte Programme",NDR Schleswig-Holstein HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
@@ -590,8 +591,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-id="Pearl.tv.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV Südtirol" tvg-id="peer.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-suedtirol.png" group-title="10 Weitere deutsche Sender",Peer TV Südtirol
-https://iptv.peer.biz/live/peertv.m3u8
+#EXTINF:-1 tvg-name="Peer TV Alto Adige" tvg-id="peer.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-alto-adige.png" group-title="10 Weitere deutsche Sender",Peer TV Alto Adige
+https://iptv.peer.biz/live/peertv-it.m3u8
 #EXTINF:-1 tvg-id="PerryMason.de@DACH" tvg-logo="https://images.pluto.tv/channels/64eddc3485efec00085b0369/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",Perry Mason
 https://jmp2.uk/plu-64eddc3485efec00085b0369.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-id="PlutoTVAction.de@DACH" tvg-logo="https://images.pluto.tv/channels/65004605110545000842035d/colorLogoPNG_1751356419664.png" group-title="10 Weitere deutsche Sender",Pluto TV Action
