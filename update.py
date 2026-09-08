@@ -198,6 +198,28 @@ SOURCE_PRIORITY = {
 }
 
 
+def get_stream_priority(url):
+    """
+    Gibt einen Wert zurück. Je NIEDRIGER der Wert, desto höher die Priorität.
+    """
+    url_lower = url.lower()
+    
+    # Höchste Priorität (0): Offizielle ARD/ZDF CDNs oder Kodinerds-Listen
+    if "ard" in url_lower or "zdf" in url_lower or "kodinerds" in url_lower:
+        return 0
+    
+    # Mittlere Priorität (1): Andere freie Web-Streams / Pluto TV
+    if "antik.sk" not in url_lower:
+        return 1
+        
+    # Niedrigste Priorität (2): Die instabilen antik.sk Smart-TV Testlinks (Fallbacks)
+    return 2
+
+# Wenn Ihr Skript die gesammelten Streams für einen Sender sortiert,
+# nutzen Sie die Funktion als Sortierschlüssel:
+# channels_list.sort(key=lambda x: get_stream_priority(x.get("url", "")))
+
+
 def source_score(entry):
 
     return SOURCE_PRIORITY.get(
@@ -1826,12 +1848,13 @@ def stream_score(entry):
 # ============================================================
 
 def selection_score(entry):
-
+    url = entry.get("url", "")
+    
     return (
-        source_score(entry),
-        stream_score(entry),
+        source_score(entry),          # 1. Haupt- vs. Fallback-Quelle (z.B. Deutschland vor Kodinerds)
+        get_stream_priority(url),     # 2. NEU: Normaler Stream vor antik.sk innerhalb dieser Quelle
+        stream_score(entry),          # 3. HD vs. SD / Geo-blocked
     )
-
 
 # ============================================================
 # ID MATCH
