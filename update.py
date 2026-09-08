@@ -2533,16 +2533,19 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 4. FIX FÜR HAMBURG 1 (Inklusive Browser-Tarnung für VLC & GoTV)
-        elif "hamburg1.de" in url_lower:
-            # Wir hängen den zwingend erforderlichen User-Agent und Referer an die Info-Zeile an
-            h1_info = info_line.replace("#EXTINF:-1", '#EXTINF:-1 http-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" http-referrer="https://www.hamburg1.de/"')
-            output.append(h1_info)
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Windows-Kodi aktiv, iPhone ignoriert es)
+        elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+            output.append(info_line)
             
-            # Die URL bleibt absolut sauber – das schützt den Import in der GoTV-App
-            neue_url = "https://hamburg1-jw.cdn.vustreams.com/live/09120205-afa3-4048-a965-318eb0cacffc/live.isml/.m3u8"
-            output.append(neue_url)
+            # Kodi-Properties (Werden NUR von Windows-Kodi ausgewertet, iOS ignoriert sie)
+            output.append("#KODIPROP:inputstream=inputstream.adaptive")
+            output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+            # Kodi setzt hierüber den Windows User-Agent beim Abspielen
+            output.append('#KODIPROP:inputstream.adaptive.user_agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
             
+            # Die URL bleibt absolut sauber – perfekt für GoTV und iPhone-Kodi
+            output.append(url)
+
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
 
         elif any(x in name or x in id_lower for x in adaptive_channels):
