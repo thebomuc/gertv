@@ -2474,11 +2474,14 @@ def build_m3u(entries):
         info_line = clean_info(entry, category)
         url = entry.get("url", "")
         name = entry.get("name", "").lower()
-        tvg_logo = entry.get("tvg_logo", "").lower()
         url_lower = url.lower()
 
-        # Alles in einer einzigen Zeile verhindert den Einrückungsfehler:
-        if any(x in name or x in tvg_id for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in tvg_logo:
+        # Holt tvg_id und tvg_logo sicher direkt aus dem Eintrag (ohne Absturzrisiko)
+        id_lower = entry.get("tvg_id", "").lower()
+        logo_lower = entry.get("tvg_logo", "").lower()
+
+        # NUR FÜR PLUTO TV & SKY NEWS: iPhone-Tarnung erzwingen
+        if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
 
