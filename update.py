@@ -2533,14 +2533,23 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. FIX FÜR REINE PLUTO TV STREAMS (Nativ über die iPhone-Pipe – OHNE störendes InputStream-Addon)
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Spezial-Handling für Apple- vs. Nicht-Apple-Geräte)
         elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
+            import platform
             output.append(info_line)
-            # "default" zwingt Kodi in den Standard-Player (wie beim iPhone) und ignoriert die fehlerhafte Automatik
-            output.append('#KODIPROP:inputstream=default')
-            output.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-
+            
+            # Wenn das Betriebssystem NICHT iOS (iPhone/iPad) und NICHT macOS ist
+            if platform.system() not in ["Darwin", "iOS"]:
+                # Windows, Android & Co. brauchen das InputStream-Addon und den User-Agent
+                output.append("#KODIPROP:inputstream=inputstream.adaptive")
+                output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+                output.append(f"{url}|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            else:
+                # Das iPhone und andere Apple-Geräte erhalten den puren Stream ohne Addon-Zusätze
+                output.append(url)
+            
         # 4. FIX FÜR ARD/ZDF MEDIATHEKEN
+
         elif any(x in name or x in id_lower for x in adaptive_channels):
             output.append(info_line)
             output.append('#KODIPROP:inputstream=inputstream.adaptive')
