@@ -2533,15 +2533,15 @@ def build_m3u(entries):
             output.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
             output.append(url)
 
-        # 3. FIX FÜR REINE PLUTO TV STREAMS (Windows-Kodi aktiv, iPhone ignoriert es)
+        # 3. FIX FÜR REINE PLUTO TV STREAMS (Windows tarnt sich als iPhone - Liste bleibt sauber für iOS)
         elif "pluto" in name or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
             output.append(info_line)
             
-            # Kodi-Properties (Werden NUR von Windows-Kodi ausgewertet, iOS ignoriert sie)
+            # Kodi-Properties (Werden NUR unter Windows-Kodi aktiv, Apple-Geräte ignorieren das komplett)
             output.append("#KODIPROP:inputstream=inputstream.adaptive")
             output.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-            # Kodi setzt hierüber den Windows User-Agent beim Abspielen
-            output.append('#KODIPROP:inputstream.adaptive.user_agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+            # Windows nutzt hierüber den echten iPhone-User-Agent:
+            output.append('#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15')
             
             # Die URL bleibt absolut sauber – perfekt für GoTV und iPhone-Kodi
             output.append(url)
