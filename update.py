@@ -2544,20 +2544,15 @@ def build_m3u(entries):
 
     return (content_win, content_ios)
 
-
 # ============================================================
 # SICHER SCHREIBEN
 # ============================================================
 
 def safe_write(content_win, content_ios):
-    # Die globalen Variablen aus dem Skriptkopf holen
+    # Alle globalen Pfad-Variablen müssen zwingend deklariert werden!
     global OUTPUT, BACKUP_OUTPUT, TEMP_OUTPUT
+    global OUTPUT_IOS, BACKUP_OUTPUT_IOS, TEMP_OUTPUT_IOS
     
-    # Pfade für die iPhone-Ausgabe definieren
-    OUTPUT_IOS = "deutsch_iphone.m3u"
-    TEMP_OUTPUT_IOS = "deutsch_iphone.m3u.tmp"
-    BACKUP_OUTPUT_IOS = "deutsch_iphone.m3u.bak"
-
     # --- 1. WINDOWS LISTE SCHREIBEN ---
     with open(TEMP_OUTPUT, "w", encoding="utf-8") as file:
         file.write(content_win)
