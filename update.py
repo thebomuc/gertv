@@ -2416,10 +2416,8 @@ def clean_info(
     info = entry["info"]
 
     # --------------------------------------------------------
-    # Fremde Kanalnummer entfernen.
-    #
-    # Dadurch kann Kodi nicht anhand von tvg-chno aus einer
-    # externen Quelle die Reihenfolge verändern.
+    # Fremde Kanalnummer, alte group-title und alte tvg-ids entfernen.
+    # Dadurch überschreiben wir das Attribut sauber und standardkonform.
     # --------------------------------------------------------
 
     info = re.sub(
@@ -2429,10 +2427,6 @@ def clean_info(
         flags=re.IGNORECASE
     )
 
-    # --------------------------------------------------------
-    # Altes group-title entfernen.
-    # --------------------------------------------------------
-
     info = re.sub(
         r'\s+group-title="[^"]*"',
         "",
@@ -2440,9 +2434,15 @@ def clean_info(
         flags=re.IGNORECASE
     )
 
+    info = re.sub(
+        r'\s+tvg-id="[^"]*"',
+        "",
+        info,
+        flags=re.IGNORECASE
+    )
+
     # --------------------------------------------------------
     # Alles hinter dem letzten Komma entfernen.
-    #
     # Der Sendername wird anschließend selbst gesetzt.
     # --------------------------------------------------------
 
@@ -2452,8 +2452,21 @@ def clean_info(
         info
     )
 
+    # Extrahiere die tvg_id aus dem Eintrag (wurde im Parser ausgelesen)
+    tvg_id = entry.get("tvg_id", "")
+
+    # Falls die ID noch das Suffix (@hd etc.) hat, jagen wir sie zur Sicherheit
+    # durch deine Normalisierung (falls nicht schon vorher geschehen)
+    if tvg_id:
+        tvg_id = normalize_tvg_id(tvg_id)
+
+    # Wir bauen die Zeile neu auf und setzen tvg-id direkt nach #EXTINF:-1
+    # Falls info das '-1' verliert oder verschoben hat, fangen wir das hier ab
+    base_info = re.sub(r'^#EXTINF:[-\d]*', '#EXTINF:-1', info)
+
     return (
-        f'{info} '
+        f'{base_info} '
+        f'tvg-id="{tvg_id}" '
         f'group-title="{category}",'
         f'{entry["name"]}'
     )
@@ -2464,9 +2477,9 @@ def clean_info(
 
 def build_m3u(entries):
 
-    # Wir erstellen zwei komplett getrennte Körbe im Arbeitsspeicher
+    # Wir erstellen zwei komplett getrennte Körbe im Arbeitsspeicher mit der iptv-org EPG Quelle
     output_win = [
-        "#EXTM3U",
+        '#EXTM3U x-tvg-url="https://github.io"\n',
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (WINDOWS KODI VERSION)",
@@ -2475,7 +2488,7 @@ def build_m3u(entries):
     ]
 
     output_ios = [
-        "#EXTM3U",
+        '#EXTM3U x-tvg-url="https://github.io"\n',
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (IPHONE & GOTV VERSION)",
@@ -2495,7 +2508,7 @@ def build_m3u(entries):
             output_ios.append(f"\n# ===== {category} =====\n")
             current_category = category
 
-        # Basis-Informationzeile des Senders generieren
+        # Basis-Informationzeile des Senders generieren (Nutzt jetzt die ID aus clean_info!)
         info_line = clean_info(entry, category)
         url = entry.get("url", "")
         if not url:
@@ -2564,7 +2577,6 @@ def build_m3u(entries):
     content_ios = "\n".join(output_ios) + "\n"
 
     return (content_win, content_ios)
-
 
 # ============================================================
 # SICHER SCHREIBEN (Vollständig entkoppelt von globalen Pfad-Fehlern)
