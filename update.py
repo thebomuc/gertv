@@ -2479,7 +2479,7 @@ def build_m3u(entries):
 
     # Wir erstellen zwei komplett getrennte Körbe im Arbeitsspeicher mit der iptv-org EPG Quelle
     output_win = [
-        '#EXTM3U x-tvg-url="https://github.io"\n',
+        '#EXTM3U x-tvg-url="https://epgshare01.online"\n',
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (WINDOWS KODI VERSION)",
@@ -2488,7 +2488,7 @@ def build_m3u(entries):
     ]
 
     output_ios = [
-        '#EXTM3U x-tvg-url="https://github.io"\n',
+        '#EXTM3U x-tvg-url="https://epgshare01.online"\n',
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (IPHONE & GOTV VERSION)",
