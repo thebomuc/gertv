@@ -156,6 +156,8 @@ https://adriaapp.b-cdn.net/1080p/index.m3u8
 https://a57e9c69976649b582a8d7604c00e69a.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AdventureEarth/playlist.m3u8
 #EXTINF:-1 tvg-name="Al Jazeera Arabic" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/aljazeera.png" tvg-id="aljazeeraarabe.nws" group-title="10 Weitere deutsche Sender",Al Jazeera Arabic
 https://live-hls-web-aja.getaj.net/AJA/index.m3u8
+#EXTINF:-1 tvg-name="Al Jazeera English" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/aljazeeraenglish.png" tvg-id="aljazeera.nws" group-title="10 Weitere deutsche Sender",Al Jazeera English
+https://live-hls-web-aje-gcp.thehlive.com/AJE/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/eTmHk4e.png" tvg-id="alexberlin.de" group-title="10 Weitere deutsche Sender",Alex Berlin (1080p)
 https://alex-stream.rosebud-media.de/bounce/alexlivetv50.smil/index.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/622f6e1e2792150007e0b2ff/colorLogoPNG.png" tvg-id="allehassenchris.de@dach" group-title="10 Weitere deutsche Sender",Alle hassen Chris
@@ -410,8 +412,6 @@ http://58bd5b7a98e04.streamlock.net/medienasa-live/mdf1_high/playlist.m3u8
 https://mdrevent1wwhls.akamaized.net/hls/live/2025205/mdrevent1ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 2" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus2.de" group-title="03 Dritte Programme",MDR+ 2
 https://mdrevent2wwhls.akamaized.net/hls/live/2025367/mdrevent2ww/master.m3u8
-#EXTINF:-1 tvg-name="MDR+ 3" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus3.de" group-title="03 Dritte Programme",MDR+ 3
-https://mdrevent3wwhls.akamaized.net/hls/live/2025368/mdrevent3ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 4" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus4.de" group-title="03 Dritte Programme",MDR+ 4
 https://mdrevent4wwhls.akamaized.net/hls/live/2025369/mdrevent4ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 5" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus5.de" group-title="03 Dritte Programme",MDR+ 5
@@ -466,14 +466,14 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenhamburg.de" group-title="02 Regional",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
-#EXTINF:-1 tvg-name="NDR Hamburg HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="02 Regional",NDR Hamburg HD
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 
 # ===== 03 Dritte Programme =====
 
 #EXTINF:-1 tvg-name="NDR International" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernseheninternational.de" group-title="03 Dritte Programme",NDR International
 https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenmecklenburgvorpommern.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern Ⓖ
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
+#EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenschleswigholstein.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
@@ -575,8 +575,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" tvg-id="pearl.tv.de" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV Südtirol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-suedtirol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV Südtirol
-https://iptv.peer.biz/live/peertv.m3u8
+#EXTINF:-1 tvg-name="Peer TV Alto Adige" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-alto-adige.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV Alto Adige
+https://iptv.peer.biz/live/peertv-it.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" tvg-id="plutotvanimals.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Animals
 https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png" tvg-id="plutotvbritischeserien.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Britische Serien
@@ -681,6 +681,8 @@ http://58bd5b7a98e04.streamlock.net/medienasa-live/ran1_high/playlist.m3u8
 
 #EXTINF:-1 tvg-name="rbb Berlin HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rbbhd.png" tvg-id="rbbberlin.de" group-title="03 Dritte Programme",rbb Berlin HD
 https://rbb-hls-berlin.akamaized.net/hls/live/2017824/rbb_berlin/master.m3u8
+#EXTINF:-1 tvg-name="rbb Event 1" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rbb.png" tvg-id="rbbevent1.de" group-title="03 Dritte Programme",rbb Event 1
+https://rbbevent01-hls.akamaized.net/hls/live/685984/rbbevent01/master.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png" tvg-id="rbbfernsehen.de@berlin" group-title="03 Dritte Programme",rbb Fernsehen Berlin (1080p) [Geo-blocked]
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
