@@ -118,8 +118,6 @@ https://stream.4fun.tv:8888/hls/4f_high/index.m3u8
 https://jmp2.uk/plu-65a67dd13af63d0008257f17.m3u8
 #EXTINF:-1 tvg-name="a.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/atv.png" tvg-id="a.tv.de" group-title="10 Weitere deutsche Sender",a.tv
 https://augsburgtv.iptv-playoutcenter.de/augsburgtv/augsburgtv.stream_1/playlist.m3u8
-#EXTINF:-1 tvg-name="Activa TV" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/activatv.png" tvg-id="activatv.es" group-title="10 Weitere deutsche Sender",Activa TV
-https://streamtv.mediasector.es/hls/activatv/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/QoDpnKg.png" tvg-id="adriamusictelevision.de" group-title="10 Weitere deutsche Sender",Adria Music Television
 https://adriaapp.b-cdn.net/1080p/index.m3u8
 #EXTINF:-1 tvg-logo="https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png" tvg-id="adventureearth.de" group-title="10 Weitere deutsche Sender",Adventure Earth (1080p)
@@ -537,8 +535,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" tvg-id="pearl.tv.de" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV Südtirol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-suedtirol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV Südtirol
-https://iptv.peer.biz/live/peertv.m3u8
+#EXTINF:-1 tvg-name="Peer TV South Tyrol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-south-tyrol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV South Tyrol
+https://iptv.peer.biz/live/peertv-en.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" tvg-id="plutotvanimals.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Animals
 https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png" tvg-id="plutotvbritischeserien.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Britische Serien
