@@ -260,6 +260,8 @@ https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8|User-Agent=Mozilla/5.0 (iPhone
 https://jmp2.uk/plu-60afbad343e3840007164348.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://i.imgur.com/YFnmSLW.png" tvg-id="ciratv.de" group-title="10 Weitere deutsche Sender",Cira TV (1080p)
 https://hlspackager.akamaized.net/live/DB/CIRA_TV/HLS/CIRA_TV.m3u8
+#EXTINF:-1 tvg-name="CNN International" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/cnninternational.png" tvg-id="cnninternationaleurope.us" group-title="10 Weitere deutsche Sender",CNN International
+https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png" tvg-id="comedycentral.de" group-title="10 Weitere deutsche Sender",Comedy Central (Germany)
 https://ma.anixa.tv/clips/stream/comedy_central/playlist.php
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Curiosity_Channel_Logo_2023.svg/960px-Curiosity_Channel_Logo_2023.svg.png" tvg-id="curiositychannel.de" group-title="10 Weitere deutsche Sender",Curiosity Channel (720p)
