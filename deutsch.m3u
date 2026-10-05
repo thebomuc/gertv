@@ -684,8 +684,6 @@ http://58bd5b7a98e04.streamlock.net/medienasa-live/ran1_high/playlist.m3u8
 
 #EXTINF:-1 tvg-name="rbb Berlin HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rbbhd.png" tvg-id="rbbberlin.de" group-title="03 Dritte Programme",rbb Berlin HD
 https://rbb-hls-berlin.akamaized.net/hls/live/2017824/rbb_berlin/master.m3u8
-#EXTINF:-1 tvg-name="rbb Event 1" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rbb.png" tvg-id="rbbevent1.de" group-title="03 Dritte Programme",rbb Event 1
-https://rbbevent01-hls.akamaized.net/hls/live/685984/rbbevent01/master.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png" tvg-id="rbbfernsehen.de@berlin" group-title="03 Dritte Programme",rbb Fernsehen Berlin (1080p) [Geo-blocked]
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
