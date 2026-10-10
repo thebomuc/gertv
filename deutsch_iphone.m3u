@@ -147,6 +147,8 @@ https://ardevent2.akamaized.net/hls/live/681512/ardevent2_geo/master.m3u8
 https://amdlive-ch01-ctnd-com.akamaized.net/arirang_1ch/smil:arirang_1ch.smil/chunklist_b2256000_sleng.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/DLVjeno.png" tvg-id="aristotv.de" group-title="10 Weitere deutsche Sender",Aristo TV (360p)
 https://ma.anixa.tv/clips/stream/aristo/index.m3u8
+#EXTINF:-1 tvg-name="ARTE Event 5" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent5.de" group-title="10 Weitere deutsche Sender",ARTE Event 5
+https://arteconcerthls.akamaized.net/hls/live/2025498/channel05/master.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/4SPOVN7.png" tvg-id="auctionhunters.de@dach" group-title="10 Weitere deutsche Sender",Auction Hunters (Germany)
 https://jmp2.uk/plu-5ede45d077746000072be0fe.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/27AKMUL.png" tvg-id="augsburgtv.de" group-title="10 Weitere deutsche Sender",Augsburg TV (1080p)
@@ -375,6 +377,8 @@ http://58bd5b7a98e04.streamlock.net/medienasa-live/mdf1_high/playlist.m3u8
 https://mdrevent1wwhls.akamaized.net/hls/live/2025205/mdrevent1ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 2" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus2.de" group-title="03 Dritte Programme",MDR+ 2
 https://mdrevent2wwhls.akamaized.net/hls/live/2025367/mdrevent2ww/master.m3u8
+#EXTINF:-1 tvg-name="MDR+ 3" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus3.de" group-title="03 Dritte Programme",MDR+ 3
+https://mdrevent3wwhls.akamaized.net/hls/live/2025368/mdrevent3ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 4" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus4.de" group-title="03 Dritte Programme",MDR+ 4
 https://mdrevent4wwhls.akamaized.net/hls/live/2025369/mdrevent4ww/master.m3u8
 #EXTINF:-1 tvg-name="MDR+ 5" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/mdr.png" tvg-id="mdrplus5.de" group-title="03 Dritte Programme",MDR+ 5
@@ -532,8 +536,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" tvg-id="pearl.tv.de" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV Alto Adige" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-alto-adige.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV Alto Adige
-https://iptv.peer.biz/live/peertv-it.m3u8
+#EXTINF:-1 tvg-name="Peer TV South Tyrol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-south-tyrol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV South Tyrol
+https://iptv.peer.biz/live/peertv-en.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" tvg-id="plutotvanimals.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Animals
 https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png" tvg-id="plutotvbritischeserien.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Britische Serien
