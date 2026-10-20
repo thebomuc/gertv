@@ -36,6 +36,8 @@ https://dash4.antik.sk/live/test_rtl_nitro_tizen/playlist.m3u8
 https://s6.hopslan.com/pro7maxxX/index.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Kabel_eins_Doku_Logo_2016.svg/960px-Kabel_eins_Doku_Logo_2016.svg.png" tvg-id="kabeleinsdoku.de" group-title="00 Priorität",kabel eins Doku (720p)
 https://s6.hopslan.com/dokuX/index.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Tele_5_Logo_2021.svg/500px-Tele_5_Logo_2021.svg.png" tvg-id="tele5.de" group-title="00 Priorität",TELE 5 (576p)
+https://s6.hopslan.com/tele5X/index.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/DMAX_BLACK.svg/960px-DMAX_BLACK.svg.png" tvg-id="dmax.de" group-title="00 Priorität",DMAX (Germany) (576p)
 http://5.180.164.197:8080/DMAX/index.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Sixx_Logo.svg/960px-Sixx_Logo.svg.png" tvg-id="sixx.de" group-title="00 Priorität",sixx
