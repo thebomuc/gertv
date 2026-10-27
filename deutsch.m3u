@@ -151,8 +151,6 @@ https://cbb622b29f5d43b598991f3fa19de291.mediatailor.eu-west-1.amazonaws.com/v1/
 https://jmp2.uk/plu-65a67dd13af63d0008257f17.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-name="a.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/atv.png" tvg-id="a.tv.de" group-title="10 Weitere deutsche Sender",a.tv
 https://augsburgtv.iptv-playoutcenter.de/augsburgtv/augsburgtv.stream_1/playlist.m3u8
-#EXTINF:-1 tvg-name="Activa TV" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/activatv.png" tvg-id="activatv.es" group-title="10 Weitere deutsche Sender",Activa TV
-https://streamtv.mediasector.es/hls/activatv/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/QoDpnKg.png" tvg-id="adriamusictelevision.de" group-title="10 Weitere deutsche Sender",Adria Music Television
 https://adriaapp.b-cdn.net/1080p/index.m3u8
 #EXTINF:-1 tvg-logo="https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png" tvg-id="adventureearth.de" group-title="10 Weitere deutsche Sender",Adventure Earth (1080p)
@@ -476,9 +474,9 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenmecklenburgvorpommern.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
-#EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern HD
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenschleswigholstein.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
+#EXTINF:-1 tvg-name="NDR Schleswig-Holstein HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
@@ -578,6 +576,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" tvg-id="pearl.tv.de" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
+#EXTINF:-1 tvg-name="Peer TV South Tyrol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-south-tyrol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV South Tyrol
+https://iptv.peer.biz/live/peertv-en.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" tvg-id="plutotvanimals.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Animals
 https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png" tvg-id="plutotvbritischeserien.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Britische Serien
