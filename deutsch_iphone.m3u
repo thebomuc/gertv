@@ -151,18 +151,6 @@ https://ardevent2.akamaized.net/hls/live/681512/ardevent2_geo/master.m3u8
 https://amdlive-ch01-ctnd-com.akamaized.net/arirang_1ch/smil:arirang_1ch.smil/chunklist_b2256000_sleng.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/DLVjeno.png" tvg-id="aristotv.de" group-title="10 Weitere deutsche Sender",Aristo TV (360p)
 https://ma.anixa.tv/clips/stream/aristo/index.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 1" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent1.de" group-title="10 Weitere deutsche Sender",ARTE Event 1
-https://arteconcerthls.akamaized.net/hls/live/2025494/channel01/master.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 2" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent2.de" group-title="10 Weitere deutsche Sender",ARTE Event 2
-https://arteconcerthls.akamaized.net/hls/live/2025495/channel02/master.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 3" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent3.de" group-title="10 Weitere deutsche Sender",ARTE Event 3
-https://arteconcerthls.akamaized.net/hls/live/2025496/channel03/master.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 4" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent4.de" group-title="10 Weitere deutsche Sender",ARTE Event 4
-https://arteconcerthls.akamaized.net/hls/live/2025497/channel04/master.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 5" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent5.de" group-title="10 Weitere deutsche Sender",ARTE Event 5
-https://arteconcerthls.akamaized.net/hls/live/2025498/channel05/master.m3u8
-#EXTINF:-1 tvg-name="ARTE Event 6" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/arte.png" tvg-id="arteevent6.de" group-title="10 Weitere deutsche Sender",ARTE Event 6
-https://arteconcerthls.akamaized.net/hls/live/2025499/channel06/master.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/4SPOVN7.png" tvg-id="auctionhunters.de@dach" group-title="10 Weitere deutsche Sender",Auction Hunters (Germany)
 https://jmp2.uk/plu-5ede45d077746000072be0fe.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/27AKMUL.png" tvg-id="augsburgtv.de" group-title="10 Weitere deutsche Sender",Augsburg TV (1080p)
@@ -238,8 +226,6 @@ https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8
 https://jmp2.uk/plu-60afbad343e3840007164348.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/YFnmSLW.png" tvg-id="ciratv.de" group-title="10 Weitere deutsche Sender",Cira TV (1080p)
 https://hlspackager.akamaized.net/live/DB/CIRA_TV/HLS/CIRA_TV.m3u8
-#EXTINF:-1 tvg-name="CNN International" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/cnninternational.png" tvg-id="cnninternationaleurope.us" group-title="10 Weitere deutsche Sender",CNN International
-https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png" tvg-id="comedycentral.de" group-title="10 Weitere deutsche Sender",Comedy Central (Germany)
 https://ma.anixa.tv/clips/stream/comedy_central/playlist.php
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Curiosity_Channel_Logo_2023.svg/960px-Curiosity_Channel_Logo_2023.svg.png" tvg-id="curiositychannel.de" group-title="10 Weitere deutsche Sender",Curiosity Channel (720p)
