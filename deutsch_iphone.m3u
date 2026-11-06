@@ -246,6 +246,10 @@ https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.
 https://jmp2.uk/stvp-CHAJ0500413A
 #EXTINF:-1 tvg-logo="https://i.imgur.com/HimuPPb.png" tvg-id="deluxemusic.de" group-title="10 Weitere deutsche Sender",Deluxe Music (720p)
 https://sdn-global-live-streaming-packager-cache.3qsdn.com/13456/13456_264_live.m3u8
+#EXTINF:-1 tvg-name="DELUXE MUSIC DANCE" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/deluxemusicdance.png" tvg-id="deluxemusicdance.de" group-title="10 Weitere deutsche Sender",DELUXE MUSIC DANCE
+https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.m3u8
+#EXTINF:-1 tvg-name="DELUXE MUSIC DANCE BY KONTOR" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Deluxe_Dance_by_Kontor_Logo_2023.svg/500px-Deluxe_Dance_by_Kontor_Logo_2023.svg.png" tvg-country="DE" tvg-id="deluxemusicdancebykontor.de" group-title="10 Weitere deutsche Sender",DELUXE MUSIC DANCE BY KONTOR
+https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.m3u8
 #EXTINF:-1 tvg-name="DELUXE MUSIC RAP" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/deluxemusicrap.png" tvg-id="deluxemusicrap.de" group-title="10 Weitere deutsche Sender",DELUXE MUSIC RAP
 https://sdn-global-live-streaming-packager-cache.3qsdn.com/65183/65183_264_live.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/s3h67hx.png" tvg-id="deluxerap.de" group-title="10 Weitere deutsche Sender",Deluxe Rap (1080p)
@@ -341,8 +345,8 @@ https://relay2.cdn.fem-net.de/hls/loop/istuff_live/istuff_live-720p.m3u8
 https://sdn-global-live-streaming-packager-cache.3qsdn.com/7441/7441_264_live.m3u8
 #EXTINF:-1 tvg-logo="https://i.ibb.co/1LzJz7Y/Channels4-profile-7.jpg" tvg-id="kanal12sprembergtv.de" group-title="10 Weitere deutsche Sender",Kanal12 Spremberg TV (404p) [Not 24/7]
 https://58de7a369a9c4.streamlock.net/sprembergtv/live/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/CVJWiM0.png" tvg-id="kaufbeitv.de" group-title="10 Weitere deutsche Sender",KaufBei TV (576p)
-https://api.alpaca.t62a.com/hls/9103/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/CVJWiM0.png" tvg-id="kaufbeitv.de" group-title="10 Weitere deutsche Sender",KaufBei TV (720p)
+https://elephant.t62a.com/hls/8103/index.m3u8
 
 # ===== 06 Kinder =====
 
@@ -424,6 +428,8 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenhamburg.de" group-title="02 Regional",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
+#EXTINF:-1 tvg-name="NDR Hamburg HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="02 Regional",NDR Hamburg HD
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 
 # ===== 03 Dritte Programme =====
 
@@ -432,8 +438,6 @@ https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenmecklenburgvorpommern.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenschleswigholstein.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
-#EXTINF:-1 tvg-name="NDR Schleswig-Holstein HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
@@ -608,11 +612,6 @@ https://live.creacast.com/radio21/smil:radio21.smil/playlist.m3u8
 
 #EXTINF:-1 tvg-name="Radio Bremen TV HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rbtv.png" tvg-id="radiobremen.de" group-title="02 Regional",Radio Bremen TV HD
 https://rbhlslive.akamaized.net/hls/live/2020435/rbfs/master.m3u8
-
-# ===== 04 Nachrichten =====
-
-#EXTINF:-1 tvg-name="Rai News 24" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/rainews24.png" tvg-id="rainews.it" group-title="04 Nachrichten",Rai News 24
-https://8e7439fdb1694c8da3a0fd63e4dda518.msvdn.net/rainews1/hls/playlist_mo.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
 
@@ -848,7 +847,7 @@ https://yletvworld.akamaized.net/hls/live/622547/yletvteemafemw/index.m3u8
 https://yletvworld.akamaized.net/hls/live/622540/yletv1w/index.m3u8
 #EXTINF:-1 tvg-name="Yle TV2" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/yletv2.png" tvg-id="yle2.fi" group-title="10 Weitere deutsche Sender",Yle TV2
 https://yletvworld.akamaized.net/hls/live/622541/yletv2w/index.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/rTBX6lS.png" tvg-id="yoltv.de" group-title="10 Weitere deutsche Sender",YOL TV
+#EXTINF:-1 tvg-logo="https://i.imgur.com/rTBX6lS.png" tvg-id="yoltv.de" group-title="10 Weitere deutsche Sender",YOL TV (720p)
 https://live.yoltv.com/hls/stream.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/2/24/Zee_One_Logo_2025.png" tvg-id="zeeone.uk@german" group-title="10 Weitere deutsche Sender",Zee One German (720p)
 https://e4955b54.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/U2Ftc3VuZy1kZV9aZWVPbmVfSExT/playlist.m3u8
