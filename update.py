@@ -743,12 +743,10 @@ EXCLUDE_NAME_WORDS = [
 # Option 1: Internationale ARD-Feeds direkt bei den URL-Ausschlüssen sperren
 EXCLUDE_URL_PARTS = [
     "viamotionhsi.netplus.ch",
-    "/daserste/int/",
-    "daserste_int",
-    "daserste-int",
-    "/ard_int/",
+    # Fängt spezifische internationale Master-Playlists ab
+    "/live/hls/int/",
+    "/int/master.m3u8",
 ]
-
 
 # ============================================================
 # NORMALISIERUNG
@@ -1182,9 +1180,18 @@ def excluded(entry):
             return True
 
     url = entry.get("url", "").lower()
+
+    # 1. Prüfe statische Ausschluss-Fragmente
     for blocked in EXCLUDE_URL_PARTS:
         if blocked.lower() in url:
             return True
+
+    # 2. Zuverlässiger Ausschluss aller internationalen Feeds für ARD, Das Erste und ZDF
+    is_public_channel = any(net in url for net in ["ard", "daserste", "zdf"])
+    has_international_marker = any(marker in url for marker in ["/int/", "/int.", "_int.", "-int.", "_int/"])
+
+    if is_public_channel and has_international_marker:
+        return True
 
     return False
 
