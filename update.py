@@ -145,34 +145,33 @@ SOURCE_PRIORITY = {
 
 def get_stream_priority(url):
     """
-    Gibt einen Wert zurück. Je NIEDRIGER der Wert, desto höher die Priorität.
+    Je NIEDRIGER der Wert, desto HÖHER die Priorität.
     """
     url_lower = url.lower()
 
-    # Höchste Priorität (0): Explizite ARD/ZDF Inlands-Streams der Mediathek (/de/)
-    if any(tag in url_lower for tag in ["/de/", "_de.", "-de."]) and any(
-        net in url_lower for net in ["ard", "daserste", "zdf"]
-    ):
+    # 1. Höchste Priorität (0): Offizielle ARD & ZDF Mediathek-CDNs
+    official_cdns = [
+        "akamaized.net",
+        "ard-mcdn.de",
+        "zdf.de",
+        "daserste.de"
+    ]
+    if any(cdn in url_lower for cdn in official_cdns):
+        # Abwertung internationaler Feeds mit Hinweistafeln
+        if any(tag in url_lower for tag in ["/int/", "_int.", "-int."]):
+            return 3
         return 0
 
-    # Hohe Priorität (1): Reguläre ARD/ZDF CDNs oder Kodinerds-Listen
-    if (
-        "ard" in url_lower
-        or "daserste" in url_lower
-        or "zdf" in url_lower
-        or "kodinerds" in url_lower
-    ):
-        # Internationale Streams abwerten, falls nicht bereits gefiltert
-        if any(tag in url_lower for tag in ["/int/", "_int.", "-int."]):
-            return 4
+    # 2. Hohe Priorität (1): Kodinerds oder sonstige verifizierte ÖRR-Streams
+    if "kodinerds" in url_lower:
         return 1
 
-    # Mittlere Priorität (2): Andere freie Web-Streams / Pluto TV
-    if "antik.sk" not in url_lower:
+    # 3. Mittlere Priorität (2): Andere freie Web-Streams / Pluto TV
+    if not re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', url_lower) and "antik.sk" not in url_lower:
         return 2
 
-    # Niedrigste Priorität (3): Instabile antik.sk Testlinks
-    return 3
+    # 4. Niedrigste Priorität (4): Unbekannte IP-Relays oder Testlinks
+    return 4
 
 
 def source_score(entry):
@@ -1174,12 +1173,12 @@ def excluded(entry):
     if tvg_id in EXCLUDE_IDS:
         return True
 
-    combined = normalize(entry.get("name", "") + " " + entry.get("tvg_name", ""))
-    for word in EXCLUDE_NAME_WORDS:
-        if normalize(word) in combined:
-            return True
-
     url = entry.get("url", "").lower()
+
+    # Rohe IP-Adressen (z. B. http://5.180.164.197:8080/...) für ARD/ZDF aussortieren
+    is_public = any(net in tvg_id for net in ["zdf", "daserste", "ard", "arte", "3sat", "phoenix"])
+    if is_public and re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', url):
+        return True
 
     # 1. Prüfe statische Ausschluss-Fragmente
     for blocked in EXCLUDE_URL_PARTS:
@@ -1235,8 +1234,8 @@ def stream_score(entry):
 def selection_score(entry):
     url = entry.get("url", "")
     return (
-        source_score(entry),       # 1. Haupt- vs. Fallback-Quelle
-        get_stream_priority(url),  # 2. Inlands- vs. Normal vs. Fallback
+        get_stream_priority(url),  # 1. Offizielles CDN schlägt Drittanbieter-Streams quellenübergreifend
+        source_score(entry),       # 2. Bevorzugte Playlists
         stream_score(entry),       # 3. HD vs. SD / Geo-blocked
     )
 
