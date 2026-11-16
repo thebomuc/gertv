@@ -1,5 +1,5 @@
 #EXTM3U x-tvg-url="https://epgshare01.online"
-
+# https://bit.ly/4i8SlfS
 
 # ==================================================
 # GER TV - Deutsche TV-Liste (WINDOWS KODI VERSION)
@@ -155,8 +155,6 @@ https://123tv-mx1.flex-cdn.net/index.m3u8
 https://jmp2.uk/plu-65a67dd13af63d0008257f17.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-name="a.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/atv.png" tvg-id="a.tv.de" group-title="10 Weitere deutsche Sender",a.tv
 https://augsburgtv.iptv-playoutcenter.de/augsburgtv/augsburgtv.stream_1/playlist.m3u8
-#EXTINF:-1 tvg-name="Activa TV" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/activatv.png" tvg-id="activatv.es" group-title="10 Weitere deutsche Sender",Activa TV
-https://streamtv.mediasector.es/hls/activatv/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/QoDpnKg.png" tvg-id="adriamusictelevision.de" group-title="10 Weitere deutsche Sender",Adria Music Television
 https://adriaapp.b-cdn.net/1080p/index.m3u8
 #EXTINF:-1 tvg-logo="https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png" tvg-id="adventureearth.de" group-title="10 Weitere deutsche Sender",Adventure Earth (1080p)
@@ -270,8 +268,6 @@ https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8|User-Agent=Mozilla/5.0 (iPhone
 https://jmp2.uk/plu-60afbad343e3840007164348.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://i.imgur.com/YFnmSLW.png" tvg-id="ciratv.de" group-title="10 Weitere deutsche Sender",Cira TV (1080p)
 https://hlspackager.akamaized.net/live/DB/CIRA_TV/HLS/CIRA_TV.m3u8
-#EXTINF:-1 tvg-name="CNN International" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/cnninternational.png" tvg-id="cnninternationaleurope.us" group-title="10 Weitere deutsche Sender",CNN International
-https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png" tvg-id="comedycentral.de" group-title="10 Weitere deutsche Sender",Comedy Central (Germany)
 https://ma.anixa.tv/clips/stream/comedy_central/playlist.php
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Curiosity_Channel_Logo_2023.svg/960px-Curiosity_Channel_Logo_2023.svg.png" tvg-id="curiositychannel.de" group-title="10 Weitere deutsche Sender",Curiosity Channel (720p)
@@ -337,11 +333,6 @@ https://5acade5fc0c29.streamlock.net/kabeljournal/live2020.stream/playlist.m3u8
 https://www.youtube.com/euronewsde/live
 #EXTINF:-1 tvg-name="Euronews Deutsch" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Euronews_2022.svg/500px-Euronews_2022.svg.png" tvg-country="DE" tvg-id="euronewsgerman.fr" group-title="04 Nachrichten",Euronews Deutsch Ⓨ
 https://www.youtube.com/euronewsde/live
-
-# ===== 08 Sport =====
-
-#EXTINF:-1 tvg-logo="https://i.imgur.com/olQJgm7.png" tvg-id="eurosport1.fr@germany" group-title="08 Sport",Eurosport 1 Germany
-http://90.183.52.46:4000/play/a06v/index.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
 
@@ -496,14 +487,14 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenhamburg.de" group-title="02 Regional",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
+#EXTINF:-1 tvg-name="NDR Hamburg HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="02 Regional",NDR Hamburg HD
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 
 # ===== 03 Dritte Programme =====
 
 #EXTINF:-1 tvg-name="NDR International" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernseheninternational.de" group-title="03 Dritte Programme",NDR International
 https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenmecklenburgvorpommern.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern Ⓖ
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
-#EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 
 # ===== 02 Regional =====
@@ -522,8 +513,6 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
 
-#EXTINF:-1 tvg-logo="https://i.imgur.com/08ZUI9k.png" tvg-id="nickcomedycentralplus1.de" group-title="10 Weitere deutsche Sender",Nick/Comedy Central +1
-http://90.183.52.46:4000/play/a046/index.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/67f3eb1c443f0671bc03ece8/colorLogoPNG_1748329104247.png" tvg-id="nickjrclub.de@dach" group-title="10 Weitere deutsche Sender",Nick Jr. Club (Germany) (720p)
 https://jmp2.uk/plu-67f3eb1c443f0671bc03ece8.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/67f3eb800a1beb98767ca748/colorLogoPNG_1749200817646.png" tvg-id="nickelodeonclassics.de@dach" group-title="10 Weitere deutsche Sender",Nickelodeon Classics (720p)
@@ -619,8 +608,8 @@ https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_d
 https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="pearl.tv" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/pearltv.png" tvg-id="pearl.tv.de" group-title="10 Weitere deutsche Sender",pearl.tv
 https://www.youtube.com/embed/Ou6XkR1tGE4
-#EXTINF:-1 tvg-name="Peer TV South Tyrol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-south-tyrol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV South Tyrol
-https://iptv.peer.biz/live/peertv-en.m3u8
+#EXTINF:-1 tvg-name="Peer TV Südtirol" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/peer-tv-suedtirol.png" tvg-id="peer.tv" group-title="10 Weitere deutsche Sender",Peer TV Südtirol
+https://iptv.peer.biz/live/peertv.m3u8
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/67f68bd2135aeda9ddf0ef54/colorLogoPNG_1746816413112.png" tvg-id="plutotvadultanimation.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Adult Animation
 https://jmp2.uk/plu-67f68bd2135aeda9ddf0ef54.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png" tvg-id="plutotvanimals.de@dach" group-title="10 Weitere deutsche Sender",Pluto TV Animals
@@ -739,8 +728,6 @@ https://stream01.welocal.stream/stream/fhd-rfo_66876/ngrp:stream_all/playlist.m3
 https://stream01.stream.welocal.world/stream/fhd-rfo_66876/ngrp:stream_all/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/4wMZ8Em.png" tvg-id="ric.de" group-title="10 Weitere deutsche Sender",RiC (1080p)
 https://rictv.iptv-playoutcenter.de/rictv/rictv-web/playlist.m3u8
-#EXTINF:-1 tvg-logo="" tvg-id="rictoday.de" group-title="10 Weitere deutsche Sender",RiC.today
-http://88.212.7.14/live/test_ric_international_avc_25p/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/nvFXRjH.png" tvg-id="rockantenne.de" group-title="10 Weitere deutsche Sender",Rock Antenne [Not 24/7]
 https://stream.rockantenne.de/rockantenne/stream/mp3
 #EXTINF:-1 tvg-logo="https://i.imgur.com/6ve1FTN.png" tvg-id="rocklandtv.de" group-title="10 Weitere deutsche Sender",Rockland TV (480p) [Not 24/7]
@@ -849,8 +836,6 @@ https://jmp2.uk/plu-68d2759a59fd82da3226492d.m3u8|User-Agent=Mozilla/5.0 (iPhone
 https://5889e7d0d6e28.streamlock.net/tide-live/_definst_/smil:livestream.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/TLC_Logo.svg/960px-TLC_Logo.svg.png" tvg-id="tlc.de" group-title="10 Weitere deutsche Sender",TLC (Germany) (576p)
 https://s6.hopslan.com/tlcX/index.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/l0RGbRI.png" tvg-id="tntinternational.ru@europe" group-title="10 Weitere deutsche Sender",TNT International (480p)
-http://91.228.35.249:8001/1:0:1:6a7:3138:13e:820000:0:0:0:
 #EXTINF:-1 tvg-logo="https://images.pluto.tv/channels/5d6792bd6be2998ad0ccce30/colorLogoPNG.png" tvg-id="totallyturtles.de@dach" group-title="10 Weitere deutsche Sender",Totally Turtles (Germany) (720p)
 https://jmp2.uk/plu-5d6792bd6be2998ad0ccce30.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-name="TRT World HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/trtworld.png" tvg-id="trtworld.nws" group-title="10 Weitere deutsche Sender",TRT World HD
@@ -879,8 +864,6 @@ https://tvaktuellr.iptv-playoutcenter.de/tvaktuellr/tvaktuellr.stream_1/playlist
 https://edge16.vedge.infomaniak.com/livecast/tvm3/manifest.m3u8
 #EXTINF:-1 tvg-name="TVO" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/tvo.png" tvg-id="tvo.de" group-title="10 Weitere deutsche Sender",TVO
 https://tvoberfranken.iptv-playoutcenter.de/tvoberfranken/tvoberfranken.stream_1/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/BQpQRvFS/tv-rus-plus.png" tvg-id="tvrusplus.de" group-title="10 Weitere deutsche Sender",TVRUS+ (576p)
-http://91.235.255.32:8001/1:0:1:6AC:3138:13E:820000:0:0:0
 #EXTINF:-1 tvg-logo="https://i.imgur.com/4j4MZTT.png" tvg-id="unserding.de" group-title="10 Weitere deutsche Sender",Unserding (720p) [Geo-blocked]
 https://srde.akamaized.net/hls/live/2031842/visualradio-unserding/index.m3u8
 
