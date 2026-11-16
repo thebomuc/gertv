@@ -8,10 +8,10 @@
 
 # ===== 00 Priorität =====
 
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/ARD_Dachmarke_2014.svg/960px-ARD_Dachmarke_2014.svg.png" tvg-id="daserste.de" group-title="00 Priorität",Das Erste HD (1080p)
+#EXTINF:-1 tvg-name="Das Erste HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/daserstehd.png" tvg-id="daserste.de" group-title="00 Priorität",Das Erste HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
-https://daserste-live.ard-mcdn.de/daserste/live/hls/int/master.m3u8
+https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/rtLb6m9.png" tvg-id="zdf.de" group-title="00 Priorität",ZDF
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
@@ -474,14 +474,14 @@ https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenhamburg.de" group-title="02 Regional",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
-#EXTINF:-1 tvg-name="NDR Hamburg HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="02 Regional",NDR Hamburg HD
-https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
 
 # ===== 03 Dritte Programme =====
 
 #EXTINF:-1 tvg-name="NDR International" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernseheninternational.de" group-title="03 Dritte Programme",NDR International
 https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenmecklenburgvorpommern.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern Ⓖ
+https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
+#EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern HD" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/ndrhd.png" tvg-id="ndr.de" group-title="03 Dritte Programme",NDR Mecklenburg-Vorpommern HD
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-country="DE" tvg-id="ndrfernsehenschleswigholstein.de" group-title="03 Dritte Programme",NDR Schleswig-Holstein Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
