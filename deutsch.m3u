@@ -8,7 +8,7 @@
 
 # ===== 00 Priorität =====
 
-#EXTINF:-1 tvg-name="Das Erste HD" tvg-id="daserste.de" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/4a/Das_Erste_HD_Logo.svg" group-title="00 Priorität",Das Erste HD
+#EXTINF:-1 tvg-name="Das Erste HD" tvg-id="daserste.de" tvg-logo="https://banner2.cleanpng.com/20180919/zfw/kisspng-logo-das-erste-ard-high-definition-television-uptown-controllers-free-download-1713939080538.webp" group-title="00 Priorität",Das Erste HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8
