@@ -1,23 +1,23 @@
-import re
 import os
+import re
 import shutil
-import subprocess
-import urllib.request
-import urllib.error
 import socket
+import subprocess
 import threading
 import traceback
-from urllib.parse import urlparse, urljoin
+import urllib.error
+import urllib.request
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin, urlparse
 
 # ============================================================
 # GER TV - update.py
 # ============================================================
 #
 # Erstellt:
-#
 #     deutsch.m3u
+#     deutsch_iphone.m3u
 #
 # REIHENFOLGE
 # -----------
@@ -28,37 +28,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # -------
 # Quellen besitzen eine feste Priorität.
 #
-# Eine neue Quelle ersetzt NICHT automatisch einen bereits
-# vorhandenen Stream aus einer höher priorisierten Quelle.
-#
 # Innerhalb derselben Quellen-Priorität entscheidet:
-#
-#   1. HD + nicht Geo-blocked
-#   2. SD + nicht Geo-blocked
-#   3. HD + Geo-blocked
-#   4. SD + Geo-blocked
-#
-# REGIONAL-FALLBACK
-# -----------------
-# Beispiel:
-#
-#   NDR Niedersachsen
-#       ↓ falls nicht gefunden
-#   NDR Hamburg
-#       ↓ falls nicht gefunden
-#   allgemeiner NDR
-#
-# KODI
-# ----
-# Fremde tvg-chno-Werte werden entfernt.
-# Kodi soll die Reihenfolge der erzeugten M3U verwenden.
-#
-# NETPLUS
-# -------
-# viamotionhsi.netplus.ch wird grundsätzlich ausgeschlossen.
-#
+#   1. Stream-Typ (ARD/ZDF Inlands-CDN vor Standard vor Testlinks)
+#   2. HD + nicht Geo-blocked
+#   3. SD + nicht Geo-blocked
+#   4. HD + Geo-blocked
+#   5. SD + Geo-blocked
 # ============================================================
-
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -77,84 +53,68 @@ TEMP_OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u.tmp")
 # ============================================================
 
 SOURCES = [
-
     (
         "Deutschland",
-        "https://iptv-org.github.io/iptv/countries/de.m3u"
+        "https://iptv-org.github.io/iptv/countries/de.m3u",
     ),
-
     (
         "Bayern",
-        "https://iptv-org.github.io/iptv/subdivisions/de-by.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-by.m3u",
     ),
-
     (
         "Berlin",
-        "https://iptv-org.github.io/iptv/subdivisions/de-be.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-be.m3u",
     ),
-
     (
         "Brandenburg",
-        "https://iptv-org.github.io/iptv/subdivisions/de-bb.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-bb.m3u",
     ),
-
     (
         "Hamburg",
-        "https://iptv-org.github.io/iptv/subdivisions/de-hh.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-hh.m3u",
     ),
-
     (
         "Mecklenburg-Vorpommern",
-        "https://iptv-org.github.io/iptv/subdivisions/de-mv.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-mv.m3u",
     ),
-
     (
         "Niedersachsen",
-        "https://iptv-org.github.io/iptv/subdivisions/de-ni.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-ni.m3u",
     ),
-
     (
         "Schleswig-Holstein",
-        "https://iptv-org.github.io/iptv/subdivisions/de-sh.m3u"
+        "https://iptv-org.github.io/iptv/subdivisions/de-sh.m3u",
     ),
-
     (
         "German TV M3U",
-        "https://raw.githubusercontent.com/josxha/german-tv-m3u/main/german-tv.m3u"
+        "https://raw.githubusercontent.com/josxha/german-tv-m3u/main/german-tv.m3u",
     ),
-
 ]
 
 
 # ============================================================
 # ZUSÄTZLICHE FALLBACK-QUELLEN
 # ============================================================
-#
-# Diese Quellen werden NICHT beim normalen Quellenlauf geladen.
-# Sie werden ausschließlich dann lazy geladen, wenn ein Fixed-
-# Sender in den normalen Quellen nicht gefunden wurde.
-# ============================================================
 
 FALLBACK_SOURCES = [
     (
         "Kodinerds",
-        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u"
+        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u",
     ),
-        (
+    (
         "Kodinerds Master-Liste",
-        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/kodi/kodi_tv_main.m3u"
+        "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/kodi/kodi_tv_main.m3u",
     ),
     (
         "Free-TV/IPTV Deutschland",
-        "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_germany.m3u8"
+        "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_germany.m3u8",
     ),
     (
         "deutsche-iptv-playlist",
-        "https://raw.githubusercontent.com/tgru-dev/deutsche-iptv-playlist/main/ip-tv.m3u"
+        "https://raw.githubusercontent.com/tgru-dev/deutsche-iptv-playlist/main/ip-tv.m3u",
     ),
 ]
 
-# Pro Lauf wird jede Fallback-Quelle höchstens einmal geladen.
 FALLBACK_ENTRIES_CACHE = {}
 FALLBACK_SOURCE_ERRORS = {}
 
@@ -162,33 +122,9 @@ FALLBACK_SOURCE_ERRORS = {}
 # ============================================================
 # QUELLEN-PRIORITÄT
 # ============================================================
-#
-# Kleine Zahl = höhere Priorität.
-#
-# Die Reihenfolge deiner bisherigen Quellen bleibt erhalten.
-# Die drei zusätzlichen Quellen kommen danach als Fallback.
-#
-# Wichtig:
-# Die Quellen-Priorität kommt VOR dem Stream-Score.
-#
-# Also:
-#
-#   bessere Quelle + SD
-#
-# kann gegenüber
-#
-#   schlechtere Quelle + HD
-#
-# gewinnen.
-#
-# Dadurch ersetzen neue Quellen nicht ungefragt deine
-# bisherigen funktionierenden Streams.
-# ============================================================
 
 SOURCE_PRIORITY = {
-
     "Deutschland": 1,
-
     "Bayern": 2,
     "Berlin": 3,
     "Brandenburg": 4,
@@ -196,70 +132,58 @@ SOURCE_PRIORITY = {
     "Mecklenburg-Vorpommern": 6,
     "Niedersachsen": 7,
     "Schleswig-Holstein": 8,
-
     "German TV M3U": 9,
-
-    # Neue Quellen ausschließlich als Fallback
     "Kodinerds": 10,
     "Free-TV/IPTV Deutschland": 11,
     "deutsche-iptv-playlist": 12,
 }
 
 
+# ============================================================
+# STREAM-PRIORITÄT (OPTION 1 IMPLEMENTIERUNG)
+# ============================================================
+
 def get_stream_priority(url):
     """
     Gibt einen Wert zurück. Je NIEDRIGER der Wert, desto höher die Priorität.
     """
     url_lower = url.lower()
-    
-    # Höchste Priorität (0): Offizielle ARD/ZDF CDNs oder Kodinerds-Listen
-    if "ard" in url_lower or "zdf" in url_lower or "kodinerds" in url_lower:
-        return 0
-    
-    # Mittlere Priorität (1): Andere freie Web-Streams / Pluto TV
-    if "antik.sk" not in url_lower:
-        return 1
-        
-    # Niedrigste Priorität (2): Die instabilen antik.sk Smart-TV Testlinks (Fallbacks)
-    return 2
 
-# Wenn Ihr Skript die gesammelten Streams für einen Sender sortiert,
-# nutzen Sie die Funktion als Sortierschlüssel:
-# channels_list.sort(key=lambda x: get_stream_priority(x.get("url", "")))
+    # Höchste Priorität (0): Explizite ARD/ZDF Inlands-Streams der Mediathek (/de/)
+    if any(tag in url_lower for tag in ["/de/", "_de.", "-de."]) and any(
+        net in url_lower for net in ["ard", "daserste", "zdf"]
+    ):
+        return 0
+
+    # Hohe Priorität (1): Reguläre ARD/ZDF CDNs oder Kodinerds-Listen
+    if (
+        "ard" in url_lower
+        or "daserste" in url_lower
+        or "zdf" in url_lower
+        or "kodinerds" in url_lower
+    ):
+        # Internationale Streams abwerten, falls nicht bereits gefiltert
+        if any(tag in url_lower for tag in ["/int/", "_int.", "-int."]):
+            return 4
+        return 1
+
+    # Mittlere Priorität (2): Andere freie Web-Streams / Pluto TV
+    if "antik.sk" not in url_lower:
+        return 2
+
+    # Niedrigste Priorität (3): Instabile antik.sk Testlinks
+    return 3
 
 
 def source_score(entry):
-
-    return SOURCE_PRIORITY.get(
-        entry.get("source", ""),
-        99
-    )
+    return SOURCE_PRIORITY.get(entry.get("source", ""), 99)
 
 
 # ============================================================
 # FESTE PRIORITÄT
-#
-# Reihenfolge exakt nach Wunsch.
-#
-# Jeder Sender kann mehrere IDs/Namen besitzen.
-#
-# Die Liste arbeitet mit Prioritätsgruppen:
-#
-#   "variants": [
-#       [erste Variante],
-#       [Fallback-Variante],
-#       [weiterer Fallback]
-#   ]
-#
-# Die ERSTE gefundene Variante gewinnt.
-# Innerhalb derselben Variante:
-#
-#   Quelle → Stream-Qualität
-#
 # ============================================================
 
 FIXED_CHANNELS = [
-
     (
         "Das Erste",
         [
@@ -269,7 +193,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ZDF",
         [
@@ -279,7 +202,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ZDFinfo",
         [
@@ -289,7 +211,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ZDFneo",
         [
@@ -299,7 +220,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ONE HD",
         [
@@ -309,7 +229,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "3sat",
         [
@@ -319,7 +238,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "kabel eins",
         [
@@ -329,7 +247,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ProSieben",
         [
@@ -339,7 +256,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "RTL",
         [
@@ -349,7 +265,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Sat.1",
         [
@@ -359,7 +274,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "VOX",
         [
@@ -369,7 +283,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "RTL Zwei",
         [
@@ -379,7 +292,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Super RTL",
         [
@@ -389,7 +301,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "NITRO",
         [
@@ -399,7 +310,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "VOXup",
         [
@@ -409,7 +319,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ProSieben MAXX",
         [
@@ -419,20 +328,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "kabel eins Doku",
         [
             {
                 "ids": ["kabeleinsdoku.de"],
-                "names": [
-                    "kabel eins doku",
-                    "kabel1 doku",
-                ],
+                "names": ["kabel eins doku", "kabel1 doku"],
             }
         ],
     ),
-
     (
         "TELE 5",
         [
@@ -442,7 +346,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "DMAX",
         [
@@ -452,7 +355,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "sixx",
         [
@@ -462,36 +364,24 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Sat.1 Gold",
         [
             {
-                "ids": ["sat1gold.de", "sat1gold.de"],
-                "names": [
-                    "sat 1 gold",
-                    "sat.1 gold",
-                ],
+                "ids": ["sat1gold.de"],
+                "names": ["sat 1 gold", "sat.1 gold"],
             }
         ],
     ),
-
     (
         "ARD-alpha",
         [
             {
-                "ids": [
-                    "ardalpha.de",
-                    "ard-alpha.de",
-                ],
-                "names": [
-                    "ard alpha",
-                    "ard-alpha",
-                ],
+                "ids": ["ardalpha.de", "ard-alpha.de"],
+                "names": ["ard alpha", "ard-alpha"],
             }
         ],
     ),
-
     (
         "Phoenix",
         [
@@ -501,33 +391,24 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "ARTE",
         [
             {
-                "ids": [
-                    "arte.de",
-                    "artedeutsch.de",
-                ],
+                "ids": ["arte.de", "artedeutsch.de"],
                 "names": ["arte"],
             }
         ],
     ),
-
     (
         "Tagesschau24",
         [
             {
                 "ids": ["tagesschau24.de"],
-                "names": [
-                    "tagesschau24",
-                    "tagesschau 24",
-                ],
+                "names": ["tagesschau24", "tagesschau 24"],
             }
         ],
     ),
-
     (
         "MDR Fernsehen",
         [
@@ -551,97 +432,59 @@ FIXED_CHANNELS = [
             },
         ],
     ),
-
-    # ========================================================
-    # NDR:
-    #
-    # 1. NDR Niedersachsen
-    # 2. NDR Hamburg als Fallback
-    # 3. allgemeiner NDR als letzter Fallback
-    # ========================================================
-
     (
         "NDR Niedersachsen",
         [
             {
-                "ids": [
-                    "ndrfernsehen.de@niedersachsen",
-                ],
-                "names": [
-                    "ndr niedersachsen",
-                    "ndr niedersachsen hd",
-                ],
+                "ids": ["ndrfernsehen.de@niedersachsen"],
+                "names": ["ndr niedersachsen", "ndr niedersachsen hd"],
             },
             {
-                "ids": [
-                    "ndrfernsehen.de@hamburg",
-                ],
-                "names": [
-                    "ndr hamburg",
-                ],
+                "ids": ["ndrfernsehen.de@hamburg"],
+                "names": ["ndr hamburg"],
             },
             {
                 "ids": ["ndrfernsehen.de"],
-                "names": [
-                    "ndr fernsehen",
-                    "ndr",
-                ],
+                "names": ["ndr fernsehen", "ndr"],
             },
         ],
     ),
-
     (
         "Noa 4 Hamburg",
         [
             {
                 "ids": ["noa4hamburg.de"],
-                "names": [
-                    "noa4 hamburg",
-                    "noa4 hh",
-                ],
+                "names": ["noa4 hamburg", "noa4 hh"],
             }
         ],
     ),
-
     (
         "Hamburg 1",
         [
             {
                 "ids": ["hamburg1.de"],
-                "names": [
-                    "hamburg 1",
-                    "hamburg1",
-                ],
+                "names": ["hamburg 1", "hamburg1"],
             }
         ],
     ),
-
     (
         "Radio Weser TV Bremen",
         [
             {
                 "ids": ["radiowesertvbremen.de"],
-                "names": [
-                    "radio weser tv bremen",
-                    "radio weser tv",
-                ],
+                "names": ["radio weser tv bremen", "radio weser tv"],
             }
         ],
     ),
-
     (
         "Radio Bremen Fernsehen",
         [
             {
                 "ids": ["radiobremenfernsehen.de"],
-                "names": [
-                    "radio bremen fernsehen",
-                    "radio bremen tv",
-                ],
+                "names": ["radio bremen fernsehen", "radio bremen tv"],
             }
         ],
     ),
-
     (
         "WDR Fernsehen",
         [
@@ -655,32 +498,24 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "SWR Fernsehen Rheinland-Pfalz",
         [
             {
                 "ids": ["swrfernsehenrheinlandpfalz.de"],
-                "names": [
-                    "swr fernsehen rheinland pfalz",
-                ],
+                "names": ["swr fernsehen rheinland pfalz"],
             }
         ],
     ),
-
     (
         "hr-fernsehen",
         [
             {
                 "ids": ["hrfernsehen.de"],
-                "names": [
-                    "hr fernsehen",
-                    "hr-fernsehen",
-                ],
+                "names": ["hr fernsehen", "hr-fernsehen"],
             }
         ],
     ),
-
     (
         "SR Fernsehen",
         [
@@ -690,7 +525,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "rbb Fernsehen",
         [
@@ -700,23 +534,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Oberpfalz TV",
         [
             {
-                "ids": [
-                    "oberpfalztv.de",
-                    "oberpfalz tv.de",
-                ],
-                "names": [
-                    "oberpfalz tv",
-                    "oberpfalztv",
-                ],
+                "ids": ["oberpfalztv.de", "oberpfalz tv.de"],
+                "names": ["oberpfalz tv", "oberpfalztv"],
             }
         ],
     ),
-
     (
         "BR Fernsehen Nord",
         [
@@ -726,24 +552,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "München TV",
         [
             {
-                "ids": [
-                    "munchentv.de",
-                    "munchen tv.de",
-                ],
-                "names": [
-                    "muenchen tv",
-                    "münchen tv",
-                    "münchen.tv",
-                ],
+                "ids": ["munchentv.de", "munchen tv.de"],
+                "names": ["muenchen tv", "münchen tv", "münchen.tv"],
             }
         ],
     ),
-
     (
         "Nachrichten 360",
         [
@@ -753,7 +570,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "SPIEGEL TV",
         [
@@ -763,20 +579,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "N24 Doku",
         [
             {
                 "ids": ["n24doku.de"],
-                "names": [
-                    "n24 doku",
-                    "n24doku",
-                ],
+                "names": ["n24 doku", "n24doku"],
             }
         ],
     ),
-
     (
         "WELT",
         [
@@ -786,23 +597,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "RT DE",
         [
             {
-                "ids": [
-                    "rtde.de",
-                    "rtdeutsch.de",
-                ],
-                "names": [
-                    "rt de",
-                    "rt deutsch",
-                ],
+                "ids": ["rtde.de", "rtdeutsch.de"],
+                "names": ["rt de", "rt deutsch"],
             }
         ],
     ),
-
     (
         "DokuSat",
         [
@@ -812,7 +615,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Authentic History",
         [
@@ -822,20 +624,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Bibel TV",
         [
             {
                 "ids": ["bibeltv.de"],
-                "names": [
-                    "bibel tv",
-                    "bibeltv",
-                ],
+                "names": ["bibel tv", "bibeltv"],
             }
         ],
     ),
-
     (
         "EWTN",
         [
@@ -845,20 +642,15 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "K-TV",
         [
             {
                 "ids": ["k-tv.de", "ktv.de"],
-                "names": [
-                    "k tv",
-                    "k-tv",
-                ],
+                "names": ["k tv", "k-tv"],
             }
         ],
     ),
-
     (
         "Terra Mater WILD",
         [
@@ -868,7 +660,6 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
     (
         "Welt der Wunder",
         [
@@ -878,69 +669,48 @@ FIXED_CHANNELS = [
             }
         ],
     ),
-
-    # ========================================================
-    # RAKUTEN TV
-    #
-    # Fest am Ende der Fixed-Reihenfolge.
-    # ========================================================
-
     (
         "Rakuten TV Action Movies Germany",
         [
             {
                 "ids": ["rakutentvactionmovies.es@germany"],
-                "names": [
-                    "rakuten tv action movies germany",
-                ],
+                "names": ["rakuten tv action movies germany"],
             }
         ],
     ),
-
     (
         "Rakuten TV Comedy Movies Germany",
         [
             {
                 "ids": ["rakutentvcomedymovies.es@germany"],
-                "names": [
-                    "rakuten tv comedy movies germany",
-                ],
+                "names": ["rakuten tv comedy movies germany"],
             }
         ],
     ),
-
     (
         "Rakuten TV Drama Movies Germany",
         [
             {
                 "ids": ["rakutentvdramamovies.es@germany"],
-                "names": [
-                    "rakuten tv drama movies germany",
-                ],
+                "names": ["rakuten tv drama movies germany"],
             }
         ],
     ),
-
     (
         "Rakuten TV Family Movies Germany",
         [
             {
                 "ids": ["rakutentvfamilymovies.es@germany"],
-                "names": [
-                    "rakuten tv family movies germany",
-                ],
+                "names": ["rakuten tv family movies germany"],
             }
         ],
     ),
-
     (
         "Rakuten TV Top Movies Germany",
         [
             {
                 "ids": ["rakutentvtopmovies.es@germany"],
-                "names": [
-                    "rakuten tv top movies germany",
-                ],
+                "names": ["rakuten tv top movies germany"],
             }
         ],
     ),
@@ -956,9 +726,7 @@ EXCLUDE_IDS = {
     "zeeone.de",
 }
 
-
 EXCLUDE_NAME_WORDS = [
-
     "shopping",
     "teleshopping",
     "home shopping",
@@ -966,26 +734,19 @@ EXCLUDE_NAME_WORDS = [
     "hse",
     "1-2-3 tv",
     "123 tv",
-
     "erotik",
     "xxx",
     "adult",
     "porn",
 ]
 
-
-# ============================================================
-# AUSGESCHLOSSENE STREAM-URLS
-# ============================================================
-#
-# Netplus funktioniert außerhalb des entsprechenden Schweizer
-# Netzes/VPN nicht zuverlässig und soll deshalb komplett aus
-# der deutschen Liste verschwinden.
-# ============================================================
-
+# Option 1: Internationale ARD-Feeds direkt bei den URL-Ausschlüssen sperren
 EXCLUDE_URL_PARTS = [
-
     "viamotionhsi.netplus.ch",
+    "/daserste/int/",
+    "daserste_int",
+    "daserste-int",
+    "/ard_int/",
 ]
 
 
@@ -994,92 +755,35 @@ EXCLUDE_URL_PARTS = [
 # ============================================================
 
 def normalize(value):
-
     value = value.lower()
-
     replacements = {
         "ä": "ae",
         "ö": "oe",
         "ü": "ue",
         "ß": "ss",
     }
-
     for old, new in replacements.items():
         value = value.replace(old, new)
 
-    value = re.sub(
-        r"[^a-z0-9@]+",
-        " ",
-        value
-    )
-
+    value = re.sub(r"[^a-z0-9@]+", " ", value)
     return " ".join(value.split())
 
 
-# ============================================================
-# TVG-ID NORMALISIERUNG
-#
-# Nur Qualitäts-Suffix entfernen.
-#
-# @HD / @SD / @FHD / @UHD / @4K
-#
-# Regionale Kennzeichnungen bleiben erhalten.
-# ============================================================
-
 def normalize_tvg_id(tvg_id):
-
     value = tvg_id.strip().lower()
-
-    value = re.sub(
-        r"@(hd|sd|fhd|uhd|4k)$",
-        "",
-        value
-    )
-
+    value = re.sub(r"@(hd|sd|fhd|uhd|4k)$", "", value)
     return value
 
 
-# ============================================================
-# ATTRIBUTE
-# ============================================================
-
 def get_attribute(info, attribute):
-
-    match = re.search(
-        rf'{re.escape(attribute)}="([^"]*)"',
-        info,
-        re.IGNORECASE
-    )
-
+    match = re.search(rf'{re.escape(attribute)}="([^"]*)"', info, re.IGNORECASE)
     if match:
         return match.group(1).strip()
-
     return ""
 
 
 # ============================================================
 # STREAM-HEALTH-CHECK
-# ============================================================
-#
-# WICHTIG:
-# Diese Prüfung wird NUR für Kandidaten aus den zusätzlichen
-# FALLBACK_SOURCES ausgeführt.
-#
-# Prüfketten:
-#
-#   HTTP/HTTPS:
-#       DNS -> TCP -> HTTP -> Nutzdaten
-#
-#   HLS:
-#       DNS -> TCP -> HTTP -> Playlist -> Media-Playlist
-#       -> erstes echtes Segment
-#
-#   RTSP/RTMP/TCP:
-#       DNS -> TCP
-#
-# Ein TCP-Connect allein beweist bei RTSP/RTMP nicht, dass ein
-# gültiger Videostream geliefert wird. Dafür wäre ein externer
-# Protokoll-Client wie ffprobe erforderlich.
 # ============================================================
 
 HEALTHCHECK_TIMEOUT = 8
@@ -1093,7 +797,6 @@ STREAM_HEALTH_LOCK = threading.Lock()
 
 def get_host_port(url):
     parsed = urlparse(url)
-
     if not parsed.hostname:
         raise RuntimeError("Kein Host in URL")
 
@@ -1110,20 +813,14 @@ def get_host_port(url):
     elif parsed.scheme == "tcp":
         raise RuntimeError("TCP-URL ohne Port")
     else:
-        raise RuntimeError(
-            f"Nicht unterstütztes Protokoll: {parsed.scheme}"
-        )
+        raise RuntimeError(f"Nicht unterstütztes Protokoll: {parsed.scheme}")
 
     return parsed.hostname, port
 
 
 def check_tcp(url):
     host, port = get_host_port(url)
-
-    with socket.create_connection(
-        (host, port),
-        timeout=HEALTHCHECK_TIMEOUT
-    ):
+    with socket.create_connection((host, port), timeout=HEALTHCHECK_TIMEOUT):
         return True
 
 
@@ -1132,9 +829,8 @@ def http_read(url, max_bytes=HEALTHCHECK_READ_BYTES):
         url,
         headers={
             "User-Agent": (
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/131 Safari/537.36"
             ),
             "Accept": (
@@ -1143,148 +839,74 @@ def http_read(url, max_bytes=HEALTHCHECK_READ_BYTES):
                 "video/*,*/*"
             ),
             "Connection": "close",
-        }
+        },
     )
 
-    with urllib.request.urlopen(
-        request,
-        timeout=HEALTHCHECK_TIMEOUT
-    ) as response:
-
+    with urllib.request.urlopen(request, timeout=HEALTHCHECK_TIMEOUT) as response:
         status = response.getcode()
-
         if status < 200 or status >= 400:
-            raise RuntimeError(
-                f"HTTP Status {status}"
-            )
+            raise RuntimeError(f"HTTP Status {status}")
 
         data = response.read(max_bytes)
-
         if not data:
-            raise RuntimeError(
-                "Leere HTTP-Antwort"
-            )
+            raise RuntimeError("Leere HTTP-Antwort")
 
         return response, data
 
 
 def looks_like_hls(url, response, data):
     lower_url = url.lower()
-
-    content_type = (
-        response.headers.get(
-            "Content-Type",
-            ""
-        ).lower()
-    )
+    content_type = response.headers.get("Content-Type", "").lower()
 
     if ".m3u8" in lower_url:
         return True
-
     if b"#EXT-X-STREAM-INF:" in data:
         return True
-
-    if (
-        "mpegurl" in content_type
-        or "m3u" in content_type
-    ):
+    if "mpegurl" in content_type or "m3u" in content_type:
         return True
-
     return b"#EXTM3U" in data
 
 
 def hls_first_uri(playlist_url, data):
-    text = data.decode(
-        "utf-8",
-        errors="replace"
-    )
+    text = data.decode("utf-8", errors="replace")
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
 
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-    ]
-
-    # Master-Playlist: erste Variant-Playlist.
     for index, line in enumerate(lines):
         if line.startswith("#EXT-X-STREAM-INF:"):
-            for candidate in lines[index + 1:]:
+            for candidate in lines[index + 1 :]:
                 if not candidate.startswith("#"):
-                    return urljoin(
-                        playlist_url,
-                        candidate
-                    )
+                    return urljoin(playlist_url, candidate)
 
-    # Media-Playlist: erstes echtes Segment.
-    # Wir suchen bewusst erst nach EXTINF, damit z.B. eine
-    # EXT-X-KEY- oder EXT-X-MAP-URI nicht fälschlich als
-    # normales erstes Segment behandelt wird.
     for index, line in enumerate(lines):
         if line.startswith("#EXTINF:"):
-            for candidate in lines[index + 1:]:
+            for candidate in lines[index + 1 :]:
                 if not candidate.startswith("#"):
-                    return urljoin(
-                        playlist_url,
-                        candidate
-                    )
+                    return urljoin(playlist_url, candidate)
 
-    # Fallback für einfache Playlists ohne EXTINF.
     for line in lines:
         if not line.startswith("#"):
-            return urljoin(
-                playlist_url,
-                line
-            )
+            return urljoin(playlist_url, line)
 
-    raise RuntimeError(
-        "Keine HLS-URI gefunden"
-    )
+    raise RuntimeError("Keine HLS-URI gefunden")
 
 
 def check_hls(playlist_url, playlist_data):
     if b"#EXTM3U" not in playlist_data:
-        raise RuntimeError(
-            "Keine gültige HLS-Playlist"
-        )
+        raise RuntimeError("Keine gültige HLS-Playlist")
 
-    child_url = hls_first_uri(
-        playlist_url,
-        playlist_data
-    )
+    child_url = hls_first_uri(playlist_url, playlist_data)
 
-    # Master -> Media Playlist.
     if ".m3u8" in child_url.lower():
-        child_response, child_data = http_read(
-            child_url,
-            max_bytes=HLS_MAX_BYTES
-        )
-
-        if not looks_like_hls(
-            child_url,
-            child_response,
-            child_data
-        ):
-            raise RuntimeError(
-                "Ungültige HLS Media-Playlist"
-            )
-
-        segment_url = hls_first_uri(
-            child_url,
-            child_data
-        )
+        child_response, child_data = http_read(child_url, max_bytes=HLS_MAX_BYTES)
+        if not looks_like_hls(child_url, child_response, child_data):
+            raise RuntimeError("Ungültige HLS Media-Playlist")
+        segment_url = hls_first_uri(child_url, child_data)
     else:
         segment_url = child_url
 
-    # Erstes tatsächliches Segment abrufen.
-    _, segment_data = http_read(
-        segment_url,
-        max_bytes=HEALTHCHECK_READ_BYTES
-    )
-
+    _, segment_data = http_read(segment_url, max_bytes=HEALTHCHECK_READ_BYTES)
     if not segment_data:
-        raise RuntimeError(
-            "Erstes Stream-Segment ist leer"
-        )
+        raise RuntimeError("Erstes Stream-Segment ist leer")
 
     return {
         "type": "hls",
@@ -1296,21 +918,11 @@ def check_hls(playlist_url, playlist_data):
 
 def check_http_stream(url):
     response, data = http_read(url)
-
-    if looks_like_hls(
-        url,
-        response,
-        data
-    ):
-        return check_hls(
-            url,
-            data
-        )
+    if looks_like_hls(url, response, data):
+        return check_hls(url, data)
 
     if len(data) < 4:
-        raise RuntimeError(
-            "Zu wenig Nutzdaten"
-        )
+        raise RuntimeError("Zu wenig Nutzdaten")
 
     return {
         "type": "http",
@@ -1321,7 +933,6 @@ def check_http_stream(url):
 
 def check_non_http_stream(url):
     check_tcp(url)
-
     return {
         "type": urlparse(url).scheme.lower(),
         "tcp": True,
@@ -1344,27 +955,14 @@ def check_stream_health(url):
 
         if scheme in ("http", "https"):
             check_http_stream(url)
-
-        elif scheme in (
-            "rtsp",
-            "rtmp",
-            "tcp",
-            "ws",
-            "wss",
-        ):
+        elif scheme in ("rtsp", "rtmp", "tcp", "ws", "wss"):
             check_non_http_stream(url)
-
         else:
-            raise RuntimeError(
-                f"Nicht unterstütztes Protokoll: {scheme}"
-            )
+            raise RuntimeError(f"Nicht unterstütztes Protokoll: {scheme}")
 
         result = True
-
     except Exception as error:
-        print(
-            f"      DOWN: {url} -> {error}"
-        )
+        print(f"      DOWN: {url} -> {error}")
         result = False
 
     with STREAM_HEALTH_LOCK:
@@ -1374,11 +972,6 @@ def check_stream_health(url):
 
 
 def load_fallback_source(source_name, url):
-    """
-    Lazy Loader: Die Fallback-Quelle wird erst beim ersten
-    tatsächlichen Bedarf geladen und danach im Speicher behalten.
-    """
-
     if source_name in FALLBACK_ENTRIES_CACHE:
         return FALLBACK_ENTRIES_CACHE[source_name]
 
@@ -1386,59 +979,28 @@ def load_fallback_source(source_name, url):
         return []
 
     try:
-        print(
-            f"    Lade Fallback-Quelle {source_name} ..."
-        )
-
+        print(f"    Lade Fallback-Quelle {source_name} ...")
         text = download(url)
 
         if "#EXTM3U" not in text[:4096]:
-            raise RuntimeError(
-                "Keine gültige M3U-Datei (#EXTM3U fehlt)"
-            )
+            raise RuntimeError("Keine gültige M3U-Datei (#EXTM3U fehlt)")
 
-        entries = parse_m3u(
-            text,
-            source_name
-        )
-
+        entries = parse_m3u(text, source_name)
         if not entries:
-            raise RuntimeError(
-                "Keine M3U-Einträge gefunden"
-            )
+            raise RuntimeError("Keine M3U-Einträge gefunden")
 
         FALLBACK_ENTRIES_CACHE[source_name] = entries
-
-        print(
-            f"      OK: {len(entries)} Einträge"
-        )
-
+        print(f"      OK: {len(entries)} Einträge")
         return entries
-
     except Exception as error:
         FALLBACK_SOURCE_ERRORS[source_name] = str(error)
-
-        print(
-            f"      FEHLER: {error}"
-        )
-
+        print(f"      FEHLER: {error}")
         return []
 
 
-def find_healthy_fallback_matches(
-    source_entries,
-    variant
-):
-    """
-    Es werden ausschließlich die Kandidaten dieses Senders
-    geprüft, niemals die komplette Fallback-M3U.
-    """
-
+def find_healthy_fallback_matches(source_entries, variant):
     try:
-        matches = find_variant_matches(
-            source_entries,
-            variant
-        )
+        matches = find_variant_matches(source_entries, variant)
     except Exception as error:
         print(f"      MATCH-FEHLER: {error}")
         return []
@@ -1446,16 +1008,13 @@ def find_healthy_fallback_matches(
     matches = [
         entry
         for entry in matches
-        if isinstance(entry, dict)
-        and entry.get("url")
-        and not excluded(entry)
+        if isinstance(entry, dict) and entry.get("url") and not excluded(entry)
     ]
 
     if not matches:
         return []
 
     matches.sort(key=selection_score)
-
     healthy = []
 
     for entry in matches:
@@ -1463,109 +1022,58 @@ def find_healthy_fallback_matches(
             if check_stream_health(entry.get("url", "")):
                 healthy.append(entry)
         except Exception as error:
-            print(
-                f"      DOWN: {entry.get('url', '')} -> {error}"
-            )
+            print(f"      DOWN: {entry.get('url', '')} -> {error}")
 
     healthy.sort(key=selection_score)
     return healthy
 
 
 def build_fixed_with_fallbacks(entries):
-    """
-    Zuerst exakt die bestehende Fixed-Logik.
-
-    Nur wenn ein Fixed-Sender in KEINER normalen Variante
-    gefunden wird, werden die drei zusätzlichen Quellen
-    lazy geladen.
-
-    Die Fallback-Quellen werden dabei in ihrer Prioritäts-
-    reihenfolge geprüft. Innerhalb einer Variante gilt weiterhin:
-
-        Quelle -> Stream-Qualität
-
-    Wichtig:
-    Ein Fallback wird nicht global für alle Sender geladen.
-    """
-
     result, used_ids, missing = build_fixed(entries)
-
     if not missing:
         return result, used_ids, missing
 
-    definitions_by_name = OrderedDict(
-        FIXED_CHANNELS
-    )
-
+    definitions_by_name = OrderedDict(FIXED_CHANNELS)
     missing_set = set(missing)
 
     print()
     print("==========================================")
     print("FALLBACK-QUELLEN")
     print("==========================================")
-    print(
-        f"Fehlende Fixed-Sender: {len(missing_set)}"
-    )
+    print(f"Fehlende Fixed-Sender: {len(missing_set)}")
 
-    # Bereits ausgewählte Fixed-Sender werden aus den
-    # Kandidaten ausgeschlossen.
-    selected_by_name = {
-        entry.get("display_name")
-        for entry in result
-    }
-
+    selected_by_name = {entry.get("display_name") for entry in result}
     new_missing = []
 
     for display_name in missing:
         if display_name in selected_by_name:
             continue
 
-        definition = definitions_by_name.get(
-            display_name
-        )
-
+        definition = definitions_by_name.get(display_name)
         if definition is None:
             new_missing.append(display_name)
             continue
 
         variants = definition
-
         selected = None
         selected_variant = None
 
-        # Varianten strikt in der bestehenden Reihenfolge.
-        for variant_number, variant in enumerate(
-            variants,
-            start=1
-        ):
-
-            # Fallback-Quellen strikt nach ihrer Reihenfolge.
-            # Sobald eine höher priorisierte Fallback-Quelle einen
-            # gesunden Kandidaten für diese Variante liefert, werden
-            # die nachfolgenden Quellen nicht mehr geladen.
+        for variant_number, variant in enumerate(variants, start=1):
             for source_name, source_url in FALLBACK_SOURCES:
-
-                source_entries = load_fallback_source(
-                    source_name,
-                    source_url
-                )
-
+                source_entries = load_fallback_source(source_name, source_url)
                 if not source_entries:
                     continue
 
                 fallback_candidates = find_healthy_fallback_matches(
-                    source_entries,
-                    variant
+                    source_entries, variant
                 )
 
                 if fallback_candidates:
                     fallback_candidates.sort(key=selection_score)
-                    # KORREKTUR: Nur zugreifen, wenn die Liste nicht leer ist
                     if len(fallback_candidates) > 0:
                         selected = fallback_candidates[0]
                         selected_variant = variant_number
                         break
-
 
             if selected is not None:
                 break
@@ -1574,19 +1082,13 @@ def build_fixed_with_fallbacks(entries):
             new_missing.append(display_name)
             continue
 
-        base_id = normalize_tvg_id(
-            selected.get("tvg_id", "")
-        )
-
-        # Keine doppelte TVG-ID.
+        base_id = normalize_tvg_id(selected.get("tvg_id", ""))
         if base_id and base_id in used_ids:
             new_missing.append(display_name)
             continue
 
         selected["category"] = "00 Priorität"
-        selected["priority"] = (
-            len(result) + 1
-        )
+        selected["priority"] = len(result) + 1
         selected["display_name"] = display_name
         selected["matched_variant"] = selected_variant
 
@@ -1596,8 +1098,7 @@ def build_fixed_with_fallbacks(entries):
             used_ids.add(base_id)
 
         print(
-            f"    Fallback OK: {display_name} "
-            f"-> {selected['source']} "
+            f"    Fallback OK: {display_name} -> {selected['source']} "
             f"(Variante {selected_variant})"
         )
 
@@ -1605,57 +1106,38 @@ def build_fixed_with_fallbacks(entries):
 
 
 # ============================================================
-# DOWNLOAD
+# DOWNLOAD & PARSER
 # ============================================================
 
 def download(url):
-
     request = urllib.request.Request(
         url,
         headers={
             "User-Agent": (
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/131 Safari/537.36"
             )
-        }
+        },
     )
 
-    with urllib.request.urlopen(
-        request,
-        timeout=60
-    ) as response:
-
+    with urllib.request.urlopen(request, timeout=60) as response:
         data = response.read()
 
     if not data:
         raise RuntimeError("Leere Antwort")
 
-    return data.decode(
-        "utf-8",
-        errors="replace"
-    )
+    return data.decode("utf-8", errors="replace")
 
-
-# ============================================================
-# M3U PARSER
-# ============================================================
 
 def parse_m3u(text, source):
-
     lines = text.splitlines()
-
     entries = []
-
     i = 0
 
     while i < len(lines):
-
         line = lines[i].strip()
-
         if not line.startswith("#EXTINF:"):
-
             i += 1
             continue
 
@@ -1663,143 +1145,62 @@ def parse_m3u(text, source):
             break
 
         url = lines[i + 1].strip()
-
         if not url or url.startswith("#"):
-
             i += 2
             continue
 
-        match = re.search(
-            r",(.+)$",
-            line
-        )
-
-        name = (
-            match.group(1).strip()
-            if match
-            else ""
-        )
+        match = re.search(r",(.+)$", line)
+        name = match.group(1).strip() if match else ""
 
         entry = {
-
             "info": line,
-
             "name": name,
-
-            "tvg_id": get_attribute(
-                line,
-                "tvg-id"
-            ),
-
-            "tvg_name": get_attribute(
-                line,
-                "tvg-name"
-            ),
-
-            "language": get_attribute(
-                line,
-                "tvg-language"
-            ),
-
-            "country": get_attribute(
-                line,
-                "tvg-country"
-            ),
-
-            "group": get_attribute(
-                line,
-                "group-title"
-            ),
-
+            "tvg_id": get_attribute(line, "tvg-id"),
+            "tvg_name": get_attribute(line, "tvg-name"),
+            "tvg_logo": get_attribute(line, "tvg-logo"),
+            "language": get_attribute(line, "tvg-language"),
+            "country": get_attribute(line, "tvg-country"),
+            "group": get_attribute(line, "group-title"),
             "source": source,
-
             "url": url,
         }
 
         entries.append(entry)
-
         i += 2
 
     return entries
 
 
-# ============================================================
-# AUSSCHLUSS
-# ============================================================
-
 def excluded(entry):
-
-    tvg_id = normalize_tvg_id(
-        entry["tvg_id"]
-    )
-
+    tvg_id = normalize_tvg_id(entry.get("tvg_id", ""))
     if tvg_id in EXCLUDE_IDS:
         return True
 
-    combined = normalize(
-        entry["name"]
-        + " "
-        + entry["tvg_name"]
-    )
-
+    combined = normalize(entry.get("name", "") + " " + entry.get("tvg_name", ""))
     for word in EXCLUDE_NAME_WORDS:
-
         if normalize(word) in combined:
             return True
 
-    # --------------------------------------------------------
-    # URL-Ausschlüsse
-    # --------------------------------------------------------
-
-    url = entry.get(
-        "url",
-        ""
-    ).lower()
-
+    url = entry.get("url", "").lower()
     for blocked in EXCLUDE_URL_PARTS:
-
         if blocked.lower() in url:
             return True
 
     return False
 
 
-# ============================================================
-# GEO BLOCKED
-# ============================================================
-
 def is_geo_blocked(entry):
-
     text = normalize(
-        entry["info"]
-        + " "
-        + entry["name"]
-        + " "
-        + entry["tvg_name"]
+        entry.get("info", "") + " " + entry.get("name", "") + " " + entry.get("tvg_name", "")
     )
+    return "geo blocked" in text or "geoblocked" in text
 
-    return (
-        "geo blocked" in text
-        or "geoblocked" in text
-    )
-
-
-# ============================================================
-# HD
-# ============================================================
 
 def is_hd(entry):
-
     text = normalize(
-        entry["info"]
-        + " "
-        + entry["name"]
-        + " "
-        + entry["tvg_name"]
+        entry.get("info", "") + " " + entry.get("name", "") + " " + entry.get("tvg_name", "")
     )
-
     words = set(text.split())
-
     return (
         "hd" in words
         or "fhd" in words
@@ -1811,373 +1212,143 @@ def is_hd(entry):
     )
 
 
-# ============================================================
-# STREAM SCORE
-# ============================================================
-#
-# Wird NUR innerhalb derselben Quellen-Priorität verwendet.
-#
-#   0 = HD + nicht Geo-blocked
-#   1 = SD + nicht Geo-blocked
-#   2 = HD + Geo-blocked
-#   3 = SD + Geo-blocked
-#
-# ============================================================
-
 def stream_score(entry):
-
     geo = is_geo_blocked(entry)
     hd = is_hd(entry)
 
     if hd and not geo:
         return 0
-
     if not hd and not geo:
         return 1
-
     if hd and geo:
         return 2
-
     return 3
 
 
-# ============================================================
-# KOMBINIERTER STREAM-SCORE
-# ============================================================
-#
-# Quelle ist wichtiger als Stream-Qualität.
-#
-# Beispiel:
-#
-# Quelle 1 + SD
-#       ist besser als
-# Quelle 12 + HD
-#
-# ============================================================
-
 def selection_score(entry):
     url = entry.get("url", "")
-    
     return (
-        source_score(entry),          # 1. Haupt- vs. Fallback-Quelle (z.B. Deutschland vor Kodinerds)
-        get_stream_priority(url),     # 2. NEU: Normaler Stream vor antik.sk innerhalb dieser Quelle
-        stream_score(entry),          # 3. HD vs. SD / Geo-blocked
+        source_score(entry),       # 1. Haupt- vs. Fallback-Quelle
+        get_stream_priority(url),  # 2. Inlands- vs. Normal vs. Fallback
+        stream_score(entry),       # 3. HD vs. SD / Geo-blocked
     )
 
+
 # ============================================================
-# ID MATCH
+# MATCHING LOGIK
 # ============================================================
 
 def id_matches(entry, ids):
-
-    entry_id = normalize_tvg_id(
-        entry["tvg_id"]
-    )
-
+    entry_id = normalize_tvg_id(entry.get("tvg_id", ""))
     if not entry_id:
         return False
 
     for channel_id in ids:
-
-        target = normalize_tvg_id(
-            channel_id
-        )
-
+        target = normalize_tvg_id(channel_id)
         if entry_id == target:
             return True
 
     return False
 
 
-# ============================================================
-# NAME MATCH
-#
-# Sehr vorsichtig, damit z.B.
-#
-#   Totally Turtles
-#
-# niemals RTL wird.
-# ============================================================
-
 def name_matches(entry, names):
-
-    entry_name = normalize(
-        entry["name"]
-    )
-
-    tvg_name = normalize(
-        entry["tvg_name"]
-    )
-
-    values = {
-        value
-        for value in (
-            entry_name,
-            tvg_name
-        )
-        if value
-    }
-
-    # --------------------------------------------------------
-    # Exakter Name
-    # --------------------------------------------------------
+    entry_name = normalize(entry.get("name", ""))
+    tvg_name = normalize(entry.get("tvg_name", ""))
+    values = {value for value in (entry_name, tvg_name) if value}
 
     for candidate in names:
-
         target = normalize(candidate)
-
         if target in values:
             return True
 
-    # --------------------------------------------------------
-    # Sichere längere Teilmatches
-    # --------------------------------------------------------
-
     safe_partial = {
-
         "zdf info",
         "zdf neo",
-
         "sat 1 gold",
-
         "kabel eins doku",
         "kabel1 doku",
-
         "prosieben maxx",
-
         "rtl zwei",
-
         "radio bremen fernsehen",
         "radio bremen tv",
-
         "radio weser tv",
         "radio weser tv bremen",
-
         "swr fernsehen rheinland pfalz",
-
         "br fernsehen nord",
-
         "terra mater wild",
-
         "authentic history",
-
         "nachrichten 360",
-
         "oberpfalz tv",
-
         "muenchen tv",
-
         "noa4 hamburg",
-
         "ndr niedersachsen",
-
         "ndr hamburg",
-
         "ndr fernsehen",
-
         "welt der wunder",
-
         "spiegel tv",
-
         "dokusat",
-
     }
 
     for candidate in names:
-
         target = normalize(candidate)
-
         if target not in safe_partial:
             continue
-
         for value in values:
-
             if target in value:
                 return True
 
     return False
 
 
-# ============================================================
-# DEFINITION MATCH
-# ============================================================
-
-def matches_definition(
-    entry,
-    definition
-):
-
+def matches_definition(entry, definition):
     ids = definition.get("ids", [])
     names = definition.get("names", [])
 
     if id_matches(entry, ids):
         return True
-
     if name_matches(entry, names):
         return True
-
     return False
 
 
-# ============================================================
-# MATCHES EINER VARIANTE
-# ============================================================
+def find_variant_matches(entries, variant):
+    return [entry for entry in entries if matches_definition(entry, variant)]
 
-def find_variant_matches(
-    entries,
-    variant
-):
-
-    return [
-
-        entry
-
-        for entry in entries
-
-        if matches_definition(
-            entry,
-            variant
-        )
-
-    ]
-
-
-# ============================================================
-# BESTE VARIANTE
-# ============================================================
-#
-# Variante 1 hat Vorrang vor Variante 2.
-#
-# Beispiel:
-#
-# NDR Niedersachsen vorhanden:
-#     -> Niedersachsen
-#
-# nicht:
-#     -> Hamburg
-#
-# Nur wenn Niedersachsen NICHT gefunden wird:
-#     -> Hamburg
-#
-# Innerhalb der Variante:
-#
-#     Quelle → Stream-Qualität
-#
-# ============================================================
-
-def find_best_variant(
-    entries,
-    variants
-):
-
-    for variant_number, variant in enumerate(
-        variants,
-        start=1
-    ):
-
-        matches = find_variant_matches(
-            entries,
-            variant
-        )
-
-        if not matches:
-            continue
-
-        matches.sort(
-            key=selection_score
-        )
-
-        return (
-            matches[0],
-            variant_number
-        )
-
-    return (
-        None,
-        None
-    )
-
-
-# ============================================================
-# FIXED AUFBAU
-# ============================================================
 
 def build_fixed(entries):
-
     result = []
-
     used_ids = set()
-
     missing = []
 
-    for priority_number, definition in enumerate(
-        FIXED_CHANNELS,
-        start=1
-    ):
-
+    for priority_number, definition in enumerate(FIXED_CHANNELS, start=1):
         display_name = definition[0]
         variants = definition[1]
 
         selected = None
         selected_variant = None
 
-        # ----------------------------------------------------
-        # Varianten strikt in der vorgegebenen Reihenfolge
-        # ----------------------------------------------------
-
-        for variant_number, variant in enumerate(
-            variants,
-            start=1
-        ):
-
-            matches = find_variant_matches(
-                entries,
-                variant
-            )
-
-            # Bereits verwendete TVG-ID nicht doppelt
+        for variant_number, variant in enumerate(variants, start=1):
+            matches = find_variant_matches(entries, variant)
             matches = [
-
                 entry
-
                 for entry in matches
-
-                if (
-                    normalize_tvg_id(
-                        entry["tvg_id"]
-                    )
-                    not in used_ids
-                )
-
+                if normalize_tvg_id(entry.get("tvg_id", "")) not in used_ids
             ]
 
             if not matches:
                 continue
 
-            # ------------------------------------------------
-            # Quelle zuerst, Stream-Qualität danach
-            # ------------------------------------------------
-
-            matches.sort(
-                key=selection_score
-            )
-
+            matches.sort(key=selection_score)
             if matches:
-               selected = matches[0]
-               selected_variant = variant_number
-               break
+                selected = matches[0]
+                selected_variant = variant_number
+                break
 
         if selected is None:
-
-            missing.append(
-                display_name
-            )
-
+            missing.append(display_name)
             continue
 
-        base_id = normalize_tvg_id(
-            selected.get("tvg_id", "")
-        )
+        base_id = normalize_tvg_id(selected.get("tvg_id", ""))
 
         selected["category"] = "00 Priorität"
         selected["priority"] = priority_number
@@ -2189,61 +1360,39 @@ def build_fixed(entries):
         if base_id:
             used_ids.add(base_id)
 
-    return (
-        result,
-        used_ids,
-        missing
-    )
+    return result, used_ids, missing
 
 
 # ============================================================
-# KATEGORIE
+# KATEGORIE & SORTIERUNG
 # ============================================================
 
 def get_category(entry):
-
-    text = normalize(
-        entry["name"]
-        + " "
-        + entry["tvg_name"]
-    )
+    text = normalize(entry.get("name", "") + " " + entry.get("tvg_name", ""))
 
     if "rakuten tv" in text:
         return "09 Rakuten TV"
 
     regional_words = [
-
         "ndr niedersachsen",
         "ndr hamburg",
-
         "noa4",
         "hamburg 1",
         "hamburg1",
-
         "radio weser",
         "weser tv",
-
         "radio bremen",
-
         "oberpfalz tv",
         "oberpfalztv",
-
         "muenchen tv",
         "munchen tv",
-
         "br fernsehen nord",
-
         "swr fernsehen rheinland pfalz",
     ]
-
-    if any(
-        word in text
-        for word in regional_words
-    ):
+    if any(word in text for word in regional_words):
         return "02 Regional"
 
     third_words = [
-
         "ndr",
         "wdr",
         "swr",
@@ -2253,15 +1402,10 @@ def get_category(entry):
         "sr fernsehen",
         "br fernsehen",
     ]
-
-    if any(
-        word in text
-        for word in third_words
-    ):
+    if any(word in text for word in third_words):
         return "03 Dritte Programme"
 
     news_words = [
-
         "welt",
         "n tv",
         "ntv",
@@ -2271,15 +1415,10 @@ def get_category(entry):
         "rt de",
         "rt deutsch",
     ]
-
-    if any(
-        word in text
-        for word in news_words
-    ):
+    if any(word in text for word in news_words):
         return "04 Nachrichten"
 
     documentary_words = [
-
         "doku",
         "dokumentation",
         "history",
@@ -2288,40 +1427,15 @@ def get_category(entry):
         "spiegel tv",
         "authentic history",
     ]
-
-    if any(
-        word in text
-        for word in documentary_words
-    ):
+    if any(word in text for word in documentary_words):
         return "05 Dokumentation & Wissen"
 
-    children_words = [
-
-        "kika",
-        "kinder",
-        "kids",
-        "junior",
-    ]
-
-    if any(
-        word in text
-        for word in children_words
-    ):
+    children_words = ["kika", "kinder", "kids", "junior"]
+    if any(word in text for word in children_words):
         return "06 Kinder"
 
-    religion_words = [
-
-        "bibel tv",
-        "bibeltv",
-        "ewtn",
-        "k tv",
-        "erf",
-    ]
-
-    if any(
-        word in text
-        for word in religion_words
-    ):
+    religion_words = ["bibel tv", "bibeltv", "ewtn", "k tv", "erf"]
+    if any(word in text for word in religion_words):
         return "07 Religion"
 
     if "sport" in text:
@@ -2330,154 +1444,57 @@ def get_category(entry):
     return "10 Weitere deutsche Sender"
 
 
-# ============================================================
-# REST DEDUP
-# ============================================================
-#
-# Auch hier gilt:
-#
-#     Quelle → Stream-Qualität
-#
-# und nicht mehr:
-#
-#     Stream-Qualität über alle Quellen
-#
-# ============================================================
-
 def deduplicate(entries):
-
     result = OrderedDict()
-
     for entry in entries:
-
-        tvg_id = normalize_tvg_id(
-            entry["tvg_id"]
-        )
-
+        tvg_id = normalize_tvg_id(entry.get("tvg_id", ""))
         if not tvg_id:
             continue
 
         if tvg_id not in result:
-
             result[tvg_id] = entry
             continue
 
         existing = result[tvg_id]
-
-        if (
-            selection_score(entry)
-            < selection_score(existing)
-        ):
-
+        if selection_score(entry) < selection_score(existing):
             result[tvg_id] = entry
 
     return list(result.values())
 
 
-# ============================================================
-# REST SORTIERUNG
-# ============================================================
-#
-# WICHTIG:
-#
-# Nach FIXED kommt KEINE Kategorie-Sortierung mehr.
-#
-# Alles wird schlicht alphabetisch A-Z sortiert.
-#
-# ============================================================
-
 def sort_rest(entries):
-
     for entry in entries:
-
-        entry["category"] = get_category(
-            entry
-        )
+        entry["category"] = get_category(entry)
 
     entries.sort(
         key=lambda entry: (
-            normalize(entry["name"]),
-            normalize(entry["tvg_id"]),
+            normalize(entry.get("name", "")),
+            normalize(entry.get("tvg_id", "")),
         )
     )
-
     return entries
 
 
-# ============================================================
-# M3U INFO
-# ============================================================
-
-def clean_info(
-    entry,
-    category
-):
-
+def clean_info(entry, category):
     info = entry["info"]
+    info = re.sub(r'\s+tvg-chno="[^"]*"', "", info, flags=re.IGNORECASE)
+    info = re.sub(r'\s+group-title="[^"]*"', "", info, flags=re.IGNORECASE)
+    info = re.sub(r'\s+tvg-id="[^"]*"', "", info, flags=re.IGNORECASE)
+    info = re.sub(r",.*$", "", info)
 
-    # --------------------------------------------------------
-    # Fremde Kanalnummer, alte group-title und alte tvg-ids entfernen.
-    # Dadurch überschreiben wir das Attribut sauber und standardkonform.
-    # --------------------------------------------------------
-
-    info = re.sub(
-        r'\s+tvg-chno="[^"]*"',
-        "",
-        info,
-        flags=re.IGNORECASE
-    )
-
-    info = re.sub(
-        r'\s+group-title="[^"]*"',
-        "",
-        info,
-        flags=re.IGNORECASE
-    )
-
-    info = re.sub(
-        r'\s+tvg-id="[^"]*"',
-        "",
-        info,
-        flags=re.IGNORECASE
-    )
-
-    # --------------------------------------------------------
-    # Alles hinter dem letzten Komma entfernen.
-    # Der Sendername wird anschließend selbst gesetzt.
-    # --------------------------------------------------------
-
-    info = re.sub(
-        r",.*$",
-        "",
-        info
-    )
-
-    # Extrahiere die tvg_id aus dem Eintrag (wurde im Parser ausgelesen)
     tvg_id = entry.get("tvg_id", "")
-
-    # Falls die ID noch das Suffix (@hd etc.) hat, jagen wir sie zur Sicherheit
-    # durch deine Normalisierung (falls nicht schon vorher geschehen)
     if tvg_id:
         tvg_id = normalize_tvg_id(tvg_id)
 
-    # Wir bauen die Zeile neu auf und setzen tvg-id direkt nach #EXTINF:-1
-    # Falls info das '-1' verliert oder verschoben hat, fangen wir das hier ab
-    base_info = re.sub(r'^#EXTINF:[-\d]*', '#EXTINF:-1', info)
+    base_info = re.sub(r"^#EXTINF:[-\d]*", "#EXTINF:-1", info)
+    return f'{base_info} tvg-id="{tvg_id}" group-title="{category}",{entry.get("name", "")}'
 
-    return (
-        f'{base_info} '
-        f'tvg-id="{tvg_id}" '
-        f'group-title="{category}",'
-        f'{entry["name"]}'
-    )
 
 # ============================================================
-# M3U ERSTELLEN (Beide Listen werden direkt parallel befüllt)
+# M3U ERSTELLEN
 # ============================================================
 
 def build_m3u(entries):
-
-    # Wir erstellen zwei komplett getrennte Körbe im Arbeitsspeicher mit der iptv-org EPG Quelle
     output_win = [
         '#EXTM3U x-tvg-url="https://epgshare01.online"\n',
         "",
@@ -2498,67 +1515,74 @@ def build_m3u(entries):
 
     current_category = None
 
+    adaptive_channels = [
+        "daserste.de",
+        "zdf.de",
+        "zdfinfo.de",
+        "zdfneo.de",
+        "one.de",
+        "3sat.de",
+        "phoenix.de",
+        "tagesschau24.de",
+        "arte.de",
+        "mdrfernsehen.de",
+        "ndrfernsehen.de",
+        "wdrfernsehen.de",
+        "swrfernsehenrheinlandpfalz.de",
+        "hrfernsehen.de",
+        "srfernsehen.de",
+        "rbbfernsehen.de",
+        "brfernsehen.de",
+    ]
+
     for entry in entries:
-
-        category = entry["category"]
-
+        category = entry.get("category", "")
         if category != current_category:
-
             output_win.append(f"\n# ===== {category} =====\n")
             output_ios.append(f"\n# ===== {category} =====\n")
             current_category = category
 
-        # Basis-Informationzeile des Senders generieren (Nutzt jetzt die ID aus clean_info!)
         info_line = clean_info(entry, category)
         url = entry.get("url", "")
         if not url:
             continue
-            
+
         name = entry.get("name", "").lower()
         url_lower = url.lower()
-
-        # Holt tvg_id und tvg_logo sicher direkt aus dem Eintrag
         id_lower = entry.get("tvg_id", "").lower()
         logo_lower = entry.get("tvg_logo", "").lower()
 
-        # OFFIZIELLE MEDIATHEKEN (Brauchen zwingend die HLS/DASH Puffer-Engine gegen Ruckler)
-        adaptive_channels = [
-            "daserste.de", "zdf.de", "zdfinfo.de", "zdfneo.de", "one.de", "3sat.de", 
-            "phoenix.de", "tagesschau24.de", "arte.de", "mdrfernsehen.de", "ndrfernsehen.de", 
-            "wdrfernsehen.de", "swrfernsehenrheinlandpfalz.de", "hrfernsehen.de", 
-            "srfernsehen.de", "rbbfernsehen.de", "brfernsehen.de"
-        ]
-        
-        # 1. FIX FÜR REINE PLUTO TV STREAMS (Hier trennen wir Windows und iPhone strikt!)     
-        if any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"]) or "plu-" in url_lower or "images.pluto.tv" in logo_lower:
-            # In die Windows-Liste kommt deine funktionierende Zeile mit dem |User-Agent=
+        # 1. Pluto TV & Skynews User-Agent Fix
+        if (
+            any(x in name or x in id_lower for x in ["pluto", "sky news", "skynews"])
+            or "plu-" in url_lower
+            or "images.pluto.tv" in logo_lower
+        ):
             output_win.append(info_line)
-            output_win.append(f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15")
-            
-            # In die iPhone-Liste kommt NUR die reine, nackte URL ohne Zusätze
+            output_win.append(
+                f"{url}|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15"
+            )
             output_ios.append(info_line)
             output_ios.append(url)
 
-        # 2. FIX FÜR ARD/ZDF MEDIATHEKEN
+        # 2. Mediatheken HLS/DASH Buffer Engine
         elif any(x in id_lower for x in adaptive_channels):
-            # Windows kriegt KODIPROP
             output_win.append(info_line)
-            output_win.append('#KODIPROP:inputstream=inputstream.adaptive')
-            output_win.append('#KODIPROP:inputstream.adaptive.manifest_type=hls')
+            output_win.append("#KODIPROP:inputstream=inputstream.adaptive")
+            output_win.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
             output_win.append(url)
-            
-            # iPhone streamt die Mediatheken direkt nativ (ohne KODIPROP Absturzrisiko)
+
             output_ios.append(info_line)
             output_ios.append(url)
 
-        # 3. MULTICAST-FIX: Automatische Reparatur für Windows-Kodi (udp:// und rtp://)
+        # 3. Multicast-Fix (udp:// und rtp://)
         elif url_lower.startswith("udp://") and not url_lower.startswith("udp://@"):
             fixed_url = url.replace("udp://", "udp://@", 1).replace("UDP://", "udp://@", 1)
             output_win.append(info_line)
             output_win.append(fixed_url)
             output_ios.append(info_line)
             output_ios.append(fixed_url)
-            
+
         elif url_lower.startswith("rtp://") and not url_lower.startswith("rtp://@"):
             fixed_url = url.replace("rtp://", "rtp://@", 1).replace("RTP://", "rtp://@", 1)
             output_win.append(info_line)
@@ -2566,7 +1590,7 @@ def build_m3u(entries):
             output_ios.append(info_line)
             output_ios.append(fixed_url)
 
-        # 4. STANDARD-MODUS: Für alle anderen (ProSieben, RTL, VOX etc.) identisch eintragen
+        # 4. Standard
         else:
             output_win.append(info_line)
             output_win.append(url)
@@ -2576,15 +1600,10 @@ def build_m3u(entries):
     content_win = "\n".join(output_win) + "\n"
     content_ios = "\n".join(output_ios) + "\n"
 
-    return (content_win, content_ios)
+    return content_win, content_ios
 
-# ============================================================
-# SICHER SCHREIBEN (Vollständig entkoppelt von globalen Pfad-Fehlern)
-# ============================================================
 
 def safe_write(content_win, content_ios):
-
-    # 1. WINDOWS-DATEI SICHER SCHREIBEN
     with open(TEMP_OUTPUT, "w", encoding="utf-8") as file:
         file.write(content_win)
 
@@ -2594,12 +1613,10 @@ def safe_write(content_win, content_ios):
                 os.remove(BACKUP_OUTPUT)
             except OSError:
                 pass
-
         os.replace(OUTPUT, BACKUP_OUTPUT)
 
     os.replace(TEMP_OUTPUT, OUTPUT)
 
-    # 2. IPHONE-DATEI SICHER SCHREIBEN
     with open(TEMP_OUTPUT_IOS, "w", encoding="utf-8") as file:
         file.write(content_ios)
 
@@ -2609,7 +1626,6 @@ def safe_write(content_win, content_ios):
                 os.remove(BACKUP_OUTPUT_IOS)
             except OSError:
                 pass
-
         os.replace(OUTPUT_IOS, BACKUP_OUTPUT_IOS)
 
     os.replace(TEMP_OUTPUT_IOS, OUTPUT_IOS)
@@ -2619,16 +1635,7 @@ def safe_write(content_win, content_ios):
     print(f"   iPhone : {OUTPUT_IOS} ({os.path.getsize(OUTPUT_IOS)} Bytes)")
 
 
-
-
 def stage_ios_in_github_actions():
-    """
-    Der bestehende GitHub-Workflow staged nur deutsch.m3u.
-    Wenn das Script unter GitHub Actions laeuft, wird deshalb die
-    erzeugte deutsch_iphone.m3u hier selbst fuer denselben Commit
-    vorgemerkt. Lokal passiert nichts.
-    """
-
     if os.environ.get("GITHUB_ACTIONS", "").lower() != "true":
         return
 
@@ -2638,7 +1645,7 @@ def stage_ios_in_github_actions():
             cwd=SCRIPT_DIR,
             check=True,
         )
-        print("-> GitHub Actions: deutsch_iphone.m3u fuer Commit vorgemerkt.")
+        print("-> GitHub Actions: deutsch_iphone.m3u für Commit vorgemerkt.")
     except (OSError, subprocess.CalledProcessError) as error:
         raise RuntimeError(
             f"deutsch_iphone.m3u konnte nicht mit git add vorgemerkt werden: {error}"
@@ -2650,7 +1657,6 @@ def stage_ios_in_github_actions():
 # ============================================================
 
 def main():
-
     print()
     print("==========================================")
     print("GER TV - UPDATE")
@@ -2660,7 +1666,7 @@ def main():
     all_entries = []
     successful_sources = 0
 
-    # 1. HAUPT-QUELLEN LADEN
+    # 1. Hauptquellen laden
     for source_name, url in SOURCES:
         try:
             print(f"Lade {source_name} ...")
@@ -2676,39 +1682,38 @@ def main():
         except Exception as error:
             print(f"  FEHLER: {error}")
 
-    # 2. FALLBACK-QUELLEN FÜR GLOBALEN REST-TOPF VORAB LADEN
+    # 2. Fallback-Quellen für Rest laden
     print()
     print("Lade verbleibende Fallback-Quellen für die Rest-Liste ...")
     all_fallback_candidates = []
-    
+
     for source_name, source_url in FALLBACK_SOURCES:
         fb_entries = load_fallback_source(source_name, source_url)
         if fb_entries:
-            # Vorfiltern auf unerwünschte Wörter/IDs
             clean_fb = [e for e in fb_entries if not excluded(e)]
             all_fallback_candidates.extend(clean_fb)
 
-    # 3. MULTITHREADING HEALTHCHECK FÜR RESTE AUS DEN FALLBACKS
+    # 3. Multithreading Health-Check
     healthy_fallback_entries = []
     if all_fallback_candidates:
         print()
         print("==========================================")
         print("GLOBALER HEALTH-CHECK (FALLBACK QUELLEN)")
         print("==========================================")
-        
-        # Nutzen des in Python integrierten ThreadPools mit 32 Workern für schnellen Abruf
+
         with ThreadPoolExecutor(max_workers=32) as executor:
             future_to_entry = {
-                executor.submit(check_stream_health, entry.get("url", "")): entry 
+                executor.submit(check_stream_health, entry.get("url", "")): entry
                 for entry in all_fallback_candidates
             }
+
             for future in as_completed(future_to_entry):
                 if future.result():
                     healthy_fallback_entries.append(future_to_entry[future])
-                    
-        print(f"  -> Erreichbar: {len(healthy_fallback_entries)} von {len(all_fallback_candidates)}")
-        
-        # Validierte Fallback-Streams dem Gesamttopf hinzufügen
+
+        print(
+            f"  -> Erreichbar: {len(healthy_fallback_entries)} von {len(all_fallback_candidates)}"
+        )
         all_entries.extend(healthy_fallback_entries)
 
     print()
@@ -2716,288 +1721,111 @@ def main():
     print("Erfolgreiche Fallback-Streams integriert:", len(healthy_fallback_entries))
     print("Insgesamt geladen:", len(all_entries))
 
-    # --------------------------------------------------------
-    # QUELLENSTATISTIK
-    # --------------------------------------------------------
-
+    # Statistik
     source_counts = OrderedDict()
-
     for entry in all_entries:
-
         source = entry["source"]
-
-        source_counts[source] = (
-            source_counts.get(source, 0) + 1
-        )
+        source_counts[source] = source_counts.get(source, 0) + 1
 
     print()
     print("==========================================")
     print("QUELLEN")
     print("==========================================")
-
     for source, count in source_counts.items():
-
-        print(
-            f"{source}: {count} Einträge"
-        )
+        print(f"{source}: {count} Einträge")
 
     if successful_sources == 0:
-
-        raise RuntimeError(
-            "Keine Quelle konnte geladen werden."
-        )
+        raise RuntimeError("Keine Quelle konnte geladen werden.")
 
     if len(all_entries) < 50:
+        raise RuntimeError(f"Ungewöhnlich wenige Einträge geladen: {len(all_entries)}")
 
-        raise RuntimeError(
-            "Ungewöhnlich wenige Einträge geladen: "
-            f"{len(all_entries)}"
-        )
-
-    # --------------------------------------------------------
-    # AUSSCHLÜSSE
-    # --------------------------------------------------------
-
+    # Ausschlüsse
     before_filter = len(all_entries)
-
-    filtered = [
-
-        entry
-
-        for entry in all_entries
-
-        if not excluded(entry)
-
-    ]
-
-    excluded_count = (
-        before_filter
-        - len(filtered)
-    )
+    filtered = [entry for entry in all_entries if not excluded(entry)]
+    excluded_count = before_filter - len(filtered)
 
     print()
-    print(
-        "Ausgeschlossen:",
-        excluded_count
-    )
+    print("Ausgeschlossen:", excluded_count)
+    print("Nach Ausschlüssen:", len(filtered))
 
-    print(
-        "Nach Ausschlüssen:",
-        len(filtered)
-    )
+    # Fixed-Sender aufbauen
+    fixed, used_ids, missing = build_fixed_with_fallbacks(filtered)
 
-    # --------------------------------------------------------
-    # FIXED ZUERST
-    # --------------------------------------------------------
-
-    fixed, used_ids, missing = build_fixed_with_fallbacks(
-        filtered
-    )
-
-    # --------------------------------------------------------
-    # ÜBRIGE EINTRÄGE
-    # --------------------------------------------------------
-
+    # Rest deduplizieren und alphabetisch sortieren
     rest = [
-
         entry
-
         for entry in filtered
-
-        if normalize_tvg_id(
-            entry["tvg_id"]
-        ) not in used_ids
-
+        if normalize_tvg_id(entry.get("tvg_id", "")) not in used_ids
     ]
+    rest = deduplicate(rest)
+    rest = sort_rest(rest)
 
-    # --------------------------------------------------------
-    # REST DEDUPLIZIEREN
-    # --------------------------------------------------------
-
-    rest = deduplicate(
-        rest
-    )
-
-    # --------------------------------------------------------
-    # REST ALPHABETISCH
-    # --------------------------------------------------------
-
-    rest = sort_rest(
-        rest
-    )
-
-    # --------------------------------------------------------
-    # Rakuten aus dem Rest entfernen.
-    # --------------------------------------------------------
-
+    # Rakuten an das Ende
     non_rakuten_rest = []
     rakuten_rest = []
 
     for entry in rest:
-
-        text = normalize(
-            entry["name"]
-            + " "
-            + entry["tvg_name"]
-        )
-
+        text = normalize(entry.get("name", "") + " " + entry.get("tvg_name", ""))
         if "rakuten tv" in text:
-
             rakuten_rest.append(entry)
-
         else:
-
             non_rakuten_rest.append(entry)
 
-    rest = (
-        non_rakuten_rest
-        + rakuten_rest
-    )
-
-    # --------------------------------------------------------
-    # ENDGÜLTIGE LISTE
-    # --------------------------------------------------------
-
-    entries = (
-        fixed
-        + rest
-    )
+    rest = non_rakuten_rest + rakuten_rest
+    entries = fixed + rest
 
     if len(entries) < 20:
+        raise RuntimeError(f"Nach Verarbeitung zu wenige Sender: {len(entries)}")
 
-        raise RuntimeError(
-            "Nach Verarbeitung zu wenige Sender: "
-            f"{len(entries)}"
-        )
-
-    # --------------------------------------------------------
-    # M3U ERSTELLUNG (Erzeugt zwei Textblöcke)
-    # --------------------------------------------------------
-
+    # M3U erzeugen und schreiben
     content_win, content_ios = build_m3u(entries)
-
-    # --------------------------------------------------------
-    # SICHER SCHREIBEN (Schreibt beide Dateien auf einmal)
-    # --------------------------------------------------------
-
     safe_write(content_win, content_ios)
     stage_ios_in_github_actions()
 
-    # ========================================================
-    # AUSGABE
-    # ========================================================
-
+    # Übersicht
     print()
     print("==========================================")
     print("FIXED / PRIORITÄT")
     print("==========================================")
 
-    for number, entry in enumerate(
-        fixed,
-        start=1
-    ):
-
-        hd = (
-            "HD"
-            if is_hd(entry)
-            else "SD"
-        )
-
-        geo = (
-            "GEO"
-            if is_geo_blocked(entry)
-            else "OK"
-        )
-
+    for number, entry in enumerate(fixed, start=1):
+        hd = "HD" if is_hd(entry) else "SD"
+        geo = "GEO" if is_geo_blocked(entry) else "OK"
         fallback = ""
-
-        if entry.get(
-            "matched_variant",
-            1
-        ) > 1:
-
-            fallback = (
-                f" FALLBACK#"
-                f"{entry['matched_variant']}"
-            )
+        if entry.get("matched_variant", 1) > 1:
+            fallback = f" FALLBACK#{entry['matched_variant']}"
 
         print(
-
-            f"{number:02d}. "
-            f"{entry['display_name']} "
-            f"[{hd}/{geo}]"
-            f"{fallback} "
-            f"[{entry['tvg_id']}] "
-            f"Quelle: {entry['source']}"
-
+            f"{number:02d}. {entry['display_name']} [{hd}/{geo}]{fallback} "
+            f"[{entry['tvg_id']}] Quelle: {entry['source']}"
         )
 
-    # --------------------------------------------------------
-    # Fehlende Fixed-Sender
-    # --------------------------------------------------------
-
     if missing:
-
         print()
         print("==========================================")
         print("NICHT GEFUNDENE PRIORITÄTS-SENDER")
         print("==========================================")
-
         for name in missing:
-
-            print(
-                f"- {name}"
-            )
-
-    # ========================================================
-    # ERGEBNIS
-    # ========================================================
+            print(f"- {name}")
 
     print()
     print("==========================================")
     print("ERGEBNIS")
     print("==========================================")
-
-    print(
-        "Gesamt:",
-        len(entries)
-    )
-
-    print(
-        "Priorität:",
-        len(fixed)
-    )
-
-    print(
-        "Rest:",
-        len(rest)
-    )
-
+    print("Gesamt:", len(entries))
+    print("Priorität:", len(fixed))
+    print("Rest:", len(rest))
     print()
-    print(
-        "Datei Windows:",
-        OUTPUT
-    )
-
-    print(
-        "Datei iPhone:  deutsch_iphone.m3u"
-    )
-
+    print("Datei Windows:", OUTPUT)
+    print("Datei iPhone: ", OUTPUT_IOS)
     print()
 
-
-# ============================================================
-# START
-# ============================================================
 
 if __name__ == "__main__":
-
     try:
-
         main()
-
     except Exception as error:
-
         print()
         print("==========================================")
         print("UPDATE FEHLGESCHLAGEN")
@@ -3005,17 +1833,18 @@ if __name__ == "__main__":
         print(f"{type(error).__name__}: {error}")
         traceback.print_exc()
         print()
-        print(
-            "Die vorhandenen M3U-Dateien "
-            "wurden NICHT überschrieben."
-        )
+        print("Die vorhandenen M3U-Dateien wurden NICHT überschrieben.")
 
         if os.path.exists(TEMP_OUTPUT):
-            try: os.remove(TEMP_OUTPUT)
-            except OSError: pass
+            try:
+                os.remove(TEMP_OUTPUT)
+            except OSError:
+                pass
 
-        if os.path.exists("deutsch_iphone.m3u.tmp"):
-            try: os.remove("deutsch_iphone.m3u.tmp")
-            except OSError: pass
+        if os.path.exists(TEMP_OUTPUT_IOS):
+            try:
+                os.remove(TEMP_OUTPUT_IOS)
+            except OSError:
+                pass
 
         raise SystemExit(1)
