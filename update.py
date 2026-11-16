@@ -14,27 +14,6 @@ from urllib.parse import urljoin, urlparse
 # ============================================================
 # GER TV - update.py
 # ============================================================
-#
-# Erstellt:
-#     deutsch.m3u
-#     deutsch_iphone.m3u
-#
-# REIHENFOLGE
-# -----------
-# 1. Persönliche FIXED / PRIORITÄT exakt in dieser Reihenfolge
-# 2. Danach alle übrigen Sender alphabetisch A-Z
-#
-# QUELLEN
-# -------
-# Quellen besitzen eine feste Priorität.
-#
-# Innerhalb derselben Quellen-Priorität entscheidet:
-#   1. Stream-Typ (ARD/ZDF Inlands-CDN vor Standard vor Testlinks)
-#   2. HD + nicht Geo-blocked
-#   3. SD + nicht Geo-blocked
-#   4. HD + Geo-blocked
-#   5. SD + Geo-blocked
-# ============================================================
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,7 +21,6 @@ OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u")
 BACKUP_OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u.bak")
 TEMP_OUTPUT = os.path.join(SCRIPT_DIR, "deutsch.m3u.tmp")
 
-# Globale Variablen für die iPhone-M3U
 OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u")
 BACKUP_OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u.bak")
 TEMP_OUTPUT_IOS = os.path.join(SCRIPT_DIR, "deutsch_iphone.m3u.tmp")
@@ -91,11 +69,6 @@ SOURCES = [
     ),
 ]
 
-
-# ============================================================
-# ZUSÄTZLICHE FALLBACK-QUELLEN
-# ============================================================
-
 FALLBACK_SOURCES = [
     (
         "Kodinerds",
@@ -118,11 +91,6 @@ FALLBACK_SOURCES = [
 FALLBACK_ENTRIES_CACHE = {}
 FALLBACK_SOURCE_ERRORS = {}
 
-
-# ============================================================
-# QUELLEN-PRIORITÄT
-# ============================================================
-
 SOURCE_PRIORITY = {
     "Deutschland": 1,
     "Bayern": 2,
@@ -140,37 +108,28 @@ SOURCE_PRIORITY = {
 
 
 # ============================================================
-# STREAM-PRIORITÄT (OPTION 1 IMPLEMENTIERUNG)
+# STREAM-PRIORITÄT
 # ============================================================
 
 def get_stream_priority(url):
-    """
-    Je NIEDRIGER der Wert, desto HÖHER die Priorität.
-    """
     url_lower = url.lower()
 
-    # 1. Höchste Priorität (0): Offizielle ARD & ZDF Mediathek-CDNs
-    official_cdns = [
-        "akamaized.net",
-        "ard-mcdn.de",
-        "zdf.de",
-        "daserste.de"
-    ]
+    # 1. Höchste Priorität (0): Offizielle Mediathek-CDNs von ARD & ZDF
+    official_cdns = ["akamaized.net", "ard-mcdn.de", "zdf.de", "daserste.de"]
     if any(cdn in url_lower for cdn in official_cdns):
-        # Abwertung internationaler Feeds mit Hinweistafeln
         if any(tag in url_lower for tag in ["/int/", "_int.", "-int."]):
-            return 3
+            return 4
         return 0
 
-    # 2. Hohe Priorität (1): Kodinerds oder sonstige verifizierte ÖRR-Streams
+    # 2. Hohe Priorität (1): Kodinerds / verifizierte ÖRR-Streams
     if "kodinerds" in url_lower:
         return 1
 
     # 3. Mittlere Priorität (2): Andere freie Web-Streams / Pluto TV
-    if not re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', url_lower) and "antik.sk" not in url_lower:
+    if not re.search(r"://\d+\.\d+\.\d+\.\d+", url_lower) and "antik.sk" not in url_lower:
         return 2
 
-    # 4. Niedrigste Priorität (4): Unbekannte IP-Relays oder Testlinks
+    # 4. Niedrigste Priorität (4): IP-Relays oder Testlinks
     return 4
 
 
@@ -185,228 +144,103 @@ def source_score(entry):
 FIXED_CHANNELS = [
     (
         "Das Erste",
-        [
-            {
-                "ids": ["daserste.de"],
-                "names": ["das erste"],
-            }
-        ],
+        [{"ids": ["daserste.de"], "names": ["das erste"]}],
     ),
     (
         "ZDF",
-        [
-            {
-                "ids": ["zdf.de"],
-                "names": ["zdf"],
-            }
-        ],
+        [{"ids": ["zdf.de"], "names": ["zdf"]}],
     ),
     (
         "ZDFinfo",
-        [
-            {
-                "ids": ["zdfinfo.de"],
-                "names": ["zdfinfo", "zdf info"],
-            }
-        ],
+        [{"ids": ["zdfinfo.de"], "names": ["zdfinfo", "zdf info"]}],
     ),
     (
         "ZDFneo",
-        [
-            {
-                "ids": ["zdfneo.de"],
-                "names": ["zdfneo", "zdf neo"],
-            }
-        ],
+        [{"ids": ["zdfneo.de"], "names": ["zdfneo", "zdf neo"]}],
     ),
     (
         "ONE HD",
-        [
-            {
-                "ids": ["one.de"],
-                "names": ["one hd"],
-            }
-        ],
+        [{"ids": ["one.de"], "names": ["one hd"]}],
     ),
     (
         "3sat",
-        [
-            {
-                "ids": ["3sat.de"],
-                "names": ["3sat"],
-            }
-        ],
+        [{"ids": ["3sat.de"], "names": ["3sat"]}],
     ),
     (
         "kabel eins",
-        [
-            {
-                "ids": ["kabeleins.de"],
-                "names": ["kabel eins"],
-            }
-        ],
+        [{"ids": ["kabeleins.de"], "names": ["kabel eins"]}],
     ),
     (
         "ProSieben",
-        [
-            {
-                "ids": ["prosieben.de"],
-                "names": ["prosieben"],
-            }
-        ],
+        [{"ids": ["prosieben.de"], "names": ["prosieben"]}],
     ),
     (
         "RTL",
-        [
-            {
-                "ids": ["rtl.de"],
-                "names": ["rtl"],
-            }
-        ],
+        [{"ids": ["rtl.de"], "names": ["rtl"]}],
     ),
     (
         "Sat.1",
-        [
-            {
-                "ids": ["sat1.de"],
-                "names": ["sat 1", "sat.1"],
-            }
-        ],
+        [{"ids": ["sat1.de"], "names": ["sat 1", "sat.1"]}],
     ),
     (
         "VOX",
-        [
-            {
-                "ids": ["vox.de"],
-                "names": ["vox"],
-            }
-        ],
+        [{"ids": ["vox.de"], "names": ["vox"]}],
     ),
     (
         "RTL Zwei",
-        [
-            {
-                "ids": ["rtlzwei.de"],
-                "names": ["rtl zwei", "rtl2", "rtl ii"],
-            }
-        ],
+        [{"ids": ["rtlzwei.de"], "names": ["rtl zwei", "rtl2", "rtl ii"]}],
     ),
     (
         "Super RTL",
-        [
-            {
-                "ids": ["superrtl.de"],
-                "names": ["super rtl"],
-            }
-        ],
+        [{"ids": ["superrtl.de"], "names": ["super rtl"]}],
     ),
     (
         "NITRO",
-        [
-            {
-                "ids": ["nitro.de"],
-                "names": ["nitro"],
-            }
-        ],
+        [{"ids": ["nitro.de"], "names": ["nitro"]}],
     ),
     (
         "VOXup",
-        [
-            {
-                "ids": ["voxup.de"],
-                "names": ["voxup", "vox up"],
-            }
-        ],
+        [{"ids": ["voxup.de"], "names": ["voxup", "vox up"]}],
     ),
     (
         "ProSieben MAXX",
-        [
-            {
-                "ids": ["prosiebenmaxx.de"],
-                "names": ["prosieben maxx"],
-            }
-        ],
+        [{"ids": ["prosiebenmaxx.de"], "names": ["prosieben maxx"]}],
     ),
     (
         "kabel eins Doku",
-        [
-            {
-                "ids": ["kabeleinsdoku.de"],
-                "names": ["kabel eins doku", "kabel1 doku"],
-            }
-        ],
+        [{"ids": ["kabeleinsdoku.de"], "names": ["kabel eins doku", "kabel1 doku"]}],
     ),
     (
         "TELE 5",
-        [
-            {
-                "ids": ["tele5.de"],
-                "names": ["tele 5", "tele5"],
-            }
-        ],
+        [{"ids": ["tele5.de"], "names": ["tele 5", "tele5"]}],
     ),
     (
         "DMAX",
-        [
-            {
-                "ids": ["dmax.de"],
-                "names": ["dmax"],
-            }
-        ],
+        [{"ids": ["dmax.de"], "names": ["dmax"]}],
     ),
     (
         "sixx",
-        [
-            {
-                "ids": ["sixx.de"],
-                "names": ["sixx"],
-            }
-        ],
+        [{"ids": ["sixx.de"], "names": ["sixx"]}],
     ),
     (
         "Sat.1 Gold",
-        [
-            {
-                "ids": ["sat1gold.de"],
-                "names": ["sat 1 gold", "sat.1 gold"],
-            }
-        ],
+        [{"ids": ["sat1gold.de"], "names": ["sat 1 gold", "sat.1 gold"]}],
     ),
     (
         "ARD-alpha",
-        [
-            {
-                "ids": ["ardalpha.de", "ard-alpha.de"],
-                "names": ["ard alpha", "ard-alpha"],
-            }
-        ],
+        [{"ids": ["ardalpha.de", "ard-alpha.de"], "names": ["ard alpha", "ard-alpha"]}],
     ),
     (
         "Phoenix",
-        [
-            {
-                "ids": ["phoenix.de"],
-                "names": ["phoenix"],
-            }
-        ],
+        [{"ids": ["phoenix.de"], "names": ["phoenix"]}],
     ),
     (
         "ARTE",
-        [
-            {
-                "ids": ["arte.de", "artedeutsch.de"],
-                "names": ["arte"],
-            }
-        ],
+        [{"ids": ["arte.de", "artedeutsch.de"], "names": ["arte"]}],
     ),
     (
         "Tagesschau24",
-        [
-            {
-                "ids": ["tagesschau24.de"],
-                "names": ["tagesschau24", "tagesschau 24"],
-            }
-        ],
+        [{"ids": ["tagesschau24.de"], "names": ["tagesschau24", "tagesschau 24"]}],
     ),
     (
         "MDR Fernsehen",
@@ -450,39 +284,19 @@ FIXED_CHANNELS = [
     ),
     (
         "Noa 4 Hamburg",
-        [
-            {
-                "ids": ["noa4hamburg.de"],
-                "names": ["noa4 hamburg", "noa4 hh"],
-            }
-        ],
+        [{"ids": ["noa4hamburg.de"], "names": ["noa4 hamburg", "noa4 hh"]}],
     ),
     (
         "Hamburg 1",
-        [
-            {
-                "ids": ["hamburg1.de"],
-                "names": ["hamburg 1", "hamburg1"],
-            }
-        ],
+        [{"ids": ["hamburg1.de"], "names": ["hamburg 1", "hamburg1"]}],
     ),
     (
         "Radio Weser TV Bremen",
-        [
-            {
-                "ids": ["radiowesertvbremen.de"],
-                "names": ["radio weser tv bremen", "radio weser tv"],
-            }
-        ],
+        [{"ids": ["radiowesertvbremen.de"], "names": ["radio weser tv bremen", "radio weser tv"]}],
     ),
     (
         "Radio Bremen Fernsehen",
-        [
-            {
-                "ids": ["radiobremenfernsehen.de"],
-                "names": ["radio bremen fernsehen", "radio bremen tv"],
-            }
-        ],
+        [{"ids": ["radiobremenfernsehen.de"], "names": ["radio bremen fernsehen", "radio bremen tv"]}],
     ),
     (
         "WDR Fernsehen",
@@ -499,219 +313,99 @@ FIXED_CHANNELS = [
     ),
     (
         "SWR Fernsehen Rheinland-Pfalz",
-        [
-            {
-                "ids": ["swrfernsehenrheinlandpfalz.de"],
-                "names": ["swr fernsehen rheinland pfalz"],
-            }
-        ],
+        [{"ids": ["swrfernsehenrheinlandpfalz.de"], "names": ["swr fernsehen rheinland pfalz"]}],
     ),
     (
         "hr-fernsehen",
-        [
-            {
-                "ids": ["hrfernsehen.de"],
-                "names": ["hr fernsehen", "hr-fernsehen"],
-            }
-        ],
+        [{"ids": ["hrfernsehen.de"], "names": ["hr fernsehen", "hr-fernsehen"]}],
     ),
     (
         "SR Fernsehen",
-        [
-            {
-                "ids": ["srfernsehen.de"],
-                "names": ["sr fernsehen"],
-            }
-        ],
+        [{"ids": ["srfernsehen.de"], "names": ["sr fernsehen"]}],
     ),
     (
         "rbb Fernsehen",
-        [
-            {
-                "ids": ["rbbfernsehen.de"],
-                "names": ["rbb fernsehen"],
-            }
-        ],
+        [{"ids": ["rbbfernsehen.de"], "names": ["rbb fernsehen"]}],
     ),
     (
         "Oberpfalz TV",
-        [
-            {
-                "ids": ["oberpfalztv.de", "oberpfalz tv.de"],
-                "names": ["oberpfalz tv", "oberpfalztv"],
-            }
-        ],
+        [{"ids": ["oberpfalztv.de", "oberpfalz tv.de"], "names": ["oberpfalz tv", "oberpfalztv"]}],
     ),
     (
         "BR Fernsehen Nord",
-        [
-            {
-                "ids": ["brfernsehen.de@nord"],
-                "names": ["br fernsehen nord"],
-            }
-        ],
+        [{"ids": ["brfernsehen.de@nord"], "names": ["br fernsehen nord"]}],
     ),
     (
         "München TV",
-        [
-            {
-                "ids": ["munchentv.de", "munchen tv.de"],
-                "names": ["muenchen tv", "münchen tv", "münchen.tv"],
-            }
-        ],
+        [{"ids": ["munchentv.de", "munchen tv.de"], "names": ["muenchen tv", "münchen tv", "münchen.tv"]}],
     ),
     (
         "Nachrichten 360",
-        [
-            {
-                "ids": ["nachrichten360.de"],
-                "names": ["nachrichten 360"],
-            }
-        ],
+        [{"ids": ["nachrichten360.de"], "names": ["nachrichten 360"]}],
     ),
     (
         "SPIEGEL TV",
-        [
-            {
-                "ids": [],
-                "names": ["spiegel tv"],
-            }
-        ],
+        [{"ids": [], "names": ["spiegel tv"]}],
     ),
     (
         "N24 Doku",
-        [
-            {
-                "ids": ["n24doku.de"],
-                "names": ["n24 doku", "n24doku"],
-            }
-        ],
+        [{"ids": ["n24doku.de"], "names": ["n24 doku", "n24doku"]}],
     ),
     (
         "WELT",
-        [
-            {
-                "ids": ["welt.de"],
-                "names": ["welt"],
-            }
-        ],
+        [{"ids": ["welt.de"], "names": ["welt"]}],
     ),
     (
         "RT DE",
-        [
-            {
-                "ids": ["rtde.de", "rtdeutsch.de"],
-                "names": ["rt de", "rt deutsch"],
-            }
-        ],
+        [{"ids": ["rtde.de", "rtdeutsch.de"], "names": ["rt de", "rt deutsch"]}],
     ),
     (
         "DokuSat",
-        [
-            {
-                "ids": [],
-                "names": ["dokusat"],
-            }
-        ],
+        [{"ids": [], "names": ["dokusat"]}],
     ),
     (
         "Authentic History",
-        [
-            {
-                "ids": [],
-                "names": ["authentic history"],
-            }
-        ],
+        [{"ids": [], "names": ["authentic history"]}],
     ),
     (
         "Bibel TV",
-        [
-            {
-                "ids": ["bibeltv.de"],
-                "names": ["bibel tv", "bibeltv"],
-            }
-        ],
+        [{"ids": ["bibeltv.de"], "names": ["bibel tv", "bibeltv"]}],
     ),
     (
         "EWTN",
-        [
-            {
-                "ids": ["ewtn.de"],
-                "names": ["ewtn"],
-            }
-        ],
+        [{"ids": ["ewtn.de"], "names": ["ewtn"]}],
     ),
     (
         "K-TV",
-        [
-            {
-                "ids": ["k-tv.de", "ktv.de"],
-                "names": ["k tv", "k-tv"],
-            }
-        ],
+        [{"ids": ["k-tv.de", "ktv.de"], "names": ["k tv", "k-tv"]}],
     ),
     (
         "Terra Mater WILD",
-        [
-            {
-                "ids": ["terramaterwild.de"],
-                "names": ["terra mater wild"],
-            }
-        ],
+        [{"ids": ["terramaterwild.de"], "names": ["terra mater wild"]}],
     ),
     (
         "Welt der Wunder",
-        [
-            {
-                "ids": ["weltderwunder.de"],
-                "names": ["welt der wunder"],
-            }
-        ],
+        [{"ids": ["weltderwunder.de"], "names": ["welt der wunder"]}],
     ),
     (
         "Rakuten TV Action Movies Germany",
-        [
-            {
-                "ids": ["rakutentvactionmovies.es@germany"],
-                "names": ["rakuten tv action movies germany"],
-            }
-        ],
+        [{"ids": ["rakutentvactionmovies.es@germany"], "names": ["rakuten tv action movies germany"]}],
     ),
     (
         "Rakuten TV Comedy Movies Germany",
-        [
-            {
-                "ids": ["rakutentvcomedymovies.es@germany"],
-                "names": ["rakuten tv comedy movies germany"],
-            }
-        ],
+        [{"ids": ["rakutentvcomedymovies.es@germany"], "names": ["rakuten tv comedy movies germany"]}],
     ),
     (
         "Rakuten TV Drama Movies Germany",
-        [
-            {
-                "ids": ["rakutentvdramamovies.es@germany"],
-                "names": ["rakuten tv drama movies germany"],
-            }
-        ],
+        [{"ids": ["rakutentvdramamovies.es@germany"], "names": ["rakuten tv drama movies germany"]}],
     ),
     (
         "Rakuten TV Family Movies Germany",
-        [
-            {
-                "ids": ["rakutentvfamilymovies.es@germany"],
-                "names": ["rakuten tv family movies germany"],
-            }
-        ],
+        [{"ids": ["rakutentvfamilymovies.es@germany"], "names": ["rakuten tv family movies germany"]}],
     ),
     (
         "Rakuten TV Top Movies Germany",
-        [
-            {
-                "ids": ["rakutentvtopmovies.es@germany"],
-                "names": ["rakuten tv top movies germany"],
-            }
-        ],
+        [{"ids": ["rakutentvtopmovies.es@germany"], "names": ["rakuten tv top movies germany"]}],
     ),
 ]
 
@@ -739,13 +433,12 @@ EXCLUDE_NAME_WORDS = [
     "porn",
 ]
 
-# Option 1: Internationale ARD-Feeds direkt bei den URL-Ausschlüssen sperren
 EXCLUDE_URL_PARTS = [
     "viamotionhsi.netplus.ch",
-    # Fängt spezifische internationale Master-Playlists ab
     "/live/hls/int/",
     "/int/master.m3u8",
 ]
+
 
 # ============================================================
 # NORMALISIERUNG
@@ -1175,21 +868,19 @@ def excluded(entry):
 
     url = entry.get("url", "").lower()
 
-    # Rohe IP-Adressen (z. B. http://5.180.164.197:8080/...) für ARD/ZDF aussortieren
-    is_public = any(net in tvg_id for net in ["zdf", "daserste", "ard", "arte", "3sat", "phoenix"])
-    if is_public and re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', url):
+    # 1. Rohe IP-Adressen (z. B. http://5.180.164.197:8080/...) vollständig sperren
+    if re.search(r"://\d+\.\d+\.\d+\.\d+", url):
         return True
 
-    # 1. Prüfe statische Ausschluss-Fragmente
+    # 2. Statische URL-Ausschlüsse
     for blocked in EXCLUDE_URL_PARTS:
         if blocked.lower() in url:
             return True
 
-    # 2. Zuverlässiger Ausschluss aller internationalen Feeds für ARD, Das Erste und ZDF
-    is_public_channel = any(net in url for net in ["ard", "daserste", "zdf"])
-    has_international_marker = any(marker in url for marker in ["/int/", "/int.", "_int.", "-int.", "_int/"])
-
-    if is_public_channel and has_international_marker:
+    # 3. Internationale ARD/ZDF Feeds sperren
+    is_public = any(net in url for net in ["ard", "daserste", "zdf"])
+    has_int = any(m in url for m in ["/int/", "/int.", "_int.", "-int.", "_int/"])
+    if is_public and has_int:
         return True
 
     return False
@@ -1234,7 +925,7 @@ def stream_score(entry):
 def selection_score(entry):
     url = entry.get("url", "")
     return (
-        get_stream_priority(url),  # 1. Offizielles CDN schlägt Drittanbieter-Streams quellenübergreifend
+        get_stream_priority(url),  # 1. Offizielles CDN sticht Playlist-Herkunft
         source_score(entry),       # 2. Bevorzugte Playlists
         stream_score(entry),       # 3. HD vs. SD / Geo-blocked
     )
@@ -1260,14 +951,14 @@ def id_matches(entry, ids):
 def name_matches(entry, names):
     entry_name = normalize(entry.get("name", ""))
     tvg_name = normalize(entry.get("tvg_name", ""))
-    values = {value for value in (entry_name, tvg_name) if value}
+    values = [value for value in (entry_name, tvg_name) if value]
 
     for candidate in names:
         target = normalize(candidate)
         if target in values:
             return True
 
-    safe_partial = {
+    safe_partial = [
         "zdf info",
         "zdf neo",
         "sat 1 gold",
@@ -1293,7 +984,7 @@ def name_matches(entry, names):
         "welt der wunder",
         "spiegel tv",
         "dokusat",
-    }
+    ]
 
     for candidate in names:
         target = normalize(candidate)
@@ -1502,7 +1193,8 @@ def clean_info(entry, category):
 
 def build_m3u(entries):
     output_win = [
-        '#EXTM3U x-tvg-url="https://epgshare01.online"\n',
+        '#EXTM3U x-tvg-url="https://epgshare01.online"',
+        "# https://bit.ly/4i8SlfS",
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (WINDOWS KODI VERSION)",
@@ -1511,7 +1203,8 @@ def build_m3u(entries):
     ]
 
     output_ios = [
-        '#EXTM3U x-tvg-url="https://epgshare01.online"\n',
+        '#EXTM3U x-tvg-url="https://epgshare01.online"',
+        "# Short URL for IP-TV Player/TV https://bit.ly/4i8SlfS",
         "",
         "# ==================================================",
         "# GER TV - Deutsche TV-Liste (IPHONE & GOTV VERSION)",
