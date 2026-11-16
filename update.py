@@ -414,7 +414,7 @@ FIXED_CHANNELS = [
 # ============================================================
 
 CUSTOM_LOGOS = {
-    "daserste.de": "https://banner2.cleanpng.com/20180919/zfw/kisspng-logo-das-erste-ard-high-definition-television-uptown-controllers-free-download-1713939080538.webp",
+    "daserste.de": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Das_Erste_HD_Logo.svg/330px-Das_Erste_HD_Logo.svg.png",
 }
 
 
