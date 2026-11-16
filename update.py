@@ -409,6 +409,14 @@ FIXED_CHANNELS = [
     ),
 ]
 
+# ============================================================
+# WIKIMEDIA LOGOS (Öffentlich-rechtliche Sender)
+# ============================================================
+
+CUSTOM_LOGOS = {
+    "daserste.de": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Das_Erste_HD_Logo.svg",
+}
+
 
 # ============================================================
 # AUSSCHLÜSSE
@@ -1173,18 +1181,27 @@ def sort_rest(entries):
 
 
 def clean_info(entry, category):
-    info = entry["info"]
+    info = entry.get("info", "")
+
+    # Alte Attribute und Namensteil bereinigen
     info = re.sub(r'\s+tvg-chno="[^"]*"', "", info, flags=re.IGNORECASE)
     info = re.sub(r'\s+group-title="[^"]*"', "", info, flags=re.IGNORECASE)
     info = re.sub(r'\s+tvg-id="[^"]*"', "", info, flags=re.IGNORECASE)
+    info = re.sub(r'\s+tvg-logo="[^"]*"', "", info, flags=re.IGNORECASE)
     info = re.sub(r",.*$", "", info)
 
     tvg_id = entry.get("tvg_id", "")
     if tvg_id:
         tvg_id = normalize_tvg_id(tvg_id)
 
+    # Prüfen, ob für die tvg-id ein Wikimedia-Logo hinterlegt ist
+    base_id = tvg_id.split("@")[0] if tvg_id else ""
+    logo_url = CUSTOM_LOGOS.get(tvg_id) or CUSTOM_LOGOS.get(base_id) or entry.get("tvg_logo", "")
+
+    logo_attr = f' tvg-logo="{logo_url}"' if logo_url else ""
     base_info = re.sub(r"^#EXTINF:[-\d]*", "#EXTINF:-1", info)
-    return f'{base_info} tvg-id="{tvg_id}" group-title="{category}",{entry.get("name", "")}'
+
+    return f'{base_info} tvg-id="{tvg_id}"{logo_attr} group-title="{category}",{entry.get("name", "")}'
 
 
 # ============================================================
