@@ -16,10 +16,10 @@ https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 https://zdf-hls-15.akamaized.net/hls/live/2016498/de/veryhigh/master.m3u8
-#EXTINF:-1 tvg-id="zdfinfo.de" tvg-logo="https://i.imgur.com/vtq1IWp.png" group-title="00 Priorität",ZDFinfo (720p) [Geo-blocked]
+#EXTINF:-1 tvg-name="ZDFinfo HD" tvg-id="zdfinfo.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/zdfinfohd.png" group-title="00 Priorität",ZDFinfo HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
-https://zdf-hls-17.akamaized.net/hls/live/2016500/de/high/master.m3u8
+https://zdf-hls-17.akamaized.net/hls/live/2016500/de/veryhigh/master.m3u8
 #EXTINF:-1 tvg-name="ZDFneo HD" tvg-id="zdfneo.de" tvg-logo="https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/zdfneohd.png" group-title="00 Priorität",ZDFneo HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
@@ -451,6 +451,8 @@ https://mts1.iptv-playoutcenter.de/mts/mts-web/playlist.m3u8
 
 # ===== 10 Weitere deutsche Sender =====
 
+#EXTINF:-1 tvg-id="motorvisionplus.de" tvg-logo="https://i.imgur.com/5cs5GkJ.png" group-title="10 Weitere deutsche Sender",Motorvision+ (720p)
+https://r.eu.cdn-redge.media/livehls/oeu/mt/live/motorvision_en/live.livx/playlist.m3u8
 #EXTINF:-1 tvg-id="moviedome.us@germany" tvg-logo="https://i.imgur.com/8c54ycg.png" group-title="10 Weitere deutsche Sender",Moviedome (720p)
 https://jmp2.uk/plu-615c1e5ce3039400070a0547.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-id="mtv.de" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/MTV_2021_%28brand_version%29.svg/960px-MTV_2021_%28brand_version%29.svg.png" group-title="10 Weitere deutsche Sender",MTV (Germany)
@@ -794,6 +796,14 @@ https://jmp2.uk/plu-646b150a15939400089e2702.m3u8|User-Agent=Mozilla/5.0 (iPhone
 https://jmp2.uk/plu-646b1438e94c3800082a8cff.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
 #EXTINF:-1 tvg-id="spongebobschwammkopf.de@dach" tvg-logo="https://images.pluto.tv/channels/5d00e8adaab96b5635b2a005/colorLogoPNG.png" group-title="10 Weitere deutsche Sender",SpongeBob Schwammkopf (720p)
 https://jmp2.uk/plu-5d00e8adaab96b5635b2a005.m3u8|User-Agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15
+
+# ===== 08 Sport =====
+
+#EXTINF:-1 tvg-id="sport1.de" tvg-logo="https://i.imgur.com/Tsjt7v9.png" group-title="08 Sport",Sport1 (Germany) (540p)
+https://r.eu.cdn-redge.media/livehls/oeu/mt/live/sport1/live.livx/playlist.m3u8
+
+# ===== 10 Weitere deutsche Sender =====
+
 #EXTINF:-1 tvg-id="srf.de" tvg-logo="https://i.imgur.com/92XNBmr.png" group-title="10 Weitere deutsche Sender",SRF (1080p)
 https://58de7a369a9c4.streamlock.net/srf/stream_720p/playlist.m3u8
 #EXTINF:-1 tvg-id="startrekthenextgeneration.de@dach" tvg-logo="https://images.pluto.tv/channels/69776ce979545c21a1220bff/colorLogoPNG_1769434849537.png" group-title="10 Weitere deutsche Sender",Star Trek: The Next Generation (Germany)
